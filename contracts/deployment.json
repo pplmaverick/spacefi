@@ -1,0 +1,15 @@
+{
+  "sepolia": {
+    "chainId": 11155111,
+    "collateralVault": "0xBdC53E50b1167cE1199bFaD54A034f7ab1741051",
+    "nodeRegistry": "0x15636CE4C0EdE55335f84E6386f8F49C897c077d"
+  },
+  "cc3": {
+    "chainId": 102031,
+    "evmV1Decoder": "0xcAC5B9d2817325E78090E3Ce4b9C299C819cF953",
+    "mockPayoutToken": "0x072A3A0C04Cf8CDcaf5B4A73a4Ed4fF5A841531f",
+    "spaceFinance": "0xBdC53E50b1167cE1199bFaD54A034f7ab1741051",
+    "treasury": "0xed2B5717c9b936ecC76d75401026A99143e278F5",
+    "loanAmount": "1000000000000000000000"
+  }
+}
