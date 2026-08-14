@@ -31,19 +31,7 @@ This project is not ported from another chain. Every design decision maps direct
 ---
 
 ## Architecture
-
-Ethereum Sepolia Creditcoin CC3 Testnet
-───────────────── ──────────────────────
-CollateralVault SpaceFinance
-deposit() ──── Attestcoin ──────► verifyAndExecute()
-Protocol │
-NodeRegistry ▼
-registerNode() ─── proof ──────► Loan → Active
-│
-▼
-mUSDF disbursed
-to borrower
-
+<img width="1101" height="566" alt="01" src="https://github.com/user-attachments/assets/152047bd-2f82-4411-953e-95ce250d8749" />
 
 ---
 
