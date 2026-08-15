@@ -1,8 +1,12 @@
 # SpaceFinance
 
-![Network](https://img.shields.io/badge/Creditcoin_CC3_Testnet-102031-blue)
-![Solidity](https://img.shields.io/badge/Solidity-0.8.30-purple)
+![CI](https://github.com/pplmaverick/spacefi/actions/workflows/ci.yml/badge.svg)
+![Creditcoin CC3](https://img.shields.io/badge/Creditcoin_CC3-Testnet_102031-blue)
+![Solidity](https://img.shields.io/badge/Solidity-0.8.30-363636)
 ![License](https://img.shields.io/badge/license-MIT-green)
+![Hackathon](https://img.shields.io/badge/BUIDL_CTC_2026-Fall-orange)
+
+**Live Demo →** [spacefi.vercel.app](https://spacefi.vercel.app) · Network: Creditcoin CC3 Testnet (Chain ID 102031)
 
 A DePIN infrastructure financing protocol built on Creditcoin CC3, enabling node operators to access collateral-backed loans verified by the Attestcoin Protocol — no bridges, no centralized oracles.
 
