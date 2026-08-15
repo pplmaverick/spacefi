@@ -15,6 +15,6 @@ jobs:
         with:
           node-version: '20'
       - name: Install frontend deps
-        run: cd frontend && npm ci
+        run: cd frontend && npm install
       - name: Build frontend
         run: cd frontend && npm run build
