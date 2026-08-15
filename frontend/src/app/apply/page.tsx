@@ -2,20 +2,21 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { WalletButton } from '@/components/WalletButton'
-import { useWriteContract, useWaitForTransactionReceipt, useAccount } from 'wagmi'
-import { parseEther, decodeEventLog } from 'viem'
-import { CONTRACTS, COLLATERAL_VAULT_ABI, NODE_REGISTRY_ABI, SPACE_FINANCE_ABI } from '@/lib/contracts'
+import { useWriteContract, useWaitForTransactionReceipt, useAccount, useReadContract } from 'wagmi'
+import { parseEther, decodeEventLog, parseUnits } from 'viem'
+import { CONTRACTS, COLLATERAL_VAULT_ABI, NODE_REGISTRY_ABI, SPACE_FINANCE_ABI, MOCK_PAYOUT_TOKEN_ABI } from '@/lib/contracts'
 import { sepolia } from 'wagmi/chains'
 import { cc3Testnet } from '@/lib/chains'
 
-type Step = 1 | 2 | 3 | 4 | 5
+type Step = 1 | 2 | 3 | 4 | 5 | 6
 
 const STEPS = [
   { id: 1, chain: 'SEPOLIA', label: 'Deposit Collateral' },
   { id: 2, chain: 'USC', label: 'Attestation #1' },
   { id: 3, chain: 'SEPOLIA', label: 'Register Node' },
   { id: 4, chain: 'USC', label: 'Attestation #2' },
-  { id: 5, chain: 'CC3', label: 'Loan Active' },
+  { id: 5, chain: 'CC3', label: 'Repay Loan' },
+  { id: 6, chain: 'CC3', label: 'Complete' },
 ] as const
 
 function StepIndicator({ current }: { current: Step }) {
@@ -553,10 +554,154 @@ function Step4Panel({
   )
 }
 
-function Step5Panel({ loanId, nodeId }: { loanId: string; nodeId: string }) {
+function Step5Panel({ loanId, onNext }: { loanId: string; onNext: () => void }) {
+  const [amount, setAmount] = useState('1000')
+  const [phase, setPhase] = useState<'idle' | 'approving' | 'repaying' | 'done' | 'error'>('idle')
+  const [errorMsg, setErrorMsg] = useState('')
+  const [approveTxHash, setApproveTxHash] = useState<`0x${string}` | null>(null)
+  const [repayTxHash, setRepayTxHash] = useState<`0x${string}` | null>(null)
+  const { isConnected, chainId, address } = useAccount()
+  const isRightChain = chainId === cc3Testnet.id
+  const { writeContractAsync } = useWriteContract()
+
+  const { data: cc3LoanIds } = useReadContract({
+    address: CONTRACTS.spaceFinance.address,
+    abi: SPACE_FINANCE_ABI,
+    functionName: 'getLoansByBorrower',
+    args: [address!],
+    chainId: cc3Testnet.id,
+    query: { enabled: !!address },
+  })
+  const cc3LoanId = cc3LoanIds && cc3LoanIds.length > 0
+    ? cc3LoanIds[cc3LoanIds.length - 1]  // 取最新的一筆
+    : undefined
+
+  async function handleRepay() {
+    setPhase('approving')
+    setErrorMsg('')
+    try {
+      const amountWei = parseUnits(amount, 18)
+
+      // Step A: approve mUSDF
+      const approveTx = await writeContractAsync({
+        address: CONTRACTS.mockPayoutToken.address,
+        abi: MOCK_PAYOUT_TOKEN_ABI,
+        functionName: 'approve',
+        args: [CONTRACTS.spaceFinance.address, amountWei],
+        chainId: cc3Testnet.id,
+      })
+      setApproveTxHash(approveTx)
+
+      // Step B: repay
+      setPhase('repaying')
+      const repayTx = await writeContractAsync({
+        address: CONTRACTS.spaceFinance.address,
+        abi: SPACE_FINANCE_ABI,
+        functionName: 'repay',
+        args: [cc3LoanId!, amountWei],
+        chainId: cc3Testnet.id,
+      })
+      setRepayTxHash(repayTx)
+      setPhase('done')
+    } catch (e) {
+      setErrorMsg(e instanceof Error ? e.message.split('\n')[0] : String(e))
+      setPhase('error')
+    }
+  }
+
   return (
     <div>
       <div className="mb-2 text-xs font-mono text-gray-500 uppercase tracking-wider">Step 5 · CC3 Testnet</div>
+      <h2 className="text-2xl font-bold mb-2">Repay Loan</h2>
+      <p className="text-gray-400 text-sm mb-8">
+        Repay your mUSDF loan. Full repayment unlocks your ETH collateral on Sepolia.
+      </p>
+
+      <WalletButton requiredChainId={cc3Testnet.id} />
+
+      {isConnected && isRightChain && phase === 'idle' && (
+        <div className="mt-6 space-y-4">
+          <div className="bg-[#080c14] border border-[#1a2744] rounded-lg p-4 font-mono text-sm">
+            <div className="text-gray-500 text-xs mb-1">Loan ID</div>
+            <div className="text-cyan-400">{loanId}</div>
+            <div className="text-gray-500 text-xs mt-2 mb-1">CC3 Loan ID</div>
+            <div className="text-cyan-400">{cc3LoanId !== undefined ? cc3LoanId.toString() : 'Loading...'}</div>
+          </div>
+          <div>
+            <label className="text-xs font-mono text-gray-500 uppercase tracking-wider block mb-2">Amount (mUSDF)</label>
+            <input
+              type="number"
+              value={amount}
+              onChange={e => setAmount(e.target.value)}
+              min="1"
+              className="bg-[#080c14] border border-[#1a2744] text-white font-mono px-4 py-2 rounded-lg w-48 focus:outline-none focus:border-cyan-500"
+            />
+          </div>
+          <button
+            onClick={handleRepay}
+            disabled={!amount || !cc3LoanId}
+            className="px-6 py-3 bg-cyan-500 text-black font-semibold rounded-lg hover:bg-cyan-400 transition-colors font-mono disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Repay →
+          </button>
+        </div>
+      )}
+
+      {(phase === 'approving' || phase === 'repaying') && (
+        <div className="mt-6 space-y-3">
+          <div className="text-xs font-mono text-gray-400">
+            {phase === 'approving' ? '1/2 Approving mUSDF spend...' : '2/2 Submitting repayment...'}
+          </div>
+          <div className="w-full h-2 bg-[#1a2744] rounded-full overflow-hidden">
+            <div className="h-full bg-cyan-500 rounded-full animate-pulse" style={{ width: phase === 'approving' ? '40%' : '80%' }} />
+          </div>
+        </div>
+      )}
+
+      {phase === 'done' && (
+        <div className="mt-6 space-y-4">
+          <div className="bg-[#080c14] border border-green-500/30 rounded-lg p-4 font-mono text-sm space-y-2">
+            {approveTxHash && (
+              <div className="text-xs text-gray-500">
+                Approve Tx: <a href={`https://cc3-testnet.blockscout.com/tx/${approveTxHash}`} target="_blank" rel="noopener noreferrer" className="text-cyan-600 hover:text-cyan-400">{approveTxHash.slice(0, 20)}...</a>
+              </div>
+            )}
+            {repayTxHash && (
+              <div className="text-xs text-gray-500">
+                Repay Tx: <a href={`https://cc3-testnet.blockscout.com/tx/${repayTxHash}`} target="_blank" rel="noopener noreferrer" className="text-cyan-600 hover:text-cyan-400">{repayTxHash.slice(0, 20)}...</a>
+              </div>
+            )}
+          </div>
+          <button
+            onClick={onNext}
+            className="px-6 py-3 bg-cyan-500 text-black font-semibold rounded-lg hover:bg-cyan-400 transition-colors font-mono"
+          >
+            Continue →
+          </button>
+        </div>
+      )}
+
+      {phase === 'error' && (
+        <div className="mt-6 space-y-4">
+          <div className="text-xs font-mono text-red-400 bg-red-900/20 border border-red-900/40 rounded-lg px-4 py-3">
+            {errorMsg}
+          </div>
+          <button
+            onClick={() => { setPhase('idle'); setErrorMsg('') }}
+            className="px-6 py-3 border border-[#1a2744] text-gray-300 rounded-lg hover:border-cyan-500/50 font-mono text-sm"
+          >
+            Retry
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function Step6Panel({ loanId, nodeId }: { loanId: string; nodeId: string }) {
+  return (
+    <div>
+      <div className="mb-2 text-xs font-mono text-gray-500 uppercase tracking-wider">Step 6 · CC3 Testnet</div>
       <h2 className="text-2xl font-bold mb-2">Financing Active 🎉</h2>
       <p className="text-gray-400 text-sm mb-8">
         Both USC attestations confirmed. mUSDF has been released to your wallet on Creditcoin CC3.
@@ -578,6 +723,9 @@ function Step5Panel({ loanId, nodeId }: { loanId: string; nodeId: string }) {
           <span className="text-gray-500">Token</span>
           <span className="text-white">mUSDF</span>
         </div>
+      </div>
+      <div className="bg-[#080c14] border border-yellow-500/20 rounded-lg p-4 mb-4 font-mono text-xs text-yellow-400/70">
+        ⚠ Collateral release requires owner authorization. Contact the team to unlock your ETH on Sepolia after repayment is confirmed.
       </div>
       <div className="flex gap-4">
         <Link href="/dashboard" className="px-6 py-3 bg-cyan-500 text-black font-semibold rounded-lg hover:bg-cyan-400 transition-colors font-mono">
@@ -617,7 +765,7 @@ export default function ApplyPage() {
         <div className="mb-10">
           <Link href="/" className="text-xs font-mono text-gray-600 hover:text-gray-400 transition-colors">← Back</Link>
           <h1 className="text-3xl font-bold mt-4 mb-1">Apply for Financing</h1>
-          <p className="text-gray-500 text-sm font-mono">Two USC attestations · ~20 minutes total</p>
+          <p className="text-gray-500 text-sm font-mono">Two USC attestations + repayment · ~25 minutes total</p>
         </div>
 
         <StepIndicator current={step} />
@@ -650,7 +798,13 @@ export default function ApplyPage() {
               onNext={() => setStep(5)}
             />
           )}
-          {step === 5 && <Step5Panel loanId={loanId} nodeId={nodeId} />}
+          {step === 5 && (
+            <Step5Panel
+              loanId={loanId}
+              onNext={() => setStep(6)}
+            />
+          )}
+          {step === 6 && <Step6Panel loanId={loanId} nodeId={nodeId} />}
         </div>
       </main>
     </div>
