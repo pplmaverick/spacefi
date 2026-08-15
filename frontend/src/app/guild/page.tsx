@@ -155,7 +155,7 @@ function CreateTab({ address, inGuild }: { address: `0x${string}` | undefined; i
       address: CONTRACTS.guildPool.address,
       abi: GUILD_POOL_ABI,
       functionName: 'createGuild',
-      args: [allMembers as readonly [`0x${string}`, `0x${string}`, `0x${string}`, `0x${string}`, `0x${string}`]],
+      args: [allMembers as unknown as readonly [`0x${string}`, `0x${string}`, `0x${string}`, `0x${string}`, `0x${string}`]],
       chainId: cc3Testnet.id,
     })
   }
@@ -192,7 +192,7 @@ function CreateTab({ address, inGuild }: { address: `0x${string}` | undefined; i
   )
 }
 
-function JoinTab({ address, inGuild }: { address: `0x${string}` | undefined; inGuild: boolean }) {
+function JoinTab({ inGuild }: { address: `0x${string}` | undefined; inGuild: boolean }) {
   const [guildIdInput, setGuildIdInput] = useState('')
   const { writeContract, data: txHash, isPending, error: writeError } = useWriteContract()
   const { isSuccess } = useWaitForTransactionReceipt({ hash: txHash })

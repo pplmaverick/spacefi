@@ -572,8 +572,9 @@ function Step5Panel({ loanId, onNext }: { loanId: string; onNext: () => void }) 
     chainId: cc3Testnet.id,
     query: { enabled: !!address },
   })
-  const cc3LoanId = cc3LoanIds && cc3LoanIds.length > 0
-    ? cc3LoanIds[cc3LoanIds.length - 1]  // 取最新的一筆
+  const loanIds = cc3LoanIds as readonly bigint[] | undefined
+  const cc3LoanId = loanIds && loanIds.length > 0
+    ? loanIds[loanIds.length - 1]  // 取最新的一筆
     : undefined
 
   async function handleRepay() {

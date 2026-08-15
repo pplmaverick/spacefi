@@ -42,7 +42,8 @@ export const NODE_REGISTRY_ABI = parseAbi([
 ])
 
 export const SPACE_FINANCE_ABI = parseAbi([
-  'function execute(uint8 action, uint64 chainKey, uint64 blockHeight, bytes encodedTransaction, bytes32 merkleRoot, tuple(bytes32 hash, bool isLeft)[] siblings, bytes32 lowerEndpointDigest, bytes32[] continuityRoots) external',
+  'struct MerkleProofEntry { bytes32 hash; bool isLeft; }',
+  'function execute(uint8 action, uint64 chainKey, uint64 blockHeight, bytes encodedTransaction, bytes32 merkleRoot, MerkleProofEntry[] siblings, bytes32 lowerEndpointDigest, bytes32[] continuityRoots) external',
   'function repay(uint256 loanId, uint256 amount) external',
   'function markRepaid(uint256 loanId) external',
   'function getLoan(uint256 loanId) external view returns (address borrower, uint256 collateralAmount, uint256 usdValue, bytes32 nodeId, uint8 status, uint256 repaidAmount)',
