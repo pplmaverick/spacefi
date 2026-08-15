@@ -1,18 +1,43 @@
 'use client'
 import Link from 'next/link'
 import { WalletButton } from '@/components/WalletButton'
-import { useAccount } from 'wagmi'
+import { useAccount, useReadContract } from 'wagmi'
+import { formatEther } from 'viem'
 import { cc3Testnet } from '@/lib/chains'
 import { LOAN_STATUS } from '@/lib/contracts'
 
-// Mock data — 之後換成 wagmi useReadContract
-const MOCK_LOAN = {
-  loanId: '1',
-  borrower: '0xed2B5717c9b936ecC76d75401026A99143e278F5',
-  collateralAmount: '0.05',
-  nodeId: '0x73706163656e6f64653100000000000000000000000000000000000000000000',
-  status: 3 as 0 | 1 | 2 | 3 | 4, // Active
-}
+const SPACE_FINANCE_ADDRESS = process.env.NEXT_PUBLIC_SPACE_FINANCE as `0x${string}`
+
+const BORROW_TO_LOAN_ID_ABI = [
+  {
+    name: 'borrowerToLoanId',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [{ name: 'borrower', type: 'address' }],
+    outputs: [{ name: '', type: 'uint256' }],
+  },
+] as const
+
+const GET_LOAN_ABI = [
+  {
+    name: 'getLoan',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [{ name: 'loanId', type: 'uint256' }],
+    outputs: [
+      {
+        name: '',
+        type: 'tuple',
+        components: [
+          { name: 'borrower', type: 'address' },
+          { name: 'collateralAmount', type: 'uint256' },
+          { name: 'nodeId', type: 'bytes32' },
+          { name: 'status', type: 'uint8' },
+        ],
+      },
+    ],
+  },
+] as const
 
 const STATUS_COLOR: Record<number, string> = {
   0: 'text-gray-500',
@@ -32,6 +57,34 @@ const STATUS_DOT: Record<number, string> = {
 
 export default function DashboardPage() {
   const { isConnected, address } = useAccount()
+
+  const { data: loanId } = useReadContract({
+    address: SPACE_FINANCE_ADDRESS,
+    abi: BORROW_TO_LOAN_ID_ABI,
+    functionName: 'borrowerToLoanId',
+    args: address ? [address] : undefined,
+    chainId: cc3Testnet.id,
+    query: { enabled: !!address },
+  })
+
+  const { data: loanData } = useReadContract({
+    address: SPACE_FINANCE_ADDRESS,
+    abi: GET_LOAN_ABI,
+    functionName: 'getLoan',
+    args: loanId !== undefined ? [loanId] : undefined,
+    chainId: cc3Testnet.id,
+    query: { enabled: loanId !== undefined && loanId > 0n },
+  })
+
+  const loan = loanData
+    ? {
+        id: loanId?.toString() ?? '0',
+        status: loanData.status,
+        borrower: loanData.borrower,
+        collateralAmount: formatEther(loanData.collateralAmount),
+        nodeId: loanData.nodeId,
+      }
+    : null
 
   return (
     <div className="min-h-screen bg-[#080c14] text-white">
@@ -65,11 +118,11 @@ export default function DashboardPage() {
             {/* Loan card */}
             <div className="bg-[#0d1424] border border-[#1a2744] rounded-xl p-6">
               <div className="flex items-center justify-between mb-6">
-                <span className="text-xs font-mono text-gray-500 uppercase tracking-wider">Loan #{MOCK_LOAN.loanId}</span>
+                <span className="text-xs font-mono text-gray-500 uppercase tracking-wider">Loan #{loan?.id ?? '-'}</span>
                 <div className="flex items-center gap-2">
-                  <span className={`w-2 h-2 rounded-full ${STATUS_DOT[MOCK_LOAN.status]}`} />
-                  <span className={`text-sm font-mono ${STATUS_COLOR[MOCK_LOAN.status]}`}>
-                    {LOAN_STATUS[MOCK_LOAN.status]}
+                  <span className={`w-2 h-2 rounded-full ${STATUS_DOT[(loan?.status ?? 0)]}`} />
+                  <span className={`text-sm font-mono ${STATUS_COLOR[(loan?.status ?? 0)]}`}>
+                    {LOAN_STATUS[(loan?.status ?? 0)]}
                   </span>
                 </div>
               </div>
@@ -78,16 +131,16 @@ export default function DashboardPage() {
                 <div>
                   <div className="text-xs font-mono text-gray-600 uppercase tracking-wider mb-1">Borrower</div>
                   <div className="text-sm font-mono text-gray-300 break-all">
-                    {address ? `${address.slice(0, 10)}...${address.slice(-6)}` : MOCK_LOAN.borrower.slice(0, 10) + '...'}
+                    {address ? `${address.slice(0, 10)}...${address.slice(-6)}` : (loan?.borrower ?? address ?? '-').slice(0, 10) + '...'}
                   </div>
                 </div>
                 <div>
                   <div className="text-xs font-mono text-gray-600 uppercase tracking-wider mb-1">Collateral</div>
-                  <div className="text-sm font-mono text-white">{MOCK_LOAN.collateralAmount} ETH</div>
+                  <div className="text-sm font-mono text-white">{loan?.collateralAmount ?? '-'} ETH</div>
                 </div>
                 <div className="col-span-2">
                   <div className="text-xs font-mono text-gray-600 uppercase tracking-wider mb-1">Node ID</div>
-                  <div className="text-xs font-mono text-gray-400 break-all">{MOCK_LOAN.nodeId}</div>
+                  <div className="text-xs font-mono text-gray-400 break-all">{loan?.nodeId ?? '-'}</div>
                 </div>
               </div>
             </div>
@@ -97,11 +150,11 @@ export default function DashboardPage() {
               <div className="text-xs font-mono text-gray-500 uppercase tracking-wider mb-4">USC Attestation Flow</div>
               <div className="space-y-3">
                 {[
-                  { label: 'Collateral Deposited', done: MOCK_LOAN.status >= 1 },
-                  { label: 'USC Attestation #1 (Deposited)', done: MOCK_LOAN.status >= 2 },
-                  { label: 'Node Registered', done: MOCK_LOAN.status >= 2 },
-                  { label: 'USC Attestation #2 (NodeRegistered)', done: MOCK_LOAN.status >= 3 },
-                  { label: 'mUSDF Released', done: MOCK_LOAN.status >= 3 },
+                  { label: 'Collateral Deposited', done: (loan?.status ?? 0) >= 1 },
+                  { label: 'USC Attestation #1 (Deposited)', done: (loan?.status ?? 0) >= 2 },
+                  { label: 'Node Registered', done: (loan?.status ?? 0) >= 2 },
+                  { label: 'USC Attestation #2 (NodeRegistered)', done: (loan?.status ?? 0) >= 3 },
+                  { label: 'mUSDF Released', done: (loan?.status ?? 0) >= 3 },
                 ].map(({ label, done }) => (
                   <div key={label} className="flex items-center gap-3">
                     <div className={`w-4 h-4 rounded-full border flex items-center justify-center text-xs flex-shrink-0
@@ -115,7 +168,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Actions */}
-            {MOCK_LOAN.status === 0 && (
+            {(loan?.status ?? 0) === 0 && (
               <Link href="/apply" className="block w-full text-center px-6 py-3 bg-cyan-500 text-black font-semibold rounded-lg hover:bg-cyan-400 transition-colors font-mono">
                 Start Application →
               </Link>
