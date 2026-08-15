@@ -1,34 +1,39 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.30;
 
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+
 /// @title NodeRegistry
 /// @notice Sepolia-side identity registry for Spacecoin node operators. Registration events are
 /// proved cross-chain (via USC) to SpaceFinance on CC3, which uses them to advance a borrower's
 /// loan to `NodeVerified` and trigger disbursement.
-/// @dev Both directions of duplication are rejected: a nodeId can only ever be claimed once, and
-/// an operator address can only register one nodeId. The latter keeps the operator -> loanId
-/// mapping on SpaceFinance unambiguous (one operator, one active node identity).
-contract NodeRegistry {
+/// @dev Registration requires prior owner approval of the specific (operator, nodeId) pair via
+/// `approveNode`. There is no on-chain uniqueness constraint on nodeId or operator anymore — the
+/// approval mapping is the only gate.
+contract NodeRegistry is Ownable {
     event NodeRegistered(address indexed operator, bytes32 indexed nodeId);
+    event NodeApproved(address indexed operator, bytes32 indexed nodeId);
 
     error ZeroNodeId();
-    error NodeAlreadyRegistered(bytes32 nodeId);
-    error OperatorAlreadyRegistered(address operator);
 
     mapping(bytes32 => address) public nodeOperator;
-    mapping(address => bytes32) public operatorNodeId;
+    mapping(address => mapping(bytes32 => bool)) public approvedOperators;
 
-    /// @notice Register the caller as the operator of `nodeId`.
-    /// @dev No proof of actual Spacecoin node ownership is checked here — this is the hackathon
-    /// skeleton's identity claim step. TODO: consider requiring a signed attestation from the
-    /// Spacecoin node itself before accepting the claim.
+    constructor(address initialOwner) Ownable(initialOwner) {}
+
+    /// @notice Owner-gated approval for `operator` to register `nodeId`.
+    function approveNode(address operator, bytes32 nodeId) external onlyOwner {
+        approvedOperators[operator][nodeId] = true;
+        emit NodeApproved(operator, nodeId);
+    }
+
+    /// @notice Register the caller as the operator of `nodeId`. Requires prior approval via
+    /// `approveNode`.
     function registerNode(bytes32 nodeId) external {
         if (nodeId == bytes32(0)) revert ZeroNodeId();
-        if (nodeOperator[nodeId] != address(0)) revert NodeAlreadyRegistered(nodeId);
-        if (operatorNodeId[msg.sender] != bytes32(0)) revert OperatorAlreadyRegistered(msg.sender);
+        require(approvedOperators[msg.sender][nodeId], "Not approved");
 
         nodeOperator[nodeId] = msg.sender;
-        operatorNodeId[msg.sender] = nodeId;
 
         emit NodeRegistered(msg.sender, nodeId);
     }

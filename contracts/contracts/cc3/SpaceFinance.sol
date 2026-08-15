@@ -11,7 +11,8 @@ import {USCBase} from "./USCBase.sol";
 /// @title SpaceFinance
 /// @notice CC3-side DePIN financing protocol. Proves two Sepolia-side events via USC
 /// (`CollateralVault.Deposited` and `NodeRegistry.NodeRegistered`) to advance a per-borrower loan
-/// state machine and, once both are verified, disburse a payout token from the treasury.
+/// state machine and, once both are verified, disburse a payout token from the treasury. Borrowers
+/// can hold multiple concurrent loans and repay them via `repay`.
 /// @dev Pattern mirrors usc-testnet-bridge-examples/contracts/sol/USCLoanManager.sol: inherit
 /// USCBase, implement `_processAndEmitEvent` to fan out on `action`, decode the proved receipt
 /// with EvmV1Decoder, and enforce an emitter allow-list so only the registered source contracts'
@@ -24,7 +25,8 @@ contract SpaceFinance is Ownable, ReentrancyGuard, USCBase {
         CollateralVerified,
         NodeVerified,
         Active,
-        Repaid
+        Repaid,
+        Withdrawn
     }
 
     enum Actions {
@@ -35,22 +37,23 @@ contract SpaceFinance is Ownable, ReentrancyGuard, USCBase {
     struct Loan {
         address borrower;
         uint256 collateralAmount;
+        uint256 usdValue;
         bytes32 nodeId;
         LoanStatus status;
+        uint256 repaidAmount;
     }
 
-    // keccak256("Deposited(address,uint256,uint256)") — CollateralVault.Deposited canonical signature.
-    // `amount` is NOT indexed on that event, so it must be read from `log.data`, not `topics`.
-    bytes32 public constant DEPOSITED_EVENT_SIGNATURE = keccak256("Deposited(address,uint256,uint256)");
+    // keccak256("Deposited(address,uint256,uint256,uint256)") — CollateralVault.Deposited canonical
+    // signature (borrower, loanId, amount, usdValue). Only `borrower` is indexed; the rest is read
+    // from `log.data`.
+    bytes32 public constant DEPOSITED_EVENT_SIGNATURE = keccak256("Deposited(address,uint256,uint256,uint256)");
     // keccak256("NodeRegistered(address,bytes32)") — NodeRegistry.NodeRegistered canonical signature.
     // Both fields are indexed, so both are read from `topics`, no `log.data` decode needed.
     bytes32 public constant NODE_REGISTERED_EVENT_SIGNATURE = keccak256("NodeRegistered(address,bytes32)");
 
     error InvalidAction(uint8 action);
     error SourceContractsNotConfigured();
-    error LoanAlreadyExists(uint256 loanId);
     error NoLoanForOperator(address operator);
-    error LoanNotInExpectedStatus(uint256 loanId, LoanStatus expected, LoanStatus actual);
 
     // Addresses of the Sepolia-side contracts whose events this contract trusts. Any proved event
     // whose emitter does not match these is rejected (fail-closed), same as
@@ -66,14 +69,17 @@ contract SpaceFinance is Ownable, ReentrancyGuard, USCBase {
     // instead of a fixed constant.
     uint256 public loanAmount;
 
+    uint256 public loanCounter;
     mapping(uint256 => Loan) public loans;
-    mapping(address => uint256) public borrowerToLoanId;
+    mapping(address => uint256[]) public borrowerToLoanIds;
 
     event SourceContractsRegistered(address indexed collateralVault, address indexed nodeRegistry);
     event CollateralVerified(uint256 indexed loanId, address indexed borrower, uint256 amount);
     event NodeVerified(uint256 indexed loanId, address indexed operator, bytes32 nodeId);
     event LoanDisbursed(uint256 indexed loanId, address indexed borrower, uint256 amount);
     event LoanMarkedRepaid(uint256 indexed loanId);
+    event LoanRepaid(uint256 indexed loanId, address indexed borrower);
+    event PartialRepayment(uint256 indexed loanId, address indexed borrower, uint256 amount, uint256 totalRepaid);
 
     constructor(
         address initialOwner,
@@ -118,25 +124,28 @@ contract SpaceFinance is Ownable, ReentrancyGuard, USCBase {
         EvmV1Decoder.LogEntry memory log = _firstLogFor(encodedTransaction, DEPOSITED_EVENT_SIGNATURE);
 
         require(log.address_ == collateralVault, "Deposited not emitted by registered CollateralVault");
-        require(log.topics.length == 3, "invalid Deposited topics");
+        require(log.topics.length == 2, "invalid Deposited topics");
 
         // topics[0] = event signature (already matched by getLogsByEventSignature)
         // topics[1] = borrower (indexed)
-        // topics[2] = loanId (indexed)
-        // data      = amount (NOT indexed — must abi.decode)
+        // data      = loanId, amount, usdValue (NOT indexed — must abi.decode)
+        // The decoded loanId is CollateralVault's Sepolia-side id; it is intentionally discarded
+        // here because this loan is keyed by SpaceFinance's own loanCounter instead (see summary
+        // note on the two loanId namespaces no longer matching).
         address borrower = address(uint160(uint256(log.topics[1])));
-        uint256 loanId = uint256(log.topics[2]);
-        uint256 amount = abi.decode(log.data, (uint256));
+        (, uint256 amount, uint256 usdValue) = abi.decode(log.data, (uint256, uint256, uint256));
 
-        if (loans[loanId].status != LoanStatus.None) revert LoanAlreadyExists(loanId);
+        uint256 loanId = ++loanCounter;
 
         loans[loanId] = Loan({
             borrower: borrower,
             collateralAmount: amount,
+            usdValue: usdValue,
             nodeId: bytes32(0),
-            status: LoanStatus.CollateralVerified
+            status: LoanStatus.CollateralVerified,
+            repaidAmount: 0
         });
-        borrowerToLoanId[borrower] = loanId;
+        borrowerToLoanIds[borrower].push(loanId);
 
         emit CollateralVerified(loanId, borrower, amount);
     }
@@ -152,14 +161,21 @@ contract SpaceFinance is Ownable, ReentrancyGuard, USCBase {
         address operator = address(uint160(uint256(log.topics[1])));
         bytes32 nodeId = log.topics[2];
 
-        uint256 loanId = borrowerToLoanId[operator];
+        // Not specified in the request: now that a borrower can hold multiple concurrent loans
+        // (borrowerToLoanIds), NodeRegistered has to resolve to one specific loan. Default here:
+        // the most recently created loan for this operator that is still awaiting node
+        // verification. See summary note — confirm this is the intended matching rule.
+        uint256[] storage ids = borrowerToLoanIds[operator];
+        uint256 loanId;
+        for (uint256 i = ids.length; i > 0; i--) {
+            if (loans[ids[i - 1]].status == LoanStatus.CollateralVerified) {
+                loanId = ids[i - 1];
+                break;
+            }
+        }
         if (loanId == 0) revert NoLoanForOperator(operator);
 
         Loan storage loan = loans[loanId];
-        if (loan.status != LoanStatus.CollateralVerified) {
-            revert LoanNotInExpectedStatus(loanId, LoanStatus.CollateralVerified, loan.status);
-        }
-
         loan.nodeId = nodeId;
         loan.status = LoanStatus.NodeVerified;
         emit NodeVerified(loanId, operator, nodeId);
@@ -195,6 +211,24 @@ contract SpaceFinance is Ownable, ReentrancyGuard, USCBase {
         payoutToken.safeTransferFrom(treasury, loan.borrower, loanAmount);
     }
 
+    /// @notice Repay an active loan. Accepts partial repayments; once cumulative repayment meets
+    /// or exceeds `loanAmount`, the loan is marked `Repaid`.
+    function repay(uint256 loanId, uint256 amount) external nonReentrant {
+        Loan storage loan = loans[loanId];
+        require(loan.status == LoanStatus.Active, "loan not active");
+        require(msg.sender == loan.borrower, "not borrower");
+
+        payoutToken.safeTransferFrom(msg.sender, treasury, amount);
+        loan.repaidAmount += amount;
+
+        if (loan.repaidAmount >= loanAmount) {
+            loan.status = LoanStatus.Repaid;
+            emit LoanRepaid(loanId, msg.sender);
+        } else {
+            emit PartialRepayment(loanId, msg.sender, amount, loan.repaidAmount);
+        }
+    }
+
     /// @dev Placeholder for closing the loop. There is no automated CC3 -> Sepolia signal yet, so
     /// this is owner-gated for the skeleton (mirrors CollateralVault.authorizeWithdrawal on the
     /// other chain). TODO: replace with a verified repayment proof once the reverse direction is
@@ -208,6 +242,10 @@ contract SpaceFinance is Ownable, ReentrancyGuard, USCBase {
 
     function getLoan(uint256 loanId) external view returns (Loan memory) {
         return loans[loanId];
+    }
+
+    function getLoansByBorrower(address borrower) external view returns (uint256[] memory) {
+        return borrowerToLoanIds[borrower];
     }
 
     /// @notice Spacecoin node revenue lookup, for sizing/underwriting loans against a node's

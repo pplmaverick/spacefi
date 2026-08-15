@@ -16,6 +16,7 @@ export interface Cc3Deployment {
   spaceFinance?: string;
   treasury?: string;
   loanAmount?: string;
+  guildPool?: string;
 }
 
 export interface DeploymentData {

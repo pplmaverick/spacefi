@@ -12,14 +12,16 @@ async function main() {
   console.log(`Network:  ${network.name} (chainId ${net.chainId})`);
   console.log(`Deployer: ${deployer.address}`);
 
+  const SEPOLIA_ETH_USD_FEED = "0x694AA1769357215DE4FAC081bf1f309aDC325306";
+
   const CollateralVault = await ethers.getContractFactory("CollateralVault");
-  const vault = await CollateralVault.deploy(deployer.address);
+  const vault = await CollateralVault.deploy(deployer.address, SEPOLIA_ETH_USD_FEED);
   await vault.waitForDeployment();
   const vaultAddress = await vault.getAddress();
   console.log(`\nCollateralVault deployed to: ${vaultAddress}`);
 
   const NodeRegistry = await ethers.getContractFactory("NodeRegistry");
-  const registry = await NodeRegistry.deploy();
+  const registry = await NodeRegistry.deploy(deployer.address);
   await registry.waitForDeployment();
   const registryAddress = await registry.getAddress();
   console.log(`NodeRegistry deployed to:    ${registryAddress}`);

@@ -1,15 +1,16 @@
 {
   "sepolia": {
     "chainId": 11155111,
-    "collateralVault": "0xBdC53E50b1167cE1199bFaD54A034f7ab1741051",
-    "nodeRegistry": "0x15636CE4C0EdE55335f84E6386f8F49C897c077d"
+    "collateralVault": "0x5acB13a3750e9e1844643D3f20609B46F6E55ac2",
+    "nodeRegistry": "0x16af69f36B80Ef7F150Af88e5693f38b2eA013B9"
   },
   "cc3": {
     "chainId": 102031,
-    "evmV1Decoder": "0xcAC5B9d2817325E78090E3Ce4b9C299C819cF953",
-    "mockPayoutToken": "0x072A3A0C04Cf8CDcaf5B4A73a4Ed4fF5A841531f",
-    "spaceFinance": "0xBdC53E50b1167cE1199bFaD54A034f7ab1741051",
+    "evmV1Decoder": "0xfAd4Ce92CD6bE7dF707BEFD8b09eF3297f51F583",
+    "mockPayoutToken": "0x0a75041429506A30ad804EF757bB0f4942F6811c",
+    "spaceFinance": "0xEE93Cc7c31367599bf21aB78Aea21D6011d8750B",
     "treasury": "0xed2B5717c9b936ecC76d75401026A99143e278F5",
-    "loanAmount": "1000000000000000000000"
+    "loanAmount": "1000000000000000000000",
+    "guildPool": "0x7EBc98c14920C9A9b060B81047ec96A8906b06C1"
   }
 }
