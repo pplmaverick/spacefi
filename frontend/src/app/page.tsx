@@ -18,6 +18,7 @@ export default function HomePage() {
             <Link href="/revenue" className="text-xs font-mono uppercase tracking-wider text-[#94A3B8] hover:text-[#00C2FF] transition-colors">
               Revenue
             </Link>
+            <Link href="/guild" className="text-sm font-mono text-gray-400 hover:text-[#00C2FF] transition-colors">GUILD</Link>
           </div>
         </div>
         <WalletButton />

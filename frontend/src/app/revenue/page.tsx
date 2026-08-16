@@ -73,6 +73,7 @@ export default function RevenuePage() {
         <div className="flex items-center gap-6">
           <Link href="/dashboard" className="text-xs font-mono uppercase tracking-wider text-[#94A3B8] hover:text-[#00C2FF] transition-colors">Dashboard</Link>
           <Link href="/revenue" className="text-xs font-mono uppercase tracking-wider text-[#00C2FF] border-b border-[#00C2FF] pb-1">Revenue</Link>
+          <Link href="/guild" className="text-sm font-mono text-gray-400 hover:text-[#00C2FF] transition-colors">GUILD</Link>
           <WalletButton />
         </div>
       </nav>
