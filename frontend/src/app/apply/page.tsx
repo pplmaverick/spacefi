@@ -2,8 +2,8 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { WalletButton } from '@/components/WalletButton'
-import { useWriteContract, useWaitForTransactionReceipt, useAccount, useReadContract } from 'wagmi'
-import { parseEther, decodeEventLog, parseUnits, formatUnits } from 'viem'
+import { useWriteContract, useWaitForTransactionReceipt, useAccount, useReadContract, useChainId, useSwitchChain } from 'wagmi'
+import { parseEther, decodeEventLog, parseUnits, formatUnits, parseAbi } from 'viem'
 import { CONTRACTS, COLLATERAL_VAULT_ABI, NODE_REGISTRY_ABI, SPACE_FINANCE_ABI, MOCK_PAYOUT_TOKEN_ABI } from '@/lib/contracts'
 import { sepolia } from 'wagmi/chains'
 import { cc3Testnet } from '@/lib/chains'
@@ -20,6 +20,11 @@ const STEPS = [
   { id: 5, chain: 'CC3', label: 'Repay Loan' },
   { id: 6, chain: 'CC3', label: 'Complete' },
 ] as const
+
+const ETH_USD_FEED = '0x694AA1769357215DE4FAC081bf1f309aDC325306' as `0x${string}`
+const CHAINLINK_FEED_ABI = parseAbi([
+  'function latestRoundData() external view returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound)',
+])
 
 function StepSidebar({ current }: { current: Step }) {
   return (
@@ -49,6 +54,28 @@ function StepSidebar({ current }: { current: Step }) {
   )
 }
 
+function ChainSwitchBanner({ requiredChainId, requiredChainName }: { requiredChainId: number; requiredChainName: string }) {
+  const chainId = useChainId()
+  const { switchChain } = useSwitchChain()
+  const isWrongChain = chainId !== requiredChainId
+
+  if (!isWrongChain) return null
+
+  return (
+    <div className="flex items-center justify-between bg-[#FF6B35]/10 border border-[#FF6B35]/30 rounded-lg px-4 py-2 mb-4">
+      <span className="text-xs font-mono text-[#FF6B35]">
+        ⚠ Switch to {requiredChainName} to continue
+      </span>
+      <button
+        onClick={() => switchChain({ chainId: requiredChainId })}
+        className="text-xs font-mono text-[#FF6B35] border border-[#FF6B35]/50 rounded px-3 py-1 hover:bg-[#FF6B35]/10"
+      >
+        SWITCH NETWORK
+      </button>
+    </div>
+  )
+}
+
 function OrbitAnimation() {
   return (
     <div className="absolute inset-0 flex items-center justify-center opacity-30 pointer-events-none">
@@ -75,6 +102,17 @@ function Step1Panel({ onNext }: { onNext: (loanId: string, blockNumber: bigint, 
   const [amount, setAmount] = useState('0.01')
   const { isConnected, chainId } = useAccount()
   const isRightChain = chainId === sepolia.id
+
+  const { data: priceData } = useReadContract({
+    address: ETH_USD_FEED,
+    abi: CHAINLINK_FEED_ABI,
+    functionName: 'latestRoundData',
+    chainId: sepolia.id,
+  })
+  const ethPrice = priceData ? Number(priceData[1]) / 1e8 : undefined
+  const amountNum = parseFloat(amount) || 0
+  const collateralValueUsd = ethPrice !== undefined ? amountNum * ethPrice : undefined
+  const creditLimitUsdf = collateralValueUsd !== undefined ? collateralValueUsd * 0.7 : undefined
 
   const { writeContract, data: txHash, isPending, error: writeError } = useWriteContract()
   const { data: receipt, isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash: txHash })
@@ -113,13 +151,12 @@ function Step1Panel({ onNext }: { onNext: (loanId: string, blockNumber: bigint, 
 
   return (
     <div>
+      <ChainSwitchBanner requiredChainId={sepolia.id} requiredChainName="Sepolia" />
       <div className="mb-2 font-mono text-xs text-gray-500 uppercase tracking-wider">STEP 01: DEPOSIT COLLATERAL</div>
       <h2 style={spaceGrotesk} className="text-2xl font-semibold mb-2">Deposit Collateral</h2>
       <p className="text-gray-400 text-sm mb-8">
         Lock ETH in CollateralVault on Sepolia. You&apos;ll receive a loanId that tracks your financing request.
       </p>
-
-      <WalletButton requiredChainId={sepolia.id} />
 
       {isConnected && isRightChain && (
         <div className="mt-6 space-y-4">
@@ -136,6 +173,25 @@ function Step1Panel({ onNext }: { onNext: (loanId: string, blockNumber: bigint, 
             />
           </div>
 
+          <div className="grid grid-cols-2 gap-4 bg-[#0F172A] border border-[#334155] rounded-lg p-4 mt-4">
+            <div>
+              <div className="text-xs font-mono text-gray-500 uppercase tracking-wider mb-1">Collateral Value</div>
+              <div className="text-sm font-mono text-white">
+                {collateralValueUsd !== undefined
+                  ? `$${collateralValueUsd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD`
+                  : '—'}
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-xs font-mono text-gray-500 uppercase tracking-wider mb-1">Credit Limit</div>
+              <div className="text-sm font-mono text-[#00C2FF]">
+                {creditLimitUsdf !== undefined
+                  ? `${creditLimitUsdf.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} mUSDF`
+                  : '—'}
+              </div>
+            </div>
+          </div>
+
           <button
             onClick={handleDeposit}
             disabled={isLoading || !amount}
@@ -143,6 +199,9 @@ function Step1Panel({ onNext }: { onNext: (loanId: string, blockNumber: bigint, 
           >
             {isPending ? 'Confirm in wallet...' : isConfirming ? 'Confirming...' : 'Deposit ETH →'}
           </button>
+          <p className="text-xs font-mono text-gray-500 mt-3">
+            ETH is locked in CollateralVault on Sepolia. USC will attest your deposit on Creditcoin CC3.
+          </p>
 
           {txHash && (
             <div className="text-xs font-mono text-gray-500">
@@ -390,6 +449,7 @@ function Step3Panel({ onNext }: { onNext: (nodeId: string, blockNumber: bigint, 
 
   return (
     <div>
+      <ChainSwitchBanner requiredChainId={sepolia.id} requiredChainName="Sepolia" />
       <div className="mb-2 font-mono text-xs text-gray-500 uppercase tracking-wider">STEP 03: REGISTER NODE</div>
       <h2 style={spaceGrotesk} className="text-2xl font-semibold mb-2">Register Node Identity</h2>
       <p className="text-gray-400 text-sm mb-8">
@@ -670,6 +730,7 @@ function Step5Panel({ loanId, onNext }: { loanId: string; onNext: () => void }) 
 
   return (
     <div>
+      <ChainSwitchBanner requiredChainId={cc3Testnet.id} requiredChainName="CC3 Testnet" />
       <div className="mb-2 font-mono text-xs text-gray-500 uppercase tracking-wider">STEP 05: REPAY</div>
       <h2 style={spaceGrotesk} className="text-2xl font-semibold mb-2">Repay Loan</h2>
       <p className="text-gray-400 text-sm mb-8">
