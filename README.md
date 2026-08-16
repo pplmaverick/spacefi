@@ -60,15 +60,15 @@ Once both proofs are verified on-chain, `SpaceFinance` automatically updates loa
 
 | Contract | Address |
 |---|---|
-| CollateralVault | `0xBdC53E50b1167cE1199bFaD54A034f7ab1741051` |
-| NodeRegistry | `0x15636CE4C0EdE55335f84E6386f8F49C897c077d` |
+| CollateralVault | [0x5acB13a3750e9e1844643D3f20609B46F6E55ac2](https://sepolia.etherscan.io/address/0x5acB13a3750e9e1844643D3f20609B46F6E55ac2) |
+| NodeRegistry | [0x16af69f36B80Ef7F150Af88e5693f38b2eA013B9](https://sepolia.etherscan.io/address/0x16af69f36B80Ef7F150Af88e5693f38b2eA013B9) |
 
 **Creditcoin CC3 Testnet (102031)**
 
 | Contract | Address |
 |---|---|
-| SpaceFinance | `0xBdC53E50b1167cE1199bFaD54A034f7ab1741051` |
-| MockPayoutToken (mUSDF) | `0x072A3A0C04Cf8CDcaf5B4A73a4Ed4fF5A841531f` |
+| SpaceFinance | [0xEE93Cc7c31367599bf21aB78Aea21D6011d8750B](https://creditcoin-testnet.blockscout.com/address/0xEE93Cc7c31367599bf21aB78Aea21D6011d8750B) |
+| MockPayoutToken (mUSDF) | [0x0a75041429506A30ad804EF757bB0f4942F6811c](https://creditcoin-testnet.blockscout.com/address/0x0a75041429506A30ad804EF757bB0f4942F6811c) |
 | EvmV1Decoder (lib) | `0xcAC5B9d2817325E78090E3Ce4b9C299C819cF953` |
 
 ---
@@ -136,7 +136,7 @@ CC3's precompile gas estimation is unreliable for `SpaceFinance.execute()`. The 
 | Development | Hardhat + ethers.js v6 |
 | Cross-chain | Creditcoin Attestcoin Protocol (USC) |
 | Proof generation | `@gluwa/usc-sdk` ProofBuilder |
-| Testnet token | mUSDF (`0x072A...531f`) |
+| Testnet token | mUSDF (`0x0a75...811c`) |
 
 ---
 
