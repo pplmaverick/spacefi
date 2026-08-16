@@ -63,6 +63,8 @@ async function main() {
     1_200_000
   )
 
+  console.log('Waiting 45s for USC prover to stabilize before fetching proof...')
+  await new Promise(resolve => setTimeout(resolve, 45_000))
   const result = await proofBuilder.getProof(REGISTER_TX_HASH)
   if (!result.success || !result.data) {
     throw new Error(result.error ?? 'Failed to get proof')

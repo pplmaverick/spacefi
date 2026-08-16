@@ -488,6 +488,9 @@ function Step3Panel({
       const { waitAndGetProof } = await import('@/lib/usc')
       const proof = await waitAndGetProof(depositBlock, depositTxHash)
 
+      // 等 USC prover 多確認幾個 block，降低 timing race
+      await new Promise(resolve => setTimeout(resolve, 15_000))
+
       setAtt1Phase('proving')
       att1ProofRef.current = proof
       setAtt1Phase('proof_ready')
@@ -544,6 +547,9 @@ function Step3Panel({
     try {
       const { waitAndGetProof, buildExecuteArgs } = await import('@/lib/usc')
       const proof = await waitAndGetProof(registerBlock, registerTxHash)
+
+      // 等 USC prover 多確認幾個 block，降低 timing race
+      await new Promise(resolve => setTimeout(resolve, 15_000))
 
       setAtt2Phase('proving')
 
