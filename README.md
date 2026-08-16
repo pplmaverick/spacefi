@@ -13,12 +13,13 @@ A DePIN infrastructure financing protocol built on Creditcoin CC3, enabling node
 **Deployed on Creditcoin CC3 Testnet + Ethereum Sepolia**
 
 **Sepolia**
-- CollateralVault: [0xBdC53E50b1167cE1199bFaD54A034f7ab1741051](https://sepolia.etherscan.io/address/0xBdC53E50b1167cE1199bFaD54A034f7ab1741051)
-- NodeRegistry: [0x15636CE4C0EdE55335f84E6386f8F49C897c077d](https://sepolia.etherscan.io/address/0x15636CE4C0EdE55335f84E6386f8F49C897c077d)
+- CollateralVault: [0x5acB13a3750e9e1844643D3f20609B46F6E55ac2](https://sepolia.etherscan.io/address/0x5acB13a3750e9e1844643D3f20609B46F6E55ac2)
+- NodeRegistry: [0x16af69f36B80Ef7F150Af88e5693f38b2eA013B9](https://sepolia.etherscan.io/address/0x16af69f36B80Ef7F150Af88e5693f38b2eA013B9)
 
 **CC3 Testnet**
-- SpaceFinance: [0xBdC53E50b1167cE1199bFaD54A034f7ab1741051](https://creditcoin-testnet.blockscout.com/address/0xBdC53E50b1167cE1199bFaD54A034f7ab1741051)
-- MockPayoutToken: [0x072A3A0C04Cf8CDcaf5B4A73a4Ed4fF5A841531f](https://creditcoin-testnet.blockscout.com/address/0x072A3A0C04Cf8CDcaf5B4A73a4Ed4fF5A841531f)
+- SpaceFinance: [0xEE93Cc7c31367599bf21aB78Aea21D6011d8750B](https://creditcoin-testnet.blockscout.com/address/0xEE93Cc7c31367599bf21aB78Aea21D6011d8750B)
+- MockPayoutToken: [0x0a75041429506A30ad804EF757bB0f4942F6811c](https://creditcoin-testnet.blockscout.com/address/0x0a75041429506A30ad804EF757bB0f4942F6811c)
+- GuildPool: [0x7EBc98c14920C9A9b060B81047ec96A8906b06C1](https://creditcoin-testnet.blockscout.com/address/0x7EBc98c14920C9A9b060B81047ec96A8906b06C1)
 
 ---
 
