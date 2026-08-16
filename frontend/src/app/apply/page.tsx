@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { WalletButton } from '@/components/WalletButton'
-import { useWriteContract, useWaitForTransactionReceipt, useAccount, useReadContract, useChainId, useSwitchChain } from 'wagmi'
+import { useWriteContract, useWaitForTransactionReceipt, useAccount, useReadContract, useChainId, useSwitchChain, usePublicClient } from 'wagmi'
 import { parseEther, decodeEventLog, parseUnits, formatUnits, parseAbi } from 'viem'
 import { CONTRACTS, COLLATERAL_VAULT_ABI, NODE_REGISTRY_ABI, SPACE_FINANCE_ABI, MOCK_PAYOUT_TOKEN_ABI } from '@/lib/contracts'
 import { sepolia } from 'wagmi/chains'
@@ -465,6 +465,7 @@ function Step3Panel({
 
   const { writeContractAsync } = useWriteContract()
   const chainId = useChainId()
+  const publicClient = usePublicClient({ chainId: cc3Testnet.id })
 
   const att1PhaseRef = useRef<AttPhase>(att1Phase)
   useEffect(() => { att1PhaseRef.current = att1Phase }, [att1Phase])
@@ -517,6 +518,10 @@ function Step3Panel({
         ],
         chainId: cc3Testnet.id,
       })
+      const receipt = await publicClient!.waitForTransactionReceipt({ hash })
+      if (receipt.status === 'reverted') {
+        throw new Error('USC proof verification failed on CC3. Please retry.')
+      }
       setAtt1TxHash(hash)
       setAtt1Phase('done')
     } catch (e) {
@@ -570,6 +575,10 @@ function Step3Panel({
         ],
         chainId: cc3Testnet.id,
       })
+      const receipt = await publicClient!.waitForTransactionReceipt({ hash })
+      if (receipt.status === 'reverted') {
+        throw new Error('USC proof verification failed on CC3. Please retry.')
+      }
       setAtt2TxHash(hash)
       setAtt2Phase('done')
     } catch (e) {
