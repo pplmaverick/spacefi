@@ -7,6 +7,7 @@ import { parseEther, decodeEventLog, parseUnits, formatUnits, parseAbi } from 'v
 import { CONTRACTS, COLLATERAL_VAULT_ABI, NODE_REGISTRY_ABI, SPACE_FINANCE_ABI, MOCK_PAYOUT_TOKEN_ABI } from '@/lib/contracts'
 import { sepolia } from 'wagmi/chains'
 import { cc3Testnet } from '@/lib/chains'
+import type { proofProvider } from '@gluwa/usc-sdk'
 
 type Step = 1 | 2 | 3 | 4 | 5
 
@@ -25,11 +26,12 @@ const CHAINLINK_FEED_ABI = parseAbi([
   'function latestRoundData() external view returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound)',
 ])
 
-type AttPhase = 'waiting' | 'proving' | 'submitting' | 'done' | 'error'
+type AttPhase = 'waiting' | 'proving' | 'proof_ready' | 'submitting' | 'done' | 'error'
 
 const ATT_PHASE_LABEL: Record<AttPhase, string> = {
   waiting: 'Scanning blocks...',
   proving: 'Proof generated...',
+  proof_ready: 'Proof ready — switch chain to submit',
   submitting: 'Submitting to CC3...',
   done: 'Attestation confirmed ✓',
   error: 'Attestation failed',
@@ -367,7 +369,7 @@ function AttColumn({
         <span className="font-mono text-[10px] text-gray-600">[SEPOLIA→USC→CC3]</span>
       </div>
 
-      {phase !== 'error' && (
+      {phase !== 'error' && phase !== 'proof_ready' && (
         <>
           <div className={`font-mono text-xs text-gray-300 ${phase !== 'done' ? 'animate-pulse' : ''}`}>
             {ATT_PHASE_LABEL[phase]}
@@ -379,6 +381,14 @@ function AttColumn({
             />
           </div>
         </>
+      )}
+
+      {phase === 'proof_ready' && (
+        <div>
+          <div className="text-xs font-mono text-[#3DFFC0] mb-2">✓ USC proof generated</div>
+          <div className="text-xs font-mono text-[#FF6B35] mb-3">Switch to CC3 Testnet to submit</div>
+          <ChainSwitchBanner requiredChainId={cc3Testnet.id} requiredChainName="CC3 Testnet" />
+        </div>
       )}
 
       {phase === 'done' && (
@@ -437,9 +447,12 @@ function Step3Panel({
   const TOTAL_ESTIMATE = 600 // 10 min estimate for progress bar
 
   const { writeContractAsync } = useWriteContract()
+  const chainId = useChainId()
 
   const att1PhaseRef = useRef<AttPhase>(att1Phase)
   useEffect(() => { att1PhaseRef.current = att1Phase }, [att1Phase])
+
+  const att1ProofRef = useRef<proofProvider.ContinuityResponse | null>(null)
 
   // 共用計時器 — 兩軌都到終態（done/error）才停止
   useEffect(() => {
@@ -454,13 +467,23 @@ function Step3Panel({
     setAtt1Phase('waiting')
     setAtt1Error('')
     try {
-      const { waitAndGetProof, buildExecuteArgs } = await import('@/lib/usc')
+      const { waitAndGetProof } = await import('@/lib/usc')
       const proof = await waitAndGetProof(depositBlock, depositTxHash)
 
       setAtt1Phase('proving')
-      setAtt1Phase('submitting')
+      att1ProofRef.current = proof
+      setAtt1Phase('proof_ready')
+    } catch (e) {
+      setAtt1Error(e instanceof Error ? e.message.split('\n')[0] : String(e))
+      setAtt1Phase('error')
+    }
+  }
 
-      const args = buildExecuteArgs(0, proof)
+  async function submitAtt1() {
+    try {
+      setAtt1Phase('submitting')
+      const { buildExecuteArgs } = await import('@/lib/usc')
+      const args = buildExecuteArgs(0, att1ProofRef.current!)
       const hash = await writeContractAsync({
         address: CONTRACTS.spaceFinance.address,
         abi: SPACE_FINANCE_ABI,
@@ -485,6 +508,14 @@ function Step3Panel({
     }
   }
 
+  // proof 已就緒且已切到 CC3 時自動送出 execute(action=0)
+  useEffect(() => {
+    if (chainId === cc3Testnet.id && att1Phase === 'proof_ready') {
+      submitAtt1()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chainId, att1Phase])
+
   async function runAtt2() {
     setAtt2Phase('waiting')
     setAtt2Error('')
@@ -494,8 +525,9 @@ function Step3Panel({
 
       setAtt2Phase('proving')
 
-      // 合約要求先有 CollateralVerified 狀態，所以 execute(action=1) 要等 ATT#1 完成才能送出
-      while (att1PhaseRef.current !== 'done') {
+      // 合約要求先有 CollateralVerified 狀態，所以 execute(action=1) 要等 ATT#1 送出（submitting）或完成才能送出
+      // proof_ready 狀態（用戶還在切鏈）繼續等待，不視為失敗
+      while (att1PhaseRef.current !== 'submitting' && att1PhaseRef.current !== 'done') {
         if (att1PhaseRef.current === 'error') {
           throw new Error('ATT #1 failed — cannot submit ATT #2 until ATT #1 succeeds')
         }
@@ -540,6 +572,7 @@ function Step3Panel({
     switch (phase) {
       case 'waiting': return Math.min((seconds / TOTAL_ESTIMATE) * 100, 90)
       case 'proving': return 92
+      case 'proof_ready': return 94
       case 'submitting': return 96
       case 'done': return 100
       case 'error': return 0
