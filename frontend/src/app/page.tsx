@@ -9,9 +9,10 @@ export default function HomePage() {
     <div className="min-h-screen bg-[#0F172A] text-[#F8FAFC]">
       {/* Nav */}
       <nav className="border-b border-[#334155] px-6 md:px-8 py-4 flex items-center justify-between sticky top-0 z-50 bg-[#0F172A]">
-        <div className="flex items-center gap-8">
+        <div className="flex items-center gap-6">
           <span className="font-mono text-xs text-[#00C2FF] tracking-widest uppercase">SpaceFinance</span>
           <div className="hidden md:flex gap-6">
+            <Link href="/" className="text-sm font-mono text-[#00C2FF] border-b border-[#00C2FF] transition-colors">HOME</Link>
             <Link href="/dashboard" className="text-xs font-mono uppercase tracking-wider text-[#94A3B8] hover:text-[#00C2FF] transition-colors">
               Dashboard
             </Link>
@@ -21,7 +22,9 @@ export default function HomePage() {
             <Link href="/guild" className="text-sm font-mono text-gray-400 hover:text-[#00C2FF] transition-colors">GUILD</Link>
           </div>
         </div>
-        <WalletButton />
+        <div className="flex items-center gap-4">
+          <WalletButton />
+        </div>
       </nav>
 
       {/* Hero */}

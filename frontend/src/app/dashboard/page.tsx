@@ -178,13 +178,16 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-[#0F172A] text-white flex flex-col">
       <nav className="border-b border-[#334155] px-6 py-4 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-3">
-          <span className="font-mono text-xs text-[#00C2FF] tracking-widest uppercase">SpaceFinance</span>
-        </Link>
         <div className="flex items-center gap-6">
+          <Link href="/" className="flex items-center gap-3">
+            <span className="font-mono text-xs text-[#00C2FF] tracking-widest uppercase">SpaceFinance</span>
+          </Link>
+          <Link href="/" className="text-sm font-mono text-gray-400 hover:text-[#00C2FF] transition-colors">HOME</Link>
           <Link href="/dashboard" className="text-xs font-mono uppercase tracking-wider text-[#00C2FF] border-b border-[#00C2FF] pb-1">Dashboard</Link>
           <Link href="/revenue" className="text-xs font-mono uppercase tracking-wider text-[#94A3B8] hover:text-[#00C2FF] transition-colors">Revenue</Link>
           <Link href="/guild" className="text-sm font-mono text-gray-400 hover:text-[#00C2FF] transition-colors">GUILD</Link>
+        </div>
+        <div className="flex items-center gap-4">
           <WalletButton />
         </div>
       </nav>
