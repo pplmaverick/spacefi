@@ -470,6 +470,8 @@ function Step3Panel({
   const att1PhaseRef = useRef<AttPhase>(att1Phase)
   useEffect(() => { att1PhaseRef.current = att1Phase }, [att1Phase])
 
+  const att1TxHashRef = useRef<`0x${string}` | null>(null)
+
   const att1ProofRef = useRef<proofProvider.ContinuityResponse | null>(null)
 
   // 共用計時器 — 兩軌都到終態（done/error）才停止
@@ -526,6 +528,7 @@ function Step3Panel({
         throw new Error('USC proof verification failed on CC3. Please retry.')
       }
       setAtt1TxHash(hash)
+      att1TxHashRef.current = hash
       setAtt1Phase('done')
     } catch (e) {
       setAtt1Error(e instanceof Error ? e.message.split('\n')[0] : String(e))
@@ -553,14 +556,24 @@ function Step3Panel({
 
       setAtt2Phase('proving')
 
-      // 合約要求先有 CollateralVerified 狀態，所以 execute(action=1) 要等 ATT#1 送出（submitting）或完成才能送出
-      // proof_ready 狀態（用戶還在切鏈）繼續等待，不視為失敗
-      while (att1PhaseRef.current !== 'submitting' && att1PhaseRef.current !== 'done') {
+      // 合約要求先有 CollateralVerified 狀態，所以 execute(action=1) 要等 ATT#1 的 tx 在鏈上確認才能送出
+      // 等 ATT#1 tx hash 出現
+      while (!att1TxHashRef.current) {
         if (att1PhaseRef.current === 'error') {
           throw new Error('ATT #1 failed — cannot submit ATT #2 until ATT #1 succeeds')
         }
-        await new Promise(resolve => setTimeout(resolve, 2000))
+        await new Promise(resolve => setTimeout(resolve, 3_000))
       }
+
+      // 等 ATT#1 tx 在鏈上確認
+      console.log('ATT #1 tx found, waiting for CC3 confirmation...')
+      const att1Receipt = await publicClient!.waitForTransactionReceipt({
+        hash: att1TxHashRef.current
+      })
+      if (att1Receipt.status === 'reverted') {
+        throw new Error('ATT #1 tx reverted — cannot proceed with ATT #2')
+      }
+      console.log('ATT #1 confirmed on-chain, proceeding with ATT #2...')
 
       setAtt2Phase('submitting')
 
