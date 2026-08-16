@@ -32,16 +32,12 @@ const GET_LOAN_ABI = [
     stateMutability: 'view',
     inputs: [{ name: 'loanId', type: 'uint256' }],
     outputs: [
-      {
-        name: '',
-        type: 'tuple',
-        components: [
-          { name: 'borrower', type: 'address' },
-          { name: 'collateralAmount', type: 'uint256' },
-          { name: 'nodeId', type: 'bytes32' },
-          { name: 'status', type: 'uint8' },
-        ],
-      },
+      { name: 'borrower', type: 'address' },
+      { name: 'collateralAmount', type: 'uint256' },
+      { name: 'usdValue', type: 'uint256' },
+      { name: 'nodeId', type: 'bytes32' },
+      { name: 'status', type: 'uint8' },
+      { name: 'repaidAmount', type: 'uint256' },
     ],
   },
 ] as const
@@ -97,10 +93,10 @@ export default function DashboardPage() {
   const loan = loanData
     ? {
         id: loanId?.toString() ?? '0',
-        status: loanData.status,
-        borrower: loanData.borrower,
-        collateralAmount: formatEther(loanData.collateralAmount),
-        nodeId: loanData.nodeId,
+        status: (loanData as unknown as unknown[])[4] as number,
+        borrower: (loanData as unknown as unknown[])[0] as string,
+        collateralAmount: formatEther((loanData as unknown as unknown[])[1] as bigint),
+        nodeId: (loanData as unknown as unknown[])[3] as string,
       }
     : null
 
