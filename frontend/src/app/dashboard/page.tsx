@@ -1,9 +1,10 @@
 'use client'
 import Link from 'next/link'
 import { WalletButton } from '@/components/WalletButton'
-import { useAccount, useReadContract } from 'wagmi'
+import { useAccount, useReadContract, useChainId, useSwitchChain, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
 import { formatEther } from 'viem'
 import { cc3Testnet } from '@/lib/chains'
+import { sepolia } from 'wagmi/chains'
 import { LOAN_STATUS } from '@/lib/contracts'
 import { useEffect, useState } from 'react'
 
@@ -42,6 +43,25 @@ const GET_LOAN_ABI = [
   },
 ] as const
 
+const COLLATERAL_VAULT_WITHDRAW_ABI = [
+  {
+    name: 'withdrawalAuthorized',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [{ name: 'loanId', type: 'uint256' }],
+    outputs: [{ name: '', type: 'bool' }],
+  },
+  {
+    name: 'withdraw',
+    type: 'function',
+    stateMutability: 'nonpayable',
+    inputs: [{ name: 'loanId', type: 'uint256' }],
+    outputs: [],
+  },
+] as const
+
+const COLLATERAL_VAULT_ADDRESS = process.env.NEXT_PUBLIC_COLLATERAL_VAULT as `0x${string}`
+
 const STATUS_COLOR: Record<number, string> = {
   0: 'text-gray-500',
   1: 'text-yellow-400',
@@ -65,6 +85,28 @@ const REPAYMENT_TIERS = [
   { label: 'Tier 4 — Down 30% × 2 months', rate: 'Frozen', ratio: null, color: 'text-[#64748B]' },
   { label: 'Tier 5 — Zero revenue × 3 months', rate: 'Default', ratio: null, color: 'text-[#FF6B35]' },
 ] as const
+
+function ChainSwitchBanner({ requiredChainId, requiredChainName }: { requiredChainId: number; requiredChainName: string }) {
+  const chainId = useChainId()
+  const { switchChain } = useSwitchChain()
+  const isWrongChain = chainId !== requiredChainId
+
+  if (!isWrongChain) return null
+
+  return (
+    <div className="flex items-center justify-between bg-[#FF6B35]/10 border border-[#FF6B35]/30 rounded-lg px-4 py-2 mb-4">
+      <span className="text-xs font-mono text-[#FF6B35]">
+        ⚠ Switch to {requiredChainName} to continue
+      </span>
+      <button
+        onClick={() => switchChain({ chainId: requiredChainId })}
+        className="text-xs font-mono text-[#FF6B35] border border-[#FF6B35]/50 rounded px-3 py-1 hover:bg-[#FF6B35]/10"
+      >
+        SWITCH NETWORK
+      </button>
+    </div>
+  )
+}
 
 export default function DashboardPage() {
   const { isConnected, address } = useAccount()
@@ -101,6 +143,33 @@ export default function DashboardPage() {
         nodeId: (loanData as unknown as unknown[])[3] as string,
       }
     : null
+
+  const sepoliaLoanId = loanId ?? 0n
+
+  const { data: isWithdrawAuthorized } = useReadContract({
+    address: COLLATERAL_VAULT_ADDRESS,
+    abi: COLLATERAL_VAULT_WITHDRAW_ABI,
+    functionName: 'withdrawalAuthorized',
+    args: [sepoliaLoanId],
+    chainId: sepolia.id,
+    query: {
+      enabled: loan?.status === 4 && sepoliaLoanId > 0n,
+      refetchInterval: 15000,
+    },
+  })
+
+  const { writeContract: writeWithdraw, data: withdrawTxHash, isPending: isWithdrawPending, error: withdrawError } = useWriteContract()
+  const { isLoading: isWithdrawConfirming, isSuccess: isWithdrawSuccess } = useWaitForTransactionReceipt({ hash: withdrawTxHash })
+
+  function handleWithdraw() {
+    writeWithdraw({
+      address: COLLATERAL_VAULT_ADDRESS,
+      abi: COLLATERAL_VAULT_WITHDRAW_ABI,
+      functionName: 'withdraw',
+      args: [sepoliaLoanId],
+      chainId: sepolia.id,
+    })
+  }
 
   // --- Dynamic Repayment State ---
   const [monthlyRevenue, setMonthlyRevenue] = useState<number | null>(null)
@@ -296,6 +365,51 @@ export default function DashboardPage() {
                   ))}
                 </div>
               </div>
+
+              {/* Collateral Release */}
+              {loan?.status === 4 && (
+                <div className="bg-[#1E293B] border border-[#334155] p-6">
+                  <div className="text-xs font-mono text-gray-500 uppercase tracking-wider mb-4">COLLATERAL RELEASE</div>
+
+                  <ChainSwitchBanner requiredChainId={sepolia.id} requiredChainName="Sepolia" />
+
+                  {isWithdrawSuccess ? (
+                    <div className="text-sm font-mono text-[#3DFFC0]">✓ ETH returned to your wallet</div>
+                  ) : isWithdrawAuthorized ? (
+                    <div className="space-y-3">
+                      <div className="text-xs font-mono text-[#3DFFC0] mb-2">✓ Withdrawal authorized</div>
+                      <button
+                        onClick={handleWithdraw}
+                        disabled={isWithdrawPending || isWithdrawConfirming}
+                        className="w-full bg-[#00C2FF] text-[#0F172A] font-mono text-xs uppercase tracking-wider px-6 py-3 hover:bg-[#75d1ff] transition-colors border border-[#00C2FF] disabled:opacity-50"
+                      >
+                        {isWithdrawPending ? 'Confirm in wallet...' : isWithdrawConfirming ? 'Confirming...' : 'WITHDRAW ETH →'}
+                      </button>
+                      {withdrawTxHash && (
+                        <div className="text-xs font-mono text-gray-500">
+                          Tx: <a href={`https://sepolia.etherscan.io/tx/${withdrawTxHash}`} target="_blank" rel="noopener noreferrer" className="text-[#00C2FF]">{withdrawTxHash.slice(0, 20)}...</a>
+                        </div>
+                      )}
+                      {withdrawError && (
+                        <div className="text-xs font-mono text-red-400 bg-red-900/20 border border-red-900/40 px-4 py-3 mt-2">
+                          {withdrawError.message.split('\n')[0]}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <div className="text-xs font-mono text-[#FF6B35] mb-2">⏳ Awaiting admin authorization</div>
+                      <button
+                        disabled
+                        className="w-full bg-[#1E293B] text-gray-600 font-mono text-xs uppercase tracking-wider px-6 py-3 border border-[#334155] cursor-not-allowed"
+                      >
+                        WITHDRAW ETH →
+                      </button>
+                      <div className="text-xs font-mono text-gray-600">Checking every 15s...</div>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Dynamic Repayment Rate */}
               {(loan?.status ?? 0) === 3 && (
