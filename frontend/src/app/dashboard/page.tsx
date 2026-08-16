@@ -5,6 +5,11 @@ import { useAccount, useReadContract } from 'wagmi'
 import { formatEther } from 'viem'
 import { cc3Testnet } from '@/lib/chains'
 import { LOAN_STATUS } from '@/lib/contracts'
+import { useEffect, useState } from 'react'
+
+const ESCROW_ADDRESS = '0xC130F5D76f0b4Ce8FE2ceA0D2C2b8f53A39a5cd0'
+const BLOCKSCOUT_CC3 = 'https://creditcoin.blockscout.com'
+const RECEIPT_CLAIMED_TOPIC = '0x7d6cc3c483f3de5eda2c38c7e1a94575eae31eb75440f690d047ece1c4d3e041'
 
 const SPACE_FINANCE_ADDRESS = process.env.NEXT_PUBLIC_SPACE_FINANCE as `0x${string}`
 
@@ -86,6 +91,80 @@ export default function DashboardPage() {
       }
     : null
 
+  // --- Dynamic Repayment State ---
+  const [monthlyRevenue, setMonthlyRevenue] = useState<number | null>(null)
+  const [revenueLoading, setRevenueLoading] = useState(false)
+
+  useEffect(() => {
+    if (!loan?.nodeId) return
+
+    const fetchRevenue = async () => {
+      setRevenueLoading(true)
+      try {
+        // Fetch last 90 days of ReceiptClaimed logs for this node
+        const toBlock = 'latest'
+        // Use fromBlock far enough back to cover 3 months (~3 months * 30 days * 720 blocks/day)
+        const url = `${BLOCKSCOUT_CC3}/api?module=logs&action=getLogs` +
+          `&address=${ESCROW_ADDRESS}` +
+          `&topic0=${RECEIPT_CLAIMED_TOPIC}` +
+          `&fromBlock=0&toBlock=${toBlock}`
+
+        const res = await fetch(url)
+        const json = await res.json()
+
+        if (json.status !== '1' || !Array.isArray(json.result)) {
+          setMonthlyRevenue(0)
+          return
+        }
+
+        // Filter by nodeId (topic1 or topic2 depending on contract event signature)
+        // ReceiptClaimed event: amountPaid is the revenue field
+        // Client-side filter: check if nodeId appears in the log data
+        const nodeIdLower = loan.nodeId.toLowerCase()
+        const filtered = json.result.filter((log: { topics: string[] }) =>
+          log.topics.some((t: string) => t.toLowerCase().includes(nodeIdLower.replace('0x', '')))
+        )
+
+        // Sum amountPaid from each log's data field (first 32 bytes = amountPaid)
+        let total = 0
+        for (const log of filtered) {
+          const raw = log.data?.slice(2, 66) // first 32 bytes
+          if (raw) {
+            const val = parseInt(raw, 16)
+            if (!isNaN(val)) total += val
+          }
+        }
+
+        // Convert from smallest unit (assume 6 decimals for CTC) → USD approximation
+        // Using 1 CTC ≈ $0.05 as rough estimate; display in CTC
+        const totalCTC = total / 1e18
+        const monthly = totalCTC / 3 // 90 days ÷ 3 = monthly avg
+        setMonthlyRevenue(Math.round(monthly * 100) / 100)
+      } catch (e) {
+        console.error('Revenue fetch error:', e)
+        setMonthlyRevenue(0)
+      } finally {
+        setRevenueLoading(false)
+      }
+    }
+
+    fetchRevenue()
+  }, [loan?.nodeId])
+
+  // Determine repayment ratio based on monthly revenue trend
+  // For MVP: use absolute monthly revenue level as proxy
+  // < 50 CTC → treat as declined 50%+ → 80%
+  // < 100 CTC → treat as declined 30%+ → 60%
+  // >= 100 CTC → normal → 40%
+  const getRepaymentTier = (monthly: number | null) => {
+    if (monthly === null) return null
+    if (monthly < 50) return { ratio: 80, label: '80%', note: 'Revenue down 50%+ — extended +30 days', color: 'text-red-400', border: 'border-red-900' }
+    if (monthly < 100) return { ratio: 60, label: '60%', note: 'Revenue down 30%+', color: 'text-yellow-400', border: 'border-yellow-900' }
+    return { ratio: 40, label: '40%', note: 'Normal repayment rate', color: 'text-green-400', border: 'border-green-900' }
+  }
+
+  const repaymentTier = getRepaymentTier(monthlyRevenue)
+
   return (
     <div className="min-h-screen bg-[#080c14] text-white">
       <nav className="border-b border-[#1a2744] px-6 py-4 flex items-center justify-between">
@@ -166,6 +245,63 @@ export default function DashboardPage() {
                 ))}
               </div>
             </div>
+
+            {/* Dynamic Repayment Rate */}
+            {(loan?.status ?? 0) === 3 && (
+              <div className="bg-[#0d1424] border border-[#1a2744] rounded-xl p-6">
+                <div className="text-xs font-mono text-gray-500 uppercase tracking-wider mb-4">Dynamic Repayment Rate</div>
+
+                {revenueLoading ? (
+                  <div className="text-sm font-mono text-gray-600 animate-pulse">Fetching node revenue...</div>
+                ) : repaymentTier ? (
+                  <div className="space-y-4">
+                    {/* Current ratio */}
+                    <div className={`border rounded-lg p-4 ${repaymentTier.border} bg-black/20`}>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-mono text-gray-500 uppercase tracking-wider">Current Rate</span>
+                        <span className={`text-2xl font-bold font-mono ${repaymentTier.color}`}>{repaymentTier.label}</span>
+                      </div>
+                      <div className="text-xs font-mono text-gray-600 mt-1">{repaymentTier.note}</div>
+                    </div>
+
+                    {/* Monthly revenue */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <div className="text-xs font-mono text-gray-600 uppercase tracking-wider mb-1">Monthly Avg Revenue</div>
+                        <div className="text-sm font-mono text-white">{monthlyRevenue?.toFixed(2) ?? '-'} CTC</div>
+                        <div className="text-xs font-mono text-gray-600">from ReceiptClaimed (CC3 mainnet)</div>
+                      </div>
+                      <div>
+                        <div className="text-xs font-mono text-gray-600 uppercase tracking-wider mb-1">Credit Limit</div>
+                        <div className="text-sm font-mono text-white">
+                          {monthlyRevenue !== null ? (monthlyRevenue * 3).toFixed(0) : '-'} mUSDF
+                        </div>
+                        <div className="text-xs font-mono text-gray-600">monthly avg × 3</div>
+                      </div>
+                    </div>
+
+                    {/* Tier table */}
+                    <div className="border border-[#1a2744] rounded-lg overflow-hidden">
+                      <div className="text-xs font-mono text-gray-500 px-4 py-2 border-b border-[#1a2744] uppercase tracking-wider">Repayment Schedule</div>
+                      {[
+                        { condition: 'Normal', rate: '40%', color: 'text-green-400' },
+                        { condition: 'Revenue down 30%+', rate: '60%', color: 'text-yellow-400' },
+                        { condition: 'Revenue down 50%+', rate: '80% (+30d)', color: 'text-red-400' },
+                        { condition: 'Down 30% × 2 months', rate: 'Frozen', color: 'text-gray-500' },
+                        { condition: 'Zero revenue × 3 months', rate: 'Default', color: 'text-gray-500' },
+                      ].map(({ condition, rate, color }) => (
+                        <div key={condition} className="flex items-center justify-between px-4 py-2 border-b border-[#1a2744] last:border-0">
+                          <span className="text-xs font-mono text-gray-500">{condition}</span>
+                          <span className={`text-xs font-mono font-semibold ${color}`}>{rate}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-sm font-mono text-gray-600">No revenue data found for this node.</div>
+                )}
+              </div>
+            )}
 
             {/* Actions */}
             {(loan?.status ?? 0) === 0 && (
