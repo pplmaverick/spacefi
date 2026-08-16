@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SpaceFinance | Spacecoin Node Financing</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400&amp;family=JetBrains+Mono:wght@400;500;700&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "outline-variant": "#334155",
+                    "primary": "#00C2FF",
+                    "surface-container-high": "#222a3d",
+                    "on-tertiary-container": "#822600",
+                    "surface-variant": "#1E293B",
+                    "outline": "#86929a",
+                    "secondary-fixed-dim": "#00e1a6",
+                    "on-primary-container": "#0F172A",
+                    "secondary-container": "#06eaad",
+                    "on-background": "#F8FAFC",
+                    "on-error-container": "#ffdad6",
+                    "surface": "#0F172A",
+                    "on-primary": "#003548",
+                    "on-secondary-fixed": "#002115",
+                    "on-secondary-container": "#006548",
+                    "on-error": "#690005",
+                    "on-tertiary": "#5d1900",
+                    "primary-container": "#00c2ff",
+                    "error": "#ffb4ab",
+                    "primary-fixed": "#c2e8ff",
+                    "surface-container": "#1E293B",
+                    "tertiary-fixed": "#ffdbd0",
+                    "on-surface": "#F8FAFC",
+                    "background": "#0F172A",
+                    "surface-container-lowest": "#0F172A",
+                    "tertiary": "#ffc2ae",
+                    "primary-fixed-dim": "#75d1ff",
+                    "on-tertiary-fixed-variant": "#832600",
+                    "secondary": "#99ffd3",
+                    "tertiary-fixed-dim": "#ffb59d",
+                    "surface-container-low": "#0F172A",
+                    "surface-dim": "#0F172A",
+                    "inverse-on-surface": "#283044",
+                    "surface-tint": "#00C2FF",
+                    "surface-container-highest": "#1E293B",
+                    "tertiary-container": "#ff9a78",
+                    "on-surface-variant": "#94A3B8",
+                    "on-secondary-fixed-variant": "#00513a",
+                    "on-secondary": "#003827",
+                    "inverse-primary": "#006688",
+                    "secondary-fixed": "#3dffc0",
+                    "on-primary-fixed": "#001e2b",
+                    "on-primary-fixed-variant": "#004d67",
+                    "inverse-surface": "#F8FAFC",
+                    "on-tertiary-fixed": "#390c00",
+                    "surface-bright": "#31394d",
+                    "error-container": "#93000a"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0px",
+                    "lg": "0px",
+                    "xl": "0px",
+                    "full": "0px"
+            },
+            "spacing": {
+                    "margin-mobile": "16px",
+                    "gutter": "16px",
+                    "md": "16px",
+                    "sm": "8px",
+                    "lg": "24px",
+                    "xl": "48px",
+                    "margin-desktop": "32px",
+                    "xs": "4px",
+                    "unit": "4px"
+            },
+            "fontFamily": {
+                    "headline-lg": [
+                            "Space Grotesk"
+                    ],
+                    "headline-lg-mobile": [
+                            "Space Grotesk"
+                    ],
+                    "body-sm": [
+                            "Inter"
+                    ],
+                    "label-caps": [
+                            "JetBrains Mono"
+                    ],
+                    "display-lg": [
+                            "Space Grotesk"
+                    ],
+                    "headline-md": [
+                            "Space Grotesk"
+                    ],
+                    "data-lg": [
+                            "JetBrains Mono"
+                    ],
+                    "data-md": [
+                            "JetBrains Mono"
+                    ],
+                    "body-md": [
+                            "Inter"
+                    ]
+            },
+            "fontSize": {
+                    "headline-lg": [
+                            "32px",
+                            {
+                                    "lineHeight": "1.2",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "headline-lg-mobile": [
+                            "24px",
+                            {
+                                    "lineHeight": "1.2",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "body-sm": [
+                            "14px",
+                            {
+                                    "lineHeight": "1.5",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "label-caps": [
+                            "12px",
+                            {
+                                    "lineHeight": "1",
+                                    "letterSpacing": "0.05em",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "display-lg": [
+                            "48px",
+                            {
+                                    "lineHeight": "1.1",
+                                    "letterSpacing": "-0.02em",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "headline-md": [
+                            "20px",
+                            {
+                                    "lineHeight": "1.4",
+                                    "fontWeight": "500"
+                            }
+                    ],
+                    "data-lg": [
+                            "18px",
+                            {
+                                    "lineHeight": "1.4",
+                                    "fontWeight": "500"
+                            }
+                    ],
+                    "data-md": [
+                            "14px",
+                            {
+                                    "lineHeight": "1.4",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "body-md": [
+                            "16px",
+                            {
+                                    "lineHeight": "1.6",
+                                    "fontWeight": "400"
+                            }
+                    ]
+            }
+    },
+        },
+      }
+    </script>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col font-body-md text-body-md antialiased selection:bg-primary selection:text-surface">
+<!-- TopNavBar -->
+<header class="bg-surface border-b border-outline-variant w-full h-16 flex justify-between items-center px-margin-mobile md:px-margin-desktop sticky top-0 z-50">
+<div class="flex items-center gap-lg">
+<div class="font-label-caps text-label-caps text-primary tracking-widest uppercase">
+                SPACEFINANCE
+            </div>
+<nav class="hidden md:flex gap-md">
+<!-- Highlight 'Dashboard' as active based on intent (though landing page, it's the closest action) -->
+<a class="font-label-caps text-label-caps text-on-surface-variant font-medium hover:text-primary transition-colors duration-200" href="#">
+                    Dashboard
+                </a>
+<a class="font-label-caps text-label-caps text-on-surface-variant font-medium hover:text-primary transition-colors duration-200" href="#">
+                    Revenue
+                </a>
+</nav>
+</div>
+<div>
+<button class="bg-primary text-surface font-label-caps text-label-caps uppercase px-md py-sm hover:bg-opacity-90 transition-all border border-primary">
+                Connect Wallet
+            </button>
+</div>
+</header>
+<main class="flex-grow">
+<!-- Hero Section -->
+<section class="w-full max-w-[1440px] mx-auto px-margin-mobile md:px-margin-desktop py-xl md:py-24 grid grid-cols-1 lg:grid-cols-2 gap-xl items-center min-h-[80vh]">
+<div class="flex flex-col gap-lg z-10">
+<div class="inline-flex items-center gap-sm bg-surface-container border border-outline-variant px-sm py-xs w-fit">
+<span class="text-primary text-[10px]">•</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">CREDITCOIN CC3 · DEPIN TRACK</span>
+</div>
+<h1 class="font-display-lg text-display-lg text-on-surface">
+                    Finance your <br/>
+<span class="text-primary">Spacecoin node</span> <br/>
+                    on-chain.
+                </h1>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-xl">
+                    Deposit ETH as collateral on Sepolia. Prove your node identity via USC cross-chain attestation. Receive mUSDF financing on Creditcoin CC3 — trustlessly, without intermediaries.
+                </p>
+<div class="flex flex-col sm:flex-row gap-md mt-sm">
+<button class="bg-primary text-surface font-label-caps text-label-caps uppercase px-lg py-md hover:bg-primary-fixed transition-colors border border-primary flex items-center justify-center gap-sm group">
+                        Apply for Financing
+                        <span class="material-symbols-outlined text-[16px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+<button class="bg-transparent text-on-background font-label-caps text-label-caps uppercase px-lg py-md hover:border-primary transition-colors border border-outline-variant">
+                        View Node Revenue
+                    </button>
+</div>
+</div>
+<div class="relative w-full h-[400px] lg:h-[600px] bg-surface-container border border-outline-variant overflow-hidden flex items-center justify-center">
+<!-- Abstract orbital animation placeholder -->
+<!-- STITCH_SVG_START:ANIMATION_1 class="w-full h-full opacity-80 mix-blend-screen" --><div class="w-full h-full opacity-80 mix-blend-screen" id="animated-svg-ANIMATION_1" style="display:block;"><svg fill="none" viewbox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+<!-- Central Node Cluster -->
+<circle cx="200" cy="200" fill="#00C2FF" r="10"></circle>
+<circle cx="185" cy="185" fill="#00C2FF" opacity="0.6" r="4"></circle>
+<circle cx="215" cy="215" fill="#00C2FF" opacity="0.6" r="4"></circle>
+<circle cx="215" cy="185" fill="#00C2FF" opacity="0.6" r="4"></circle>
+<circle cx="185" cy="215" fill="#00C2FF" opacity="0.6" r="4"></circle>
+<!-- Orbit Paths -->
+<ellipse cx="200" cy="200" opacity="0.4" rx="160" ry="80" stroke="#00C2FF" stroke-dasharray="4 4" stroke-width="1"></ellipse>
+<ellipse cx="200" cy="200" opacity="0.4" rx="80" ry="160" stroke="#00C2FF" stroke-dasharray="4 4" stroke-width="1"></ellipse>
+<!-- Traveling Orbit Dots -->
+<circle fill="#00C2FF" r="4">
+<animatemotion dur="8s" path="M 40,200 A 160,80 0 1,1 360,200 A 160,80 0 1,1 40,200" repeatcount="indefinite"></animatemotion>
+</circle>
+<circle fill="#3DFFC0" r="4">
+<animatemotion dur="12s" path="M 200,40 A 80,160 0 1,1 200,360 A 80,160 0 1,1 200,40" repeatcount="indefinite"></animatemotion>
+</circle>
+<!-- Attestation Pulses -->
+<circle cx="200" cy="200" r="10" stroke="#00C2FF" stroke-width="2">
+<animate attributename="r" dur="3s" from="10" repeatcount="indefinite" to="60"></animate>
+<animate attributename="opacity" dur="3s" from="0.6" repeatcount="indefinite" to="0"></animate>
+</circle>
+</svg></div><!-- STITCH_SVG_END:ANIMATION_1 -->
+<!-- Overlay UI elements for "Mission Control" feel -->
+<div class="absolute top-sm left-sm font-data-md text-data-md text-outline-variant">
+                    SYS.OP.STATUS // ACTIVE
+                </div>
+<div class="absolute bottom-sm right-sm font-data-md text-data-md text-primary opacity-50 flex items-center gap-2">
+<span class="w-2 h-2 bg-primary block animate-pulse"></span>
+                    SYNCING
+                </div>
+</div>
+</section>
+<!-- Stats Bar -->
+<section class="w-full border-y border-outline-variant bg-surface-container">
+<div class="w-full max-w-[1440px] mx-auto grid grid-cols-2 md:grid-cols-4 divide-x divide-y md:divide-y-0 divide-outline-variant">
+<div class="p-md flex flex-col gap-xs">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Protocol</span>
+<span class="font-data-lg text-data-lg text-on-surface">USC Attestcoin</span>
+</div>
+<div class="p-md flex flex-col gap-xs">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Collateral Chain</span>
+<span class="font-data-lg text-data-lg text-on-surface">Sepolia ETH</span>
+</div>
+<div class="p-md flex flex-col gap-xs">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Financing Chain</span>
+<span class="font-data-lg text-data-lg text-on-surface">CC3 Testnet</span>
+</div>
+<div class="p-md flex flex-col gap-xs">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Attestation Time</span>
+<span class="font-data-lg text-data-lg text-primary">8–10 min</span>
+</div>
+</div>
+</section>
+<!-- How It Works Section -->
+<section class="w-full max-w-[1440px] mx-auto px-margin-mobile md:px-margin-desktop py-xl">
+<div class="mb-lg">
+<h2 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">
+                    OPERATIONAL PROTOCOL
+                </h2>
+<div class="w-16 h-1 bg-primary mt-sm"></div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-md">
+<!-- Step 01 -->
+<div class="bg-surface-container border border-outline-variant p-md flex flex-col gap-sm relative group hover:border-primary transition-colors">
+<div class="absolute top-0 right-0 bg-outline-variant text-on-surface-variant font-data-md px-2 py-1 text-xs opacity-50 group-hover:opacity-100 transition-opacity">
+                        [SEPOLIA]
+                    </div>
+<div class="font-data-lg text-data-lg text-primary">01</div>
+<h3 class="font-headline-md text-headline-md text-on-surface">Lock Collateral</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Deposit ETH into the Sepolia smart contract to secure your financing limit.</p>
+</div>
+<!-- Step 02 -->
+<div class="bg-surface-container border border-outline-variant p-md flex flex-col gap-sm relative group hover:border-primary transition-colors">
+<div class="absolute top-0 right-0 bg-outline-variant text-on-surface-variant font-data-md px-2 py-1 text-xs opacity-50 group-hover:opacity-100 transition-opacity">
+                        [USC]
+                    </div>
+<div class="font-data-lg text-data-lg text-primary">02</div>
+<h3 class="font-headline-md text-headline-md text-on-surface">Request Attestation</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Initiate cross-chain message via Universal Settlement Coin protocol.</p>
+</div>
+<!-- Step 03 -->
+<div class="bg-surface-container border border-outline-variant p-md flex flex-col gap-sm relative group hover:border-primary transition-colors">
+<div class="absolute top-0 right-0 bg-outline-variant text-on-surface-variant font-data-md px-2 py-1 text-xs opacity-50 group-hover:opacity-100 transition-opacity">
+                        [USC]
+                    </div>
+<div class="font-data-lg text-data-lg text-primary">03</div>
+<h3 class="font-headline-md text-headline-md text-on-surface">Verify Node Status</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Attestors cryptographically verify your Spacecoin node health and collateral state.</p>
+</div>
+<!-- Step 04 -->
+<div class="bg-surface-container border border-outline-variant p-md flex flex-col gap-sm relative group hover:border-primary transition-colors">
+<div class="absolute top-0 right-0 bg-outline-variant text-on-surface-variant font-data-md px-2 py-1 text-xs opacity-50 group-hover:opacity-100 transition-opacity">
+                        [CC3]
+                    </div>
+<div class="font-data-lg text-data-lg text-primary">04</div>
+<h3 class="font-headline-md text-headline-md text-on-surface">Mint Financing</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Creditcoin CC3 contract automatically mints mUSDF based on attested collateral.</p>
+</div>
+<!-- Step 05 -->
+<div class="bg-surface-container border border-outline-variant p-md flex flex-col gap-sm relative group hover:border-primary transition-colors">
+<div class="absolute top-0 right-0 bg-outline-variant text-on-surface-variant font-data-md px-2 py-1 text-xs opacity-50 group-hover:opacity-100 transition-opacity">
+                        [CC3]
+                    </div>
+<div class="font-data-lg text-data-lg text-primary">05</div>
+<h3 class="font-headline-md text-headline-md text-on-surface">Deploy Hardware</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Utilize funds to expand infrastructure. Revenue streams directly to repayment contract.</p>
+</div>
+<!-- Step 06 -->
+<div class="bg-surface-container border border-outline-variant p-md flex flex-col gap-sm relative group hover:border-primary transition-colors">
+<div class="absolute top-0 right-0 bg-outline-variant text-on-surface-variant font-data-md px-2 py-1 text-xs opacity-50 group-hover:opacity-100 transition-opacity">
+                        [SEPOLIA]
+                    </div>
+<div class="font-data-lg text-data-lg text-primary">06</div>
+<h3 class="font-headline-md text-headline-md text-on-surface">Unlock Collateral</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Once mUSDF is repaid, cross-chain signal unlocks your initial ETH deposit.</p>
+</div>
+</div>
+</section>
+<!-- Why SpaceFinance -->
+<section class="w-full max-w-[1440px] mx-auto px-margin-mobile md:px-margin-desktop py-xl border-t border-outline-variant">
+<div class="mb-lg flex justify-between items-end">
+<div>
+<h2 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">
+                        SYSTEM ADVANTAGES
+                    </h2>
+<div class="w-16 h-1 bg-primary mt-sm"></div>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-md">
+<!-- Card 1 -->
+<div class="bg-surface-container border border-outline-variant p-lg flex flex-col gap-md">
+<span class="material-symbols-outlined text-primary text-[32px]">hub</span>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-xs">Trustless cross-chain</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Powered by USC attestations, removing centralized oracles or bridges. Your collateral state is verified cryptographically by the network.</p>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container border border-outline-variant p-lg flex flex-col gap-md">
+<span class="material-symbols-outlined text-primary text-[32px]">monitoring</span>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-xs">Revenue-based credit</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Node performance dictates credit limits. Smart contracts auto-route DePIN yield to service debt, minimizing manual treasury management.</p>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container border border-outline-variant p-lg flex flex-col gap-md">
+<span class="material-symbols-outlined text-primary text-[32px]">verified_user</span>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-xs">Guild accountability</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Delegated trust mechanisms allow established operators to vouch for new nodes, creating a decentralized web of trust for unsecured tranches.</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-lowest border-t border-outline-variant w-full px-margin-mobile md:px-margin-desktop py-md flex flex-col md:flex-row justify-between items-center gap-sm mt-auto">
+<div class="font-label-caps text-label-caps text-primary uppercase">
+            SpaceFinance
+        </div>
+<div class="font-label-caps text-label-caps text-on-surface-variant text-center md:text-left uppercase tracking-wider">
+            SpaceFinance · BUIDL CTC 2026 Fall · Built on Creditcoin CC3
+        </div>
+<nav class="flex gap-md">
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary underline transition-all duration-300 uppercase" href="#">
+                Docs
+            </a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary underline transition-all duration-300 uppercase" href="#">
+                GitHub
+            </a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary underline transition-all duration-300 uppercase" href="#">
+                Security
+            </a>
+</nav>
+</footer>
+</body></html>

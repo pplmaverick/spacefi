@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SpaceFinance - Revenue</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500;700&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+                "outline-variant": "#3d484f",
+                "primary": "#92d9ff",
+                "surface-container-high": "#222a3d",
+                "on-tertiary-container": "#822600",
+                "surface-variant": "#2d3449",
+                "outline": "#86929a",
+                "secondary-fixed-dim": "#00e1a6",
+                "on-primary-container": "#004c66",
+                "secondary-container": "#06eaad",
+                "on-background": "#dae2fd",
+                "on-error-container": "#ffdad6",
+                "surface": "#0b1326",
+                "on-primary": "#003548",
+                "on-secondary-fixed": "#002115",
+                "on-secondary-container": "#006548",
+                "on-error": "#690005",
+                "on-tertiary": "#5d1900",
+                "primary-container": "#00c2ff",
+                "error": "#ffb4ab",
+                "primary-fixed": "#c2e8ff",
+                "surface-container": "#171f33",
+                "tertiary-fixed": "#ffdbd0",
+                "on-surface": "#dae2fd",
+                "background": "#0b1326",
+                "surface-container-lowest": "#060e20",
+                "tertiary": "#ffc2ae",
+                "primary-fixed-dim": "#75d1ff",
+                "on-tertiary-fixed-variant": "#832600",
+                "secondary": "#99ffd3",
+                "tertiary-fixed-dim": "#ffb59d",
+                "surface-container-low": "#131b2e",
+                "surface-dim": "#0b1326",
+                "inverse-on-surface": "#283044",
+                "surface-tint": "#75d1ff",
+                "surface-container-highest": "#2d3449",
+                "tertiary-container": "#ff9a78",
+                "on-surface-variant": "#bcc8d1",
+                "on-secondary-fixed-variant": "#00513a",
+                "on-secondary": "#003827",
+                "inverse-primary": "#006688",
+                "secondary-fixed": "#3dffc0",
+                "on-primary-fixed": "#001e2b",
+                "on-primary-fixed-variant": "#004d67",
+                "inverse-surface": "#dae2fd",
+                "on-tertiary-fixed": "#390c00",
+                "surface-bright": "#31394d",
+                "error-container": "#93000a"
+        },
+        "borderRadius": {
+                "DEFAULT": "0.125rem",
+                "lg": "0.25rem",
+                "xl": "0.5rem",
+                "full": "0.75rem"
+        },
+        "spacing": {
+                "margin-mobile": "16px",
+                "gutter": "16px",
+                "md": "16px",
+                "sm": "8px",
+                "lg": "24px",
+                "xl": "48px",
+                "margin-desktop": "32px",
+                "xs": "4px",
+                "unit": "4px"
+        },
+        "fontFamily": {
+                "headline-lg": [
+                        "Space Grotesk"
+                ],
+                "headline-lg-mobile": [
+                        "Space Grotesk"
+                ],
+                "body-sm": [
+                        "Inter"
+                ],
+                "label-caps": [
+                        "JetBrains Mono"
+                ],
+                "display-lg": [
+                        "Space Grotesk"
+                ],
+                "headline-md": [
+                        "Space Grotesk"
+                ],
+                "data-lg": [
+                        "JetBrains Mono"
+                ],
+                "data-md": [
+                        "JetBrains Mono"
+                ],
+                "body-md": [
+                        "Inter"
+                ]
+        },
+        "fontSize": {
+                "headline-lg": [
+                        "32px",
+                        {
+                                "lineHeight": "1.2",
+                                "fontWeight": "600"
+                        }
+                ],
+                "headline-lg-mobile": [
+                        "24px",
+                        {
+                                "lineHeight": "1.2",
+                                "fontWeight": "600"
+                        }
+                ],
+                "body-sm": [
+                        "14px",
+                        {
+                                "lineHeight": "1.5",
+                                "fontWeight": "400"
+                        }
+                ],
+                "label-caps": [
+                        "12px",
+                        {
+                                "lineHeight": "1",
+                                "letterSpacing": "0.05em",
+                                "fontWeight": "700"
+                        }
+                ],
+                "display-lg": [
+                        "48px",
+                        {
+                                "lineHeight": "1.1",
+                                "letterSpacing": "-0.02em",
+                                "fontWeight": "700"
+                        }
+                ],
+                "headline-md": [
+                        "20px",
+                        {
+                                "lineHeight": "1.4",
+                                "fontWeight": "500"
+                        }
+                ],
+                "data-lg": [
+                        "18px",
+                        {
+                                "lineHeight": "1.4",
+                                "fontWeight": "500"
+                        }
+                ],
+                "data-md": [
+                        "14px",
+                        {
+                                "lineHeight": "1.4",
+                                "fontWeight": "400"
+                        }
+                ],
+                "body-md": [
+                        "16px",
+                        {
+                                "lineHeight": "1.6",
+                                "fontWeight": "400"
+                        }
+                ]
+        }
+},
+    },
+  }
+</script>
+<style>
+  /* Neo-brutalist utility classes for specific inputs not covered entirely by tailwind config inline */
+  .neo-input:focus {
+    border-color: #00C2FF !important;
+    border-width: 2px !important;
+    outline: none !important;
+    box-shadow: none !important;
+    padding: 7px 15px; /* Offset the 1px extra border */
+  }
+</style>
+</head>
+<body class="bg-surface text-on-surface font-body-md text-body-md min-h-screen flex flex-col antialiased selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopNavBar -->
+<nav class="bg-surface border-b border-outline-variant w-full sticky top-0 z-50">
+<div class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop h-16 max-w-full mx-auto">
+<div class="flex items-center gap-lg">
+<a class="font-label-caps text-label-caps text-primary tracking-widest uppercase" href="#">SPACEFINANCE</a>
+<div class="hidden md:flex gap-md items-center">
+<a class="font-label-caps text-label-caps text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 uppercase" href="#">Dashboard</a>
+<a class="font-label-caps text-label-caps text-primary font-bold border-b-2 border-primary pb-1 uppercase active:scale-95 active:opacity-80" href="#">Revenue</a>
+</div>
+</div>
+<div>
+<button class="bg-primary-container text-on-primary-container font-label-caps text-label-caps px-md py-sm uppercase hover:opacity-90 active:scale-95 transition-all">
+          Connect Wallet
+        </button>
+</div>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="flex-grow w-full px-margin-mobile md:px-margin-desktop py-lg md:py-xl max-w-[1440px] mx-auto flex flex-col gap-lg">
+<!-- Page Header -->
+<header class="w-full flex flex-col gap-sm">
+<h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">Node Revenue Verification</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Query on-chain reward distributions for validated DePIN nodes.</p>
+</header>
+<!-- Query Section (Level 1 Panel) -->
+<section class="bg-surface-container border border-outline-variant p-md flex flex-col md:flex-row gap-md items-start md:items-end w-full">
+<div class="flex flex-col gap-xs w-full md:w-96">
+<label class="font-label-caps text-label-caps text-on-surface-variant uppercase" for="node_id">Node ID / Public Key</label>
+<input class="neo-input bg-surface border border-outline-variant text-on-surface px-md py-sm font-data-md text-data-md w-full transition-all duration-75" id="node_id" placeholder="0x..." type="text" value="0x7a8F...39D2"/>
+</div>
+<button class="bg-primary-container text-on-primary-container font-label-caps text-label-caps px-md py-sm uppercase hover:opacity-90 active:scale-95 transition-all w-full md:w-auto flex items-center justify-center gap-xs h-[42px]">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">search</span>
+        Query
+      </button>
+</section>
+<!-- Results Section -->
+<section class="flex flex-col gap-md w-full animate-fade-in">
+<!-- Bento Grid: Stat Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-md w-full">
+<!-- Stat Card 1 -->
+<div class="bg-surface-container border border-outline-variant p-md flex flex-col gap-sm relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-1 h-full bg-primary-container"></div>
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase z-10">Total Revenue (CTC)</span>
+<span class="font-display-lg text-display-lg text-on-surface z-10">45,291<span class="text-primary-container text-headline-md">.00</span></span>
+</div>
+<!-- Stat Card 2 -->
+<div class="bg-surface-container border border-outline-variant p-md flex flex-col gap-sm relative overflow-hidden">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase z-10">Monthly Avg (CTC)</span>
+<span class="font-display-lg text-display-lg text-on-surface z-10">3,774<span class="text-on-surface-variant text-headline-md">.25</span></span>
+</div>
+<!-- Stat Card 3 -->
+<div class="bg-surface-container border border-outline-variant p-md flex flex-col gap-sm relative overflow-hidden">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase z-10">Records Count</span>
+<span class="font-display-lg text-display-lg text-on-surface z-10">1,024</span>
+</div>
+</div>
+<!-- Transaction Table Panel (Level 1) -->
+<div class="bg-surface-container border border-outline-variant w-full flex flex-col">
+<!-- Panel Header -->
+<div class="border-b border-outline-variant p-md flex flex-col md:flex-row justify-between items-start md:items-center gap-sm bg-surface-container-high">
+<h2 class="font-headline-md text-headline-md text-on-surface">Reward Transactions</h2>
+<div class="bg-primary-container/10 border border-primary-container px-sm py-xs flex items-center gap-xs">
+<div class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></div>
+<span class="font-label-caps text-label-caps text-primary-container uppercase">Spacecoin TokenPaymentEscrow · CC3 Mainnet</span>
+</div>
+</div>
+<!-- Table Container -->
+<div class="w-full overflow-x-auto">
+<table class="w-full text-left border-collapse min-w-[600px]">
+<thead>
+<tr class="border-b border-outline-variant bg-surface-container/50">
+<th class="p-md font-label-caps text-label-caps text-on-surface-variant uppercase w-1/4">Date (UTC)</th>
+<th class="p-md font-label-caps text-label-caps text-on-surface-variant uppercase w-1/4 text-right">Amount (CTC)</th>
+<th class="p-md font-label-caps text-label-caps text-on-surface-variant uppercase w-1/2">Tx Hash</th>
+</tr>
+</thead>
+<tbody class="font-data-md text-data-md text-on-surface">
+<tr class="border-b border-outline-variant hover:bg-surface-variant/30 transition-colors">
+<td class="p-md">2026-10-15 14:22:01</td>
+<td class="p-md text-right text-primary-container">125.50</td>
+<td class="p-md text-on-surface-variant truncate max-w-[200px]">0x9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b</td>
+</tr>
+<tr class="border-b border-outline-variant hover:bg-surface-variant/30 transition-colors">
+<td class="p-md">2026-10-14 14:15:33</td>
+<td class="p-md text-right text-primary-container">128.00</td>
+<td class="p-md text-on-surface-variant truncate max-w-[200px]">0x1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b</td>
+</tr>
+<tr class="border-b border-outline-variant hover:bg-surface-variant/30 transition-colors">
+<td class="p-md">2026-10-13 14:10:12</td>
+<td class="p-md text-right text-primary-container">122.25</td>
+<td class="p-md text-on-surface-variant truncate max-w-[200px]">0x5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b9a8b7c6d</td>
+</tr>
+<tr class="border-b border-outline-variant hover:bg-surface-variant/30 transition-colors">
+<td class="p-md">2026-10-12 14:05:55</td>
+<td class="p-md text-right text-primary-container">124.75</td>
+<td class="p-md text-on-surface-variant truncate max-w-[200px]">0xc4d3e2f1a0b9a8b7c6d5e4f3a2b1c0d9e8f7a6b5</td>
+</tr>
+<tr class="hover:bg-surface-variant/30 transition-colors">
+<td class="p-md">2026-10-11 14:01:20</td>
+<td class="p-md text-right text-primary-container">126.00</td>
+<td class="p-md text-on-surface-variant truncate max-w-[200px]">0x3e2f1a0b9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination / Footer of table -->
+<div class="border-t border-outline-variant p-sm flex justify-between items-center bg-surface-container/50">
+<span class="font-body-sm text-body-sm text-on-surface-variant px-sm">Showing 1-5 of 1,024</span>
+<div class="flex gap-xs">
+<button class="p-xs border border-outline-variant text-on-surface hover:border-primary-container hover:text-primary-container transition-colors disabled:opacity-50" disabled="">
+<span class="material-symbols-outlined text-[20px]">chevron_left</span>
+</button>
+<button class="p-xs border border-outline-variant text-on-surface hover:border-primary-container hover:text-primary-container transition-colors">
+<span class="material-symbols-outlined text-[20px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-lowest border-t border-outline-variant mt-auto">
+<div class="flex flex-col md:flex-row justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-md gap-sm mx-auto max-w-full">
+<div class="font-label-caps text-label-caps text-on-surface-variant text-center md:text-left">
+        SpaceFinance · BUIDL CTC 2026 Fall · Built on Creditcoin CC3
+      </div>
+<div class="flex gap-md">
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary underline transition-all duration-300 uppercase" href="#">Docs</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary underline transition-all duration-300 uppercase" href="#">GitHub</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary underline transition-all duration-300 uppercase" href="#">Security</a>
+</div>
+</div>
+</footer>
+</body></html>

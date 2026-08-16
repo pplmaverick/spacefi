@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SpaceFinance - Mission Control</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts as per Design System -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400&amp;family=JetBrains+Mono:wght@400;500;700&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "outline-variant": "#3d484f",
+                        "primary": "#92d9ff",
+                        "surface-container-high": "#222a3d",
+                        "on-tertiary-container": "#822600",
+                        "surface-variant": "#2d3449",
+                        "outline": "#86929a",
+                        "secondary-fixed-dim": "#00e1a6",
+                        "on-primary-container": "#004c66",
+                        "secondary-container": "#06eaad",
+                        "on-background": "#dae2fd",
+                        "on-error-container": "#ffdad6",
+                        "surface": "#0b1326",
+                        "on-primary": "#003548",
+                        "on-secondary-fixed": "#002115",
+                        "on-secondary-container": "#006548",
+                        "on-error": "#690005",
+                        "on-tertiary": "#5d1900",
+                        "primary-container": "#00c2ff",
+                        "error": "#ffb4ab",
+                        "primary-fixed": "#c2e8ff",
+                        "surface-container": "#171f33",
+                        "tertiary-fixed": "#ffdbd0",
+                        "on-surface": "#dae2fd",
+                        "background": "#0b1326",
+                        "surface-container-lowest": "#060e20",
+                        "tertiary": "#ffc2ae",
+                        "primary-fixed-dim": "#75d1ff",
+                        "on-tertiary-fixed-variant": "#832600",
+                        "secondary": "#99ffd3",
+                        "tertiary-fixed-dim": "#ffb59d",
+                        "surface-container-low": "#131b2e",
+                        "surface-dim": "#0b1326",
+                        "inverse-on-surface": "#283044",
+                        "surface-tint": "#75d1ff",
+                        "surface-container-highest": "#2d3449",
+                        "tertiary-container": "#ff9a78",
+                        "on-surface-variant": "#bcc8d1",
+                        "on-secondary-fixed-variant": "#00513a",
+                        "on-secondary": "#003827",
+                        "inverse-primary": "#006688",
+                        "secondary-fixed": "#3dffc0",
+                        "on-primary-fixed": "#001e2b",
+                        "on-primary-fixed-variant": "#004d67",
+                        "inverse-surface": "#dae2fd",
+                        "on-tertiary-fixed": "#390c00",
+                        "surface-bright": "#31394d",
+                        "error-container": "#93000a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "gutter": "16px",
+                        "md": "16px",
+                        "sm": "8px",
+                        "lg": "24px",
+                        "xl": "48px",
+                        "margin-desktop": "32px",
+                        "xs": "4px",
+                        "unit": "4px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Space Grotesk"],
+                        "headline-lg-mobile": ["Space Grotesk"],
+                        "body-sm": ["Inter"],
+                        "label-caps": ["JetBrains Mono"],
+                        "display-lg": ["Space Grotesk"],
+                        "headline-md": ["Space Grotesk"],
+                        "data-lg": ["JetBrains Mono"],
+                        "data-md": ["JetBrains Mono"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["32px", { "lineHeight": "1.2", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "1.2", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "label-caps": ["12px", { "lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "display-lg": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-md": ["20px", { "lineHeight": "1.4", "fontWeight": "500" }],
+                        "data-lg": ["18px", { "lineHeight": "1.4", "fontWeight": "500" }],
+                        "data-md": ["14px", { "lineHeight": "1.4", "fontWeight": "400" }],
+                        "body-md": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md min-h-screen flex flex-col antialiased selection:bg-primary-container selection:text-on-primary-container">
+<!-- Shared Component: TopNavBar -->
+<header class="bg-surface border-b border-outline-variant docked full-width top-0 z-50">
+<div class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop h-16 max-w-full">
+<div class="flex items-center gap-lg">
+<!-- Brand Logo -->
+<div class="font-label-caps text-label-caps text-primary tracking-widest flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary" data-icon="rocket_launch">rocket_launch</span>
+                    SPACEFINANCE
+                </div>
+<!-- Navigation -->
+<nav class="hidden md:flex items-center gap-md ml-xl h-full">
+<a class="h-16 flex items-center text-primary font-bold border-b-2 border-primary pb-1 font-label-caps text-label-caps mt-[2px]" href="/dashboard">Dashboard</a>
+<a class="h-16 flex items-center text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 font-label-caps text-label-caps" href="/revenue">Revenue</a>
+</nav>
+</div>
+<!-- Trailing Action -->
+<button class="bg-primary-container text-on-primary-container font-label-caps text-label-caps px-md py-sm hover:opacity-80 transition-opacity uppercase border border-primary-container">
+                Connect Wallet
+            </button>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="flex-grow w-full px-margin-mobile md:px-margin-desktop py-lg grid grid-cols-4 md:grid-cols-12 gap-gutter auto-rows-min">
+<!-- Module 1: Loan Status Card (Span 8) -->
+<div class="col-span-4 md:col-span-8 bg-surface-container border border-outline-variant p-md flex flex-col shadow-none">
+<div class="flex justify-between items-end border-b border-outline-variant pb-sm mb-md">
+<h2 class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">Active Loan Status</h2>
+<span class="bg-secondary-fixed-dim/10 border border-secondary-fixed-dim text-secondary-fixed-dim font-label-caps text-[10px] px-sm py-xs flex items-center gap-xs">
+<span class="w-1.5 h-1.5 rounded-none bg-secondary-fixed-dim inline-block animate-pulse"></span>
+                    ACTIVE
+                </span>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-md">
+<div class="flex flex-col gap-xs">
+<span class="font-label-caps text-label-caps text-on-surface-variant">Loan Reference</span>
+<span class="font-data-lg text-data-lg text-on-surface">LN-8924-FXT</span>
+</div>
+<div class="flex flex-col gap-xs">
+<span class="font-label-caps text-label-caps text-on-surface-variant">Borrower Address</span>
+<span class="font-data-md text-data-md text-on-surface truncate" title="0x71C9f4B...9B23Ea1">0x71C9...9B23</span>
+</div>
+<div class="flex flex-col gap-xs">
+<span class="font-label-caps text-label-caps text-on-surface-variant">Collateral Locked</span>
+<span class="font-data-lg text-data-lg text-primary">150.00 ETH</span>
+</div>
+<div class="flex flex-col gap-xs">
+<span class="font-label-caps text-label-caps text-on-surface-variant">Node ID</span>
+<span class="font-data-md text-data-md text-on-surface">ND-992-ALPHA</span>
+</div>
+</div>
+<!-- Sync Progress Bar (Segmented) -->
+<div class="mt-md pt-sm border-t border-outline-variant">
+<div class="flex justify-between items-center mb-xs">
+<span class="font-label-caps text-label-caps text-on-surface-variant">Node Sync Status</span>
+<span class="font-data-md text-data-md text-secondary-fixed-dim">100%</span>
+</div>
+<div class="flex gap-[2px] h-2 w-full">
+<div class="flex-1 bg-secondary-fixed-dim"></div>
+<div class="flex-1 bg-secondary-fixed-dim"></div>
+<div class="flex-1 bg-secondary-fixed-dim"></div>
+<div class="flex-1 bg-secondary-fixed-dim"></div>
+<div class="flex-1 bg-secondary-fixed-dim"></div>
+<div class="flex-1 bg-secondary-fixed-dim"></div>
+<div class="flex-1 bg-secondary-fixed-dim"></div>
+<div class="flex-1 bg-secondary-fixed-dim"></div>
+<div class="flex-1 bg-secondary-fixed-dim"></div>
+<div class="flex-1 bg-secondary-fixed-dim"></div>
+</div>
+</div>
+</div>
+<!-- Module 2: USC Attestation Flow (Span 4) -->
+<div class="col-span-4 bg-surface-container border border-outline-variant p-md flex flex-col shadow-none">
+<h2 class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest border-b border-outline-variant pb-sm mb-md">USC Attestation Flow</h2>
+<ul class="flex flex-col gap-sm">
+<li class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary-container text-[16px]" data-icon="check_box">check_box</span>
+<span class="font-data-md text-data-md text-on-surface">Collateral Deposited</span>
+</li>
+<li class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary-container text-[16px]" data-icon="check_box">check_box</span>
+<span class="font-data-md text-data-md text-on-surface">USC Attestation #1</span>
+</li>
+<li class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary-container text-[16px]" data-icon="check_box">check_box</span>
+<span class="font-data-md text-data-md text-on-surface">Node Registered</span>
+</li>
+<li class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary-container text-[16px]" data-icon="check_box">check_box</span>
+<span class="font-data-md text-data-md text-on-surface">USC Attestation #2</span>
+</li>
+<li class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary-container text-[16px]" data-icon="check_box">check_box</span>
+<span class="font-data-md text-data-md text-on-surface opacity-80">mUSDF Released</span>
+</li>
+</ul>
+</div>
+<!-- Module 4: Repayment Schedule Table (Span 8) -->
+<div class="col-span-4 md:col-span-8 bg-surface-container border border-outline-variant p-md flex flex-col shadow-none">
+<h2 class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest border-b border-outline-variant pb-sm mb-md">Repayment Schedule</h2>
+<div class="w-full overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-outline-variant">
+<th class="py-sm font-label-caps text-label-caps text-on-surface-variant font-normal">Utilization Tier</th>
+<th class="py-sm font-label-caps text-label-caps text-on-surface-variant font-normal text-right">Credit Utilized</th>
+<th class="py-sm font-label-caps text-label-caps text-on-surface-variant font-normal text-right">Repayment Rate</th>
+</tr>
+</thead>
+<tbody class="font-data-md text-data-md">
+<tr class="border-b border-outline-variant/50 hover:bg-surface-variant/30 transition-colors">
+<td class="py-sm text-on-surface">Tier 1</td>
+<td class="py-sm text-on-surface text-right">0% - 20%</td>
+<td class="py-sm text-on-surface text-right">10.00%</td>
+</tr>
+<tr class="border-b border-outline-variant/50 hover:bg-surface-variant/30 transition-colors">
+<td class="py-sm text-on-surface">Tier 2</td>
+<td class="py-sm text-on-surface text-right">21% - 40%</td>
+<td class="py-sm text-on-surface text-right">20.00%</td>
+</tr>
+<tr class="border-b border-outline-variant/50 hover:bg-surface-variant/30 transition-colors bg-primary-fixed/5 border-l-2 border-l-primary-container">
+<td class="py-sm text-primary pl-2">Tier 3 (Current)</td>
+<td class="py-sm text-primary text-right">41% - 60%</td>
+<td class="py-sm text-primary text-right font-bold">40.00%</td>
+</tr>
+<tr class="border-b border-outline-variant/50 hover:bg-surface-variant/30 transition-colors">
+<td class="py-sm text-on-surface">Tier 4</td>
+<td class="py-sm text-on-surface text-right">61% - 80%</td>
+<td class="py-sm text-on-surface text-right">60.00%</td>
+</tr>
+<tr class="hover:bg-surface-variant/30 transition-colors">
+<td class="py-sm text-error">Tier 5 (Critical)</td>
+<td class="py-sm text-error text-right">81% - 100%</td>
+<td class="py-sm text-error text-right">80.00%</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Module 3: Dynamic Repayment Rate (Span 4) -->
+<div class="col-span-4 bg-surface-container border border-outline-variant p-md flex flex-col shadow-none">
+<h2 class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest border-b border-outline-variant pb-sm mb-md">Dynamic Repayment Rate</h2>
+<div class="flex flex-col items-center justify-center py-md flex-grow border-b border-outline-variant mb-md">
+<span class="font-display-lg text-display-lg text-secondary-fixed-dim leading-none">40%</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant mt-sm">Normal repayment rate</span>
+</div>
+<div class="grid grid-cols-1 gap-md">
+<div class="flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-on-surface-variant">Monthly Avg Revenue</span>
+<span class="font-data-md text-data-md text-on-surface">4,200.00 CTC</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-on-surface-variant">Available Credit Limit</span>
+<span class="font-data-md text-data-md text-on-surface">50,000 mUSDF</span>
+</div>
+</div>
+</div>
+</main>
+<!-- Shared Component: Footer -->
+<footer class="bg-surface-container-lowest border-t border-outline-variant w-full mt-auto">
+<div class="flex flex-col md:flex-row justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-md gap-sm">
+<span class="font-label-caps text-label-caps text-on-surface-variant">
+<span class="text-primary">SpaceFinance</span> · BUIDL CTC 2026 Fall · Built on Creditcoin CC3
+            </span>
+<div class="flex gap-md font-label-caps text-label-caps">
+<a class="text-on-surface-variant hover:text-primary underline transition-all duration-300" href="#">Docs</a>
+<a class="text-on-surface-variant hover:text-primary underline transition-all duration-300" href="#">GitHub</a>
+<a class="text-on-surface-variant hover:text-primary underline transition-all duration-300" href="#">Security</a>
+</div>
+</div>
+</footer>
+</body></html>
