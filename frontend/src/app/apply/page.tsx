@@ -97,7 +97,7 @@ function OrbitAnimation() {
         <circle r="6" fill="#00C2FF">
           <animateMotion dur="8s" repeatCount="indefinite" path="M 40,200 A 160,80 0 1,1 360,200 A 160,80 0 1,1 40,200" />
         </circle>
-        <circle r="6" fill="#00C2FF">
+        <circle r="6" fill="#3DFFC0">
           <animateMotion dur="12s" repeatCount="indefinite" path="M 200,40 A 80,160 0 1,1 200,360 A 80,160 0 1,1 200,40" />
         </circle>
         <circle cx="200" cy="200" r="12" stroke="#00C2FF" strokeWidth="2">
