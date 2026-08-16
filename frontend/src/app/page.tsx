@@ -132,12 +132,11 @@ export default function HomePage() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {[
-            { chain: 'SEPOLIA', title: 'Lock Collateral', desc: 'Deposit ETH into the Sepolia smart contract to secure your financing limit.' },
-            { chain: 'USC', title: 'Request Attestation', desc: 'Initiate cross-chain message via Universal Settlement Coin protocol.' },
-            { chain: 'USC', title: 'Verify Node Status', desc: 'Attestors cryptographically verify your Spacecoin node health and collateral state.' },
-            { chain: 'CC3', title: 'Mint Financing', desc: 'Creditcoin CC3 contract automatically mints mUSDF based on attested collateral.' },
-            { chain: 'CC3', title: 'Repay', desc: 'Node revenue auto-routes to the repayment contract at your current dynamic rate.' },
-            { chain: 'SEPOLIA', title: 'Withdraw Collateral', desc: 'Once mUSDF is repaid, cross-chain signal unlocks your initial ETH deposit.' },
+            { chain: 'SEPOLIA', title: 'Deposit & Register', desc: 'Lock ETH in CollateralVault and submit your Spacecoin nodeId to NodeRegistry.' },
+            { chain: 'USC', title: 'Parallel Attestation', desc: 'USC simultaneously attests your Deposited and NodeRegistered events. Takes 8–10 minutes.' },
+            { chain: 'CC3', title: 'Financing Active', desc: 'SpaceFinance releases mUSDF to your wallet after both attestations confirm.' },
+            { chain: 'CC3', title: 'Repay', desc: 'Repay your mUSDF loan at your dynamic rate based on node revenue.' },
+            { chain: 'SEPOLIA', title: 'Unlock Collateral', desc: 'Repayment confirmed, ETH collateral returned to your wallet.' },
           ].map(({ chain, title, desc }, i) => (
             <div
               key={title}
@@ -170,11 +169,11 @@ export default function HomePage() {
             },
             {
               title: 'Revenue-based credit',
-              desc: 'Node performance dictates credit limits. Smart contracts auto-route DePIN yield to service debt, minimizing manual treasury management.',
+              desc: "Your Spacecoin node's ReceiptClaimed revenue history on CC3 mainnet determines your credit limit — up to monthly average × 3, in addition to ETH collateral.",
             },
             {
               title: 'Guild accountability',
-              desc: 'Delegated trust mechanisms allow established operators to vouch for new nodes, creating a decentralized web of trust for unsecured tranches.',
+              desc: "Join a 5-node GuildPool based on Grameen Bank's joint-liability model. Any default freezes the guild's borrowing. Members unlock collateral requirements as low as 5%.",
             },
           ].map(({ title, desc }) => (
             <div key={title} className="bg-[#1E293B] border border-[#334155] p-6 flex flex-col gap-4">
