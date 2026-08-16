@@ -26,6 +26,23 @@ const CHAINLINK_FEED_ABI = parseAbi([
   'function latestRoundData() external view returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound)',
 ])
 
+const COLLATERAL_VAULT_WITHDRAW_ABI = [
+  {
+    name: 'withdrawalAuthorized',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [{ name: 'loanId', type: 'uint256' }],
+    outputs: [{ name: '', type: 'bool' }],
+  },
+  {
+    name: 'withdraw',
+    type: 'function',
+    stateMutability: 'nonpayable',
+    inputs: [{ name: 'loanId', type: 'uint256' }],
+    outputs: [],
+  },
+] as const
+
 type AttPhase = 'waiting' | 'proving' | 'proof_ready' | 'submitting' | 'done' | 'error'
 
 const ATT_PHASE_LABEL: Record<AttPhase, string> = {
@@ -783,7 +800,7 @@ function Step4Panel({ loanId, onNext }: { loanId: string; onNext: () => void }) 
   )
 }
 
-function Step5Panel({ loanId, nodeId }: { loanId: string; nodeId: string }) {
+function Step5Panel({ loanId, nodeId, sepoliaLoanId }: { loanId: string; nodeId: string; sepoliaLoanId: string }) {
   const { address } = useAccount()
   const { data: mUsdfBalance } = useReadContract({
     address: CONTRACTS.mockPayoutToken.address,
@@ -793,6 +810,30 @@ function Step5Panel({ loanId, nodeId }: { loanId: string; nodeId: string }) {
     chainId: cc3Testnet.id,
     query: { enabled: !!address },
   })
+
+  const sepoliaLoanIdBig = BigInt(sepoliaLoanId || '0')
+
+  const { data: isAuthorized } = useReadContract({
+    address: CONTRACTS.collateralVault.address,
+    abi: COLLATERAL_VAULT_WITHDRAW_ABI,
+    functionName: 'withdrawalAuthorized',
+    args: [sepoliaLoanIdBig],
+    chainId: sepolia.id,
+    query: { enabled: sepoliaLoanIdBig > 0n, refetchInterval: 15000 },
+  })
+
+  const { writeContract: writeWithdraw, data: withdrawTxHash, isPending: isWithdrawPending, error: withdrawError } = useWriteContract()
+  const { isLoading: isWithdrawConfirming, isSuccess: isWithdrawSuccess } = useWaitForTransactionReceipt({ hash: withdrawTxHash })
+
+  function handleWithdraw() {
+    writeWithdraw({
+      address: CONTRACTS.collateralVault.address,
+      abi: COLLATERAL_VAULT_WITHDRAW_ABI,
+      functionName: 'withdraw',
+      args: [sepoliaLoanIdBig],
+      chainId: sepolia.id,
+    })
+  }
 
   return (
     <div>
@@ -834,6 +875,48 @@ function Step5Panel({ loanId, nodeId }: { loanId: string; nodeId: string }) {
         <Link href="/revenue" className="border border-[#334155] text-gray-300 hover:border-[#00C2FF] font-mono text-xs uppercase tracking-wider px-6 py-3 transition-colors">
           Node Revenue
         </Link>
+      </div>
+
+      <div className="border-t border-[#334155] pt-6 mt-6">
+        <div className="text-xs font-mono text-gray-500 uppercase tracking-wider mb-4">COLLATERAL RELEASE</div>
+
+        <ChainSwitchBanner requiredChainId={sepolia.id} requiredChainName="Sepolia" />
+
+        {isWithdrawSuccess ? (
+          <div className="text-sm font-mono text-[#3DFFC0]">✓ ETH returned to your wallet</div>
+        ) : isAuthorized ? (
+          <div className="space-y-3">
+            <div className="text-xs font-mono text-[#3DFFC0]">✓ Withdrawal authorized by admin</div>
+            <button
+              onClick={handleWithdraw}
+              disabled={isWithdrawPending || isWithdrawConfirming}
+              className="bg-[#00C2FF] text-[#0F172A] font-mono text-xs uppercase tracking-wider px-6 py-3 hover:bg-[#75d1ff] transition-colors border border-[#00C2FF] disabled:opacity-50"
+            >
+              {isWithdrawPending ? 'Confirm in wallet...' : isWithdrawConfirming ? 'Confirming...' : 'WITHDRAW ETH →'}
+            </button>
+            {withdrawError && (
+              <div className="text-xs font-mono text-red-400 bg-red-900/20 border border-red-900/40 px-4 py-3">
+                {withdrawError.message.split('\n')[0]}
+              </div>
+            )}
+            {withdrawTxHash && (
+              <div className="text-xs font-mono text-gray-500">
+                Tx: <a href={`https://sepolia.etherscan.io/tx/${withdrawTxHash}`} target="_blank" rel="noopener noreferrer" className="text-[#00C2FF]">{withdrawTxHash.slice(0, 20)}...</a>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <div className="text-xs font-mono text-[#FF6B35]">⏳ Awaiting admin authorization to release collateral</div>
+            <button
+              disabled
+              className="bg-[#334155] text-gray-600 font-mono text-xs uppercase tracking-wider px-6 py-3 border border-[#334155] cursor-not-allowed"
+            >
+              WITHDRAW ETH →
+            </button>
+            <div className="text-xs font-mono text-gray-600">Checking every 15s...</div>
+          </div>
+        )}
       </div>
     </div>
   )
@@ -896,7 +979,7 @@ export default function ApplyPage() {
                 onNext={() => setStep(5)}
               />
             )}
-            {step === 5 && <Step5Panel loanId={loanId} nodeId={nodeId} />}
+            {step === 5 && <Step5Panel loanId={loanId} nodeId={nodeId} sepoliaLoanId={loanId} />}
           </section>
         </div>
       </main>
