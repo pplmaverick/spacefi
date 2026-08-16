@@ -108,35 +108,20 @@ function ChainSwitchBanner({ requiredChainId, requiredChainName }: { requiredCha
   )
 }
 
-export default function DashboardPage() {
-  const { isConnected, address } = useAccount()
-  const OWNER_ADDRESS = process.env.NEXT_PUBLIC_OWNER_ADDRESS?.toLowerCase()
-  const isOwner = address?.toLowerCase() === OWNER_ADDRESS
-
-  const { data: loanIdsData } = useReadContract({
-    address: SPACE_FINANCE_ADDRESS,
-    abi: GET_LOANS_BY_BORROWER_ABI,
-    functionName: 'getLoansByBorrower',
-    args: address ? [address] : undefined,
-    chainId: cc3Testnet.id,
-    query: { enabled: !!address },
-  })
-
-  const loanIds = loanIdsData as bigint[] | undefined
-  const loanId = loanIds && loanIds.length > 0 ? loanIds[loanIds.length - 1] : undefined
+function LoanCard({ loanId }: { loanId: bigint }) {
+  const { address } = useAccount()
 
   const { data: loanData } = useReadContract({
     address: SPACE_FINANCE_ADDRESS,
     abi: GET_LOAN_ABI,
     functionName: 'getLoan',
-    args: loanId !== undefined ? [loanId] : undefined,
+    args: [loanId],
     chainId: cc3Testnet.id,
-    query: { enabled: loanId !== undefined && loanId > 0n },
   })
 
   const loan = loanData
     ? {
-        id: loanId?.toString() ?? '0',
+        id: loanId.toString(),
         status: (loanData as unknown as unknown[])[4] as number,
         borrower: (loanData as unknown as unknown[])[0] as string,
         collateralAmount: formatEther((loanData as unknown as unknown[])[1] as bigint),
@@ -144,7 +129,7 @@ export default function DashboardPage() {
       }
     : null
 
-  const sepoliaLoanId = loanId ?? 0n
+  const sepoliaLoanId = loanId
 
   const { data: isWithdrawAuthorized } = useReadContract({
     address: COLLATERAL_VAULT_ADDRESS,
@@ -246,6 +231,209 @@ export default function DashboardPage() {
   const repaymentTier = getRepaymentTier(monthlyRevenue)
 
   return (
+    <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
+      {/* Left column (~60%) */}
+      <div className="lg:col-span-3 flex flex-col gap-6">
+        {/* Loan card */}
+        <div className="bg-[#1E293B] border border-[#334155] p-6">
+          <div className="flex items-center justify-between mb-6">
+            <span className="text-xs font-mono text-[#64748B] uppercase tracking-wider">Loan #{loan?.id ?? '-'}</span>
+            <div className="flex items-center gap-2">
+              <span className={`w-2 h-2 rounded-full ${STATUS_DOT[(loan?.status ?? 0)]}`} />
+              <span className={`text-sm font-mono ${STATUS_COLOR[(loan?.status ?? 0)]}`}>
+                {LOAN_STATUS[(loan?.status ?? 0)]}
+              </span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-6">
+            <div>
+              <div className="text-xs font-mono text-[#64748B] uppercase tracking-wider mb-1">Borrower</div>
+              <div className="text-sm font-mono text-gray-300 break-all">
+                {address ? `${address.slice(0, 10)}...${address.slice(-6)}` : (loan?.borrower ?? address ?? '-').slice(0, 10) + '...'}
+              </div>
+            </div>
+            <div>
+              <div className="text-xs font-mono text-[#64748B] uppercase tracking-wider mb-1">Collateral</div>
+              <div className="text-sm font-mono text-white">{loan?.collateralAmount ?? '-'} ETH</div>
+            </div>
+            <div className="col-span-2">
+              <div className="text-xs font-mono text-[#64748B] uppercase tracking-wider mb-1">Node ID</div>
+              <div className="text-xs font-mono text-gray-400 break-all">{loan?.nodeId ?? '-'}</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Repayment Schedule */}
+        <div className="bg-[#1E293B] border border-[#334155] p-6">
+          <div className="text-xs font-mono text-[#64748B] uppercase tracking-wider mb-4 pb-3 border-b border-[#334155]">Repayment Schedule</div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse font-mono text-sm">
+              <thead>
+                <tr className="border-b border-[#334155]">
+                  <th className="py-2 text-xs font-mono text-[#64748B] uppercase tracking-wider font-normal">Utilization Tier</th>
+                  <th className="py-2 text-xs font-mono text-[#64748B] uppercase tracking-wider font-normal text-right">Repayment Rate</th>
+                </tr>
+              </thead>
+              <tbody>
+                {REPAYMENT_TIERS.map(tier => {
+                  const isCurrent = tier.ratio !== null && repaymentTier?.ratio === tier.ratio
+                  return (
+                    <tr
+                      key={tier.label}
+                      className={`border-b border-[#334155]/50 last:border-0 ${isCurrent ? 'border-l-2 border-l-[#00C2FF] bg-[#00C2FF]/5' : ''}`}
+                    >
+                      <td className={`py-3 pl-2 ${isCurrent ? 'text-[#00C2FF]' : 'text-gray-300'}`}>{tier.label}</td>
+                      <td className={`py-3 pr-2 text-right ${tier.color} ${isCurrent ? 'font-semibold' : ''}`}>{tier.rate}</td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      {/* Right column (~40%) */}
+      <div className="lg:col-span-2 flex flex-col gap-6">
+        {/* USC flow status */}
+        <div className="bg-[#1E293B] border border-[#334155] p-6">
+          <div className="text-xs font-mono text-[#64748B] uppercase tracking-wider mb-4">USC Attestation Flow</div>
+          <div className="space-y-3">
+            {[
+              { label: 'Collateral Deposited', done: (loan?.status ?? 0) >= 1 },
+              { label: 'USC Attestation #1 (Deposited)', done: (loan?.status ?? 0) >= 2 },
+              { label: 'Node Registered', done: (loan?.status ?? 0) >= 2 },
+              { label: 'USC Attestation #2 (NodeRegistered)', done: (loan?.status ?? 0) >= 3 },
+              { label: 'mUSDF Released', done: (loan?.status ?? 0) >= 3 },
+            ].map(({ label, done }) => (
+              <div key={label} className="flex items-center gap-3">
+                <div className={`w-4 h-4 border flex items-center justify-center text-xs flex-shrink-0
+                  ${done ? 'bg-[#3DFFC0] border-[#3DFFC0] text-[#0F172A]' : 'border-[#334155] text-[#334155]'}`}>
+                  {done ? '✓' : ''}
+                </div>
+                <span className={`text-sm font-mono ${done ? 'text-gray-300' : 'text-[#64748B]'}`}>{label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Collateral Release */}
+        {loan?.status === 4 && (
+          <div className="bg-[#1E293B] border border-[#334155] p-6">
+            <div className="text-xs font-mono text-gray-500 uppercase tracking-wider mb-4">COLLATERAL RELEASE</div>
+
+            <ChainSwitchBanner requiredChainId={sepolia.id} requiredChainName="Sepolia" />
+
+            {isWithdrawSuccess ? (
+              <div className="text-sm font-mono text-[#3DFFC0]">✓ ETH returned to your wallet</div>
+            ) : isWithdrawAuthorized ? (
+              <div className="space-y-3">
+                <div className="text-xs font-mono text-[#3DFFC0] mb-2">✓ Withdrawal authorized</div>
+                <button
+                  onClick={handleWithdraw}
+                  disabled={isWithdrawPending || isWithdrawConfirming}
+                  className="w-full bg-[#00C2FF] text-[#0F172A] font-mono text-xs uppercase tracking-wider px-6 py-3 hover:bg-[#75d1ff] transition-colors border border-[#00C2FF] disabled:opacity-50"
+                >
+                  {isWithdrawPending ? 'Confirm in wallet...' : isWithdrawConfirming ? 'Confirming...' : 'WITHDRAW ETH →'}
+                </button>
+                {withdrawTxHash && (
+                  <div className="text-xs font-mono text-gray-500">
+                    Tx: <a href={`https://sepolia.etherscan.io/tx/${withdrawTxHash}`} target="_blank" rel="noopener noreferrer" className="text-[#00C2FF]">{withdrawTxHash.slice(0, 20)}...</a>
+                  </div>
+                )}
+                {withdrawError && (
+                  <div className="text-xs font-mono text-red-400 bg-red-900/20 border border-red-900/40 px-4 py-3 mt-2">
+                    {withdrawError.message.split('\n')[0]}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="text-xs font-mono text-[#FF6B35] mb-2">⏳ Awaiting admin authorization</div>
+                <button
+                  disabled
+                  className="w-full bg-[#1E293B] text-gray-600 font-mono text-xs uppercase tracking-wider px-6 py-3 border border-[#334155] cursor-not-allowed"
+                >
+                  WITHDRAW ETH →
+                </button>
+                <div className="text-xs font-mono text-gray-600">Checking every 15s...</div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Dynamic Repayment Rate */}
+        {(loan?.status ?? 0) === 3 && (
+          <div className="bg-[#1E293B] border border-[#334155] p-6">
+            <div className="text-xs font-mono text-[#64748B] uppercase tracking-wider mb-4">Dynamic Repayment Rate</div>
+
+            {revenueLoading ? (
+              <div className="text-sm font-mono text-[#64748B] animate-pulse">Fetching node revenue...</div>
+            ) : repaymentTier ? (
+              <div className="space-y-4">
+                {/* Current ratio */}
+                <div className={`border ${repaymentTier.border} bg-black/20 p-4`}>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-mono text-[#64748B] uppercase tracking-wider">Current Rate</span>
+                    <span style={spaceGrotesk} className={`text-2xl font-bold ${repaymentTier.color}`}>{repaymentTier.label}</span>
+                  </div>
+                  <div className="text-xs font-mono text-[#64748B] mt-1">{repaymentTier.note}</div>
+                </div>
+
+                {/* Monthly revenue */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <div className="text-xs font-mono text-[#64748B] uppercase tracking-wider mb-1">Monthly Avg Revenue</div>
+                    <div className="text-sm font-mono text-white">{monthlyRevenue?.toFixed(2) ?? '-'} CTC</div>
+                    <div className="text-xs font-mono text-[#64748B]">from ReceiptClaimed (CC3 mainnet)</div>
+                  </div>
+                  <div>
+                    <div className="text-xs font-mono text-[#64748B] uppercase tracking-wider mb-1">Credit Limit</div>
+                    <div className="text-sm font-mono text-white">
+                      {monthlyRevenue !== null ? (monthlyRevenue * 3).toFixed(0) : '-'} mUSDF
+                    </div>
+                    <div className="text-xs font-mono text-[#64748B]">monthly avg × 3</div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-sm font-mono text-[#64748B]">No revenue data found for this node.</div>
+            )}
+          </div>
+        )}
+
+        {/* Actions */}
+        {(loan?.status ?? 0) === 0 && (
+          <Link
+            href="/apply"
+            className="block w-full text-center px-6 py-3 bg-[#00C2FF] text-[#0F172A] font-mono text-xs uppercase tracking-wider hover:bg-[#75d1ff] transition-colors border border-[#00C2FF]"
+          >
+            Start Application →
+          </Link>
+        )}
+      </div>
+    </div>
+  )
+}
+
+export default function DashboardPage() {
+  const { isConnected, address } = useAccount()
+  const OWNER_ADDRESS = process.env.NEXT_PUBLIC_OWNER_ADDRESS?.toLowerCase()
+  const isOwner = address?.toLowerCase() === OWNER_ADDRESS
+
+  const { data: loanIdsData } = useReadContract({
+    address: SPACE_FINANCE_ADDRESS,
+    abi: GET_LOANS_BY_BORROWER_ABI,
+    functionName: 'getLoansByBorrower',
+    args: address ? [address] : undefined,
+    chainId: cc3Testnet.id,
+    query: { enabled: !!address },
+  })
+
+  const loanIds = loanIdsData as bigint[] | undefined
+
+  return (
     <div className="min-h-screen bg-[#0F172A] text-white flex flex-col">
       <nav className="border-b border-[#334155] px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-6">
@@ -279,189 +467,24 @@ export default function DashboardPage() {
             <WalletButton />
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
-            {/* Left column (~60%) */}
-            <div className="lg:col-span-3 flex flex-col gap-6">
-              {/* Loan card */}
-              <div className="bg-[#1E293B] border border-[#334155] p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <span className="text-xs font-mono text-[#64748B] uppercase tracking-wider">Loan #{loan?.id ?? '-'}</span>
-                  <div className="flex items-center gap-2">
-                    <span className={`w-2 h-2 rounded-full ${STATUS_DOT[(loan?.status ?? 0)]}`} />
-                    <span className={`text-sm font-mono ${STATUS_COLOR[(loan?.status ?? 0)]}`}>
-                      {LOAN_STATUS[(loan?.status ?? 0)]}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-6">
-                  <div>
-                    <div className="text-xs font-mono text-[#64748B] uppercase tracking-wider mb-1">Borrower</div>
-                    <div className="text-sm font-mono text-gray-300 break-all">
-                      {address ? `${address.slice(0, 10)}...${address.slice(-6)}` : (loan?.borrower ?? address ?? '-').slice(0, 10) + '...'}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-xs font-mono text-[#64748B] uppercase tracking-wider mb-1">Collateral</div>
-                    <div className="text-sm font-mono text-white">{loan?.collateralAmount ?? '-'} ETH</div>
-                  </div>
-                  <div className="col-span-2">
-                    <div className="text-xs font-mono text-[#64748B] uppercase tracking-wider mb-1">Node ID</div>
-                    <div className="text-xs font-mono text-gray-400 break-all">{loan?.nodeId ?? '-'}</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Repayment Schedule */}
-              <div className="bg-[#1E293B] border border-[#334155] p-6">
-                <div className="text-xs font-mono text-[#64748B] uppercase tracking-wider mb-4 pb-3 border-b border-[#334155]">Repayment Schedule</div>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse font-mono text-sm">
-                    <thead>
-                      <tr className="border-b border-[#334155]">
-                        <th className="py-2 text-xs font-mono text-[#64748B] uppercase tracking-wider font-normal">Utilization Tier</th>
-                        <th className="py-2 text-xs font-mono text-[#64748B] uppercase tracking-wider font-normal text-right">Repayment Rate</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {REPAYMENT_TIERS.map(tier => {
-                        const isCurrent = tier.ratio !== null && repaymentTier?.ratio === tier.ratio
-                        return (
-                          <tr
-                            key={tier.label}
-                            className={`border-b border-[#334155]/50 last:border-0 ${isCurrent ? 'border-l-2 border-l-[#00C2FF] bg-[#00C2FF]/5' : ''}`}
-                          >
-                            <td className={`py-3 pl-2 ${isCurrent ? 'text-[#00C2FF]' : 'text-gray-300'}`}>{tier.label}</td>
-                            <td className={`py-3 pr-2 text-right ${tier.color} ${isCurrent ? 'font-semibold' : ''}`}>{tier.rate}</td>
-                          </tr>
-                        )
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+          loanIds && loanIds.length > 0 ? (
+            <div className="space-y-8">
+              {[...loanIds].reverse().flatMap((id, i) => {
+                const card = <LoanCard key={id.toString()} loanId={id} />
+                return i === 0 ? [card] : [<div key={`sep-${id.toString()}`} className="border-t border-[#334155]" />, card]
+              })}
             </div>
-
-            {/* Right column (~40%) */}
-            <div className="lg:col-span-2 flex flex-col gap-6">
-              {/* USC flow status */}
-              <div className="bg-[#1E293B] border border-[#334155] p-6">
-                <div className="text-xs font-mono text-[#64748B] uppercase tracking-wider mb-4">USC Attestation Flow</div>
-                <div className="space-y-3">
-                  {[
-                    { label: 'Collateral Deposited', done: (loan?.status ?? 0) >= 1 },
-                    { label: 'USC Attestation #1 (Deposited)', done: (loan?.status ?? 0) >= 2 },
-                    { label: 'Node Registered', done: (loan?.status ?? 0) >= 2 },
-                    { label: 'USC Attestation #2 (NodeRegistered)', done: (loan?.status ?? 0) >= 3 },
-                    { label: 'mUSDF Released', done: (loan?.status ?? 0) >= 3 },
-                  ].map(({ label, done }) => (
-                    <div key={label} className="flex items-center gap-3">
-                      <div className={`w-4 h-4 border flex items-center justify-center text-xs flex-shrink-0
-                        ${done ? 'bg-[#3DFFC0] border-[#3DFFC0] text-[#0F172A]' : 'border-[#334155] text-[#334155]'}`}>
-                        {done ? '✓' : ''}
-                      </div>
-                      <span className={`text-sm font-mono ${done ? 'text-gray-300' : 'text-[#64748B]'}`}>{label}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Collateral Release */}
-              {loan?.status === 4 && (
-                <div className="bg-[#1E293B] border border-[#334155] p-6">
-                  <div className="text-xs font-mono text-gray-500 uppercase tracking-wider mb-4">COLLATERAL RELEASE</div>
-
-                  <ChainSwitchBanner requiredChainId={sepolia.id} requiredChainName="Sepolia" />
-
-                  {isWithdrawSuccess ? (
-                    <div className="text-sm font-mono text-[#3DFFC0]">✓ ETH returned to your wallet</div>
-                  ) : isWithdrawAuthorized ? (
-                    <div className="space-y-3">
-                      <div className="text-xs font-mono text-[#3DFFC0] mb-2">✓ Withdrawal authorized</div>
-                      <button
-                        onClick={handleWithdraw}
-                        disabled={isWithdrawPending || isWithdrawConfirming}
-                        className="w-full bg-[#00C2FF] text-[#0F172A] font-mono text-xs uppercase tracking-wider px-6 py-3 hover:bg-[#75d1ff] transition-colors border border-[#00C2FF] disabled:opacity-50"
-                      >
-                        {isWithdrawPending ? 'Confirm in wallet...' : isWithdrawConfirming ? 'Confirming...' : 'WITHDRAW ETH →'}
-                      </button>
-                      {withdrawTxHash && (
-                        <div className="text-xs font-mono text-gray-500">
-                          Tx: <a href={`https://sepolia.etherscan.io/tx/${withdrawTxHash}`} target="_blank" rel="noopener noreferrer" className="text-[#00C2FF]">{withdrawTxHash.slice(0, 20)}...</a>
-                        </div>
-                      )}
-                      {withdrawError && (
-                        <div className="text-xs font-mono text-red-400 bg-red-900/20 border border-red-900/40 px-4 py-3 mt-2">
-                          {withdrawError.message.split('\n')[0]}
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      <div className="text-xs font-mono text-[#FF6B35] mb-2">⏳ Awaiting admin authorization</div>
-                      <button
-                        disabled
-                        className="w-full bg-[#1E293B] text-gray-600 font-mono text-xs uppercase tracking-wider px-6 py-3 border border-[#334155] cursor-not-allowed"
-                      >
-                        WITHDRAW ETH →
-                      </button>
-                      <div className="text-xs font-mono text-gray-600">Checking every 15s...</div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Dynamic Repayment Rate */}
-              {(loan?.status ?? 0) === 3 && (
-                <div className="bg-[#1E293B] border border-[#334155] p-6">
-                  <div className="text-xs font-mono text-[#64748B] uppercase tracking-wider mb-4">Dynamic Repayment Rate</div>
-
-                  {revenueLoading ? (
-                    <div className="text-sm font-mono text-[#64748B] animate-pulse">Fetching node revenue...</div>
-                  ) : repaymentTier ? (
-                    <div className="space-y-4">
-                      {/* Current ratio */}
-                      <div className={`border ${repaymentTier.border} bg-black/20 p-4`}>
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-mono text-[#64748B] uppercase tracking-wider">Current Rate</span>
-                          <span style={spaceGrotesk} className={`text-2xl font-bold ${repaymentTier.color}`}>{repaymentTier.label}</span>
-                        </div>
-                        <div className="text-xs font-mono text-[#64748B] mt-1">{repaymentTier.note}</div>
-                      </div>
-
-                      {/* Monthly revenue */}
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <div className="text-xs font-mono text-[#64748B] uppercase tracking-wider mb-1">Monthly Avg Revenue</div>
-                          <div className="text-sm font-mono text-white">{monthlyRevenue?.toFixed(2) ?? '-'} CTC</div>
-                          <div className="text-xs font-mono text-[#64748B]">from ReceiptClaimed (CC3 mainnet)</div>
-                        </div>
-                        <div>
-                          <div className="text-xs font-mono text-[#64748B] uppercase tracking-wider mb-1">Credit Limit</div>
-                          <div className="text-sm font-mono text-white">
-                            {monthlyRevenue !== null ? (monthlyRevenue * 3).toFixed(0) : '-'} mUSDF
-                          </div>
-                          <div className="text-xs font-mono text-[#64748B]">monthly avg × 3</div>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="text-sm font-mono text-[#64748B]">No revenue data found for this node.</div>
-                  )}
-                </div>
-              )}
-
-              {/* Actions */}
-              {(loan?.status ?? 0) === 0 && (
-                <Link
-                  href="/apply"
-                  className="block w-full text-center px-6 py-3 bg-[#00C2FF] text-[#0F172A] font-mono text-xs uppercase tracking-wider hover:bg-[#75d1ff] transition-colors border border-[#00C2FF]"
-                >
-                  Start Application →
-                </Link>
-              )}
+          ) : (
+            <div className="bg-[#1E293B] border border-[#334155] p-12 text-center">
+              <div className="text-[#64748B] font-mono text-sm mb-4">No loans found</div>
+              <Link
+                href="/apply"
+                className="inline-block px-6 py-3 bg-[#00C2FF] text-[#0F172A] font-mono text-xs uppercase tracking-wider hover:bg-[#75d1ff] transition-colors border border-[#00C2FF]"
+              >
+                Start Application →
+              </Link>
             </div>
-          </div>
+          )
         )}
       </main>
 
