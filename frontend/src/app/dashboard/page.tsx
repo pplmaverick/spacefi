@@ -183,9 +183,8 @@ export default function DashboardPage() {
         </Link>
         <div className="flex items-center gap-6">
           <Link href="/dashboard" className="text-xs font-mono uppercase tracking-wider text-[#00C2FF] border-b border-[#00C2FF] pb-1">Dashboard</Link>
-          <Link href="/apply" className="text-xs font-mono uppercase tracking-wider text-[#94A3B8] hover:text-[#00C2FF] transition-colors">Apply</Link>
           <Link href="/revenue" className="text-xs font-mono uppercase tracking-wider text-[#94A3B8] hover:text-[#00C2FF] transition-colors">Revenue</Link>
-          <WalletButton requiredChainId={cc3Testnet.id} />
+          <WalletButton />
         </div>
       </nav>
 
@@ -198,7 +197,7 @@ export default function DashboardPage() {
         {!isConnected ? (
           <div className="bg-[#1E293B] border border-[#334155] p-12 text-center">
             <div className="text-[#64748B] font-mono text-sm mb-4">Connect your wallet to view loan status</div>
-            <WalletButton requiredChainId={cc3Testnet.id} />
+            <WalletButton />
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
