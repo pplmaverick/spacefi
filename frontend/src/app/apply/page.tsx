@@ -78,19 +78,19 @@ function ChainSwitchBanner({ requiredChainId, requiredChainName }: { requiredCha
 
 function OrbitAnimation() {
   return (
-    <div className="absolute inset-0 flex items-center justify-center opacity-30 pointer-events-none">
-      <svg viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full max-w-[320px] max-h-[320px]">
-        <circle cx="200" cy="200" r="10" fill="#00C2FF" />
-        <ellipse cx="200" cy="200" rx="160" ry="80" stroke="#00C2FF" strokeWidth="1" strokeDasharray="4 4" opacity="0.4" />
-        <ellipse cx="200" cy="200" rx="80" ry="160" stroke="#00C2FF" strokeWidth="1" strokeDasharray="4 4" opacity="0.4" />
-        <circle r="4" fill="#00C2FF">
+    <div className="flex items-center justify-center mb-4">
+      <svg viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg" width="300" height="300">
+        <circle cx="200" cy="200" r="12" fill="#00C2FF" />
+        <ellipse cx="200" cy="200" rx="160" ry="80" stroke="#00C2FF" strokeWidth="1" strokeDasharray="4 4" opacity="0.6" />
+        <ellipse cx="200" cy="200" rx="80" ry="160" stroke="#00C2FF" strokeWidth="1" strokeDasharray="4 4" opacity="0.6" />
+        <circle r="6" fill="#00C2FF">
           <animateMotion dur="8s" repeatCount="indefinite" path="M 40,200 A 160,80 0 1,1 360,200 A 160,80 0 1,1 40,200" />
         </circle>
-        <circle r="4" fill="#3DFFC0">
+        <circle r="6" fill="#00C2FF">
           <animateMotion dur="12s" repeatCount="indefinite" path="M 200,40 A 80,160 0 1,1 200,360 A 80,160 0 1,1 200,40" />
         </circle>
-        <circle cx="200" cy="200" r="10" stroke="#00C2FF" strokeWidth="2">
-          <animate attributeName="r" from="10" to="60" dur="3s" repeatCount="indefinite" />
+        <circle cx="200" cy="200" r="12" stroke="#00C2FF" strokeWidth="2">
+          <animate attributeName="r" from="12" to="60" dur="3s" repeatCount="indefinite" />
           <animate attributeName="opacity" from="0.6" to="0" dur="3s" repeatCount="indefinite" />
         </circle>
       </svg>
@@ -340,9 +340,9 @@ function Step2Panel({
       )}
 
       {isProcessing && (
-        <div className="relative border border-[#334155] bg-[#0F172A] p-6 overflow-hidden">
-          <OrbitAnimation />
-          <div className="relative z-10 flex flex-col items-center text-center">
+        <div className="border border-[#334155] bg-[#0F172A] p-6">
+          <div className="flex flex-col items-center text-center">
+            <OrbitAnimation />
             <div style={spaceGrotesk} className="text-4xl font-bold text-[#00C2FF] tabular-nums mb-4">{mm}:{ss}</div>
             <div className="font-mono text-sm text-gray-300 mb-1 animate-pulse">{PHASE_LABEL[phase]}</div>
             <div className="font-mono text-xs text-gray-600 mb-6">Polling every {POLL_SECONDS}s · {Math.round(pct)}% · timeout 20min</div>
@@ -615,9 +615,9 @@ function Step4Panel({
       )}
 
       {isProcessing && (
-        <div className="relative border border-[#334155] bg-[#0F172A] p-6 overflow-hidden">
-          <OrbitAnimation />
-          <div className="relative z-10 flex flex-col items-center text-center">
+        <div className="border border-[#334155] bg-[#0F172A] p-6">
+          <div className="flex flex-col items-center text-center">
+            <OrbitAnimation />
             <div style={spaceGrotesk} className="text-4xl font-bold text-[#00C2FF] tabular-nums mb-4">{mm}:{ss}</div>
             <div className="font-mono text-sm text-gray-300 mb-1 animate-pulse">{PHASE_LABEL[phase]}</div>
             <div className="font-mono text-xs text-gray-600 mb-6">Polling every {POLL_SECONDS}s · {Math.round(pct)}% · timeout 20min</div>
