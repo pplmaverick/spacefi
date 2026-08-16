@@ -1,10 +1,15 @@
 'use client'
 import Link from 'next/link'
 import { WalletButton } from '@/components/WalletButton'
+import { useAccount } from 'wagmi'
 
 const spaceGrotesk = { fontFamily: 'var(--font-space-grotesk), sans-serif' }
 
 export default function HomePage() {
+  const OWNER_ADDRESS = process.env.NEXT_PUBLIC_OWNER_ADDRESS?.toLowerCase()
+  const { address } = useAccount()
+  const isOwner = address?.toLowerCase() === OWNER_ADDRESS
+
   return (
     <div className="min-h-screen bg-[#0F172A] text-[#F8FAFC]">
       {/* Nav */}
@@ -23,6 +28,11 @@ export default function HomePage() {
           </div>
         </div>
         <div className="flex items-center gap-4">
+          {isOwner && (
+            <Link href="/admin" className="text-sm font-mono text-[#FF6B35] hover:text-[#FF6B35]/80 transition-colors">
+              ADMIN
+            </Link>
+          )}
           <WalletButton />
         </div>
       </nav>

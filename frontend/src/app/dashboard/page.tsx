@@ -68,6 +68,8 @@ const REPAYMENT_TIERS = [
 
 export default function DashboardPage() {
   const { isConnected, address } = useAccount()
+  const OWNER_ADDRESS = process.env.NEXT_PUBLIC_OWNER_ADDRESS?.toLowerCase()
+  const isOwner = address?.toLowerCase() === OWNER_ADDRESS
 
   const { data: loanIdsData } = useReadContract({
     address: SPACE_FINANCE_ADDRESS,
@@ -187,6 +189,11 @@ export default function DashboardPage() {
           <Link href="/guild" className="text-sm font-mono text-gray-400 hover:text-[#00C2FF] transition-colors">GUILD</Link>
         </div>
         <div className="flex items-center gap-4">
+          {isOwner && (
+            <Link href="/admin" className="text-sm font-mono text-[#FF6B35] hover:text-[#FF6B35]/80 transition-colors">
+              ADMIN
+            </Link>
+          )}
           <WalletButton />
         </div>
       </nav>

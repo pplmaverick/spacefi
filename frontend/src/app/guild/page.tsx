@@ -10,6 +10,8 @@ const spaceGrotesk = { fontFamily: 'var(--font-space-grotesk), sans-serif' }
 
 export default function GuildPage() {
   const { address, isConnected } = useAccount()
+  const OWNER_ADDRESS = process.env.NEXT_PUBLIC_OWNER_ADDRESS?.toLowerCase()
+  const isOwner = address?.toLowerCase() === OWNER_ADDRESS
 
   // 查詢當前用戶 guild 狀態
   const { data: guildId } = useReadContract({
@@ -52,6 +54,11 @@ export default function GuildPage() {
           <Link href="/guild" className="text-sm font-mono text-[#00C2FF] border-b border-[#00C2FF] transition-colors">GUILD</Link>
         </div>
         <div className="flex items-center gap-4">
+          {isOwner && (
+            <Link href="/admin" className="text-sm font-mono text-[#FF6B35] hover:text-[#FF6B35]/80 transition-colors">
+              ADMIN
+            </Link>
+          )}
           <WalletButton />
         </div>
       </nav>
