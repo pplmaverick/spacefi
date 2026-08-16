@@ -15,13 +15,13 @@ const SPACE_FINANCE_ADDRESS = process.env.NEXT_PUBLIC_SPACE_FINANCE as `0x${stri
 
 const spaceGrotesk = { fontFamily: 'var(--font-space-grotesk), sans-serif' }
 
-const BORROW_TO_LOAN_ID_ABI = [
+const GET_LOANS_BY_BORROWER_ABI = [
   {
-    name: 'borrowerToLoanId',
+    name: 'getLoansByBorrower',
     type: 'function',
     stateMutability: 'view',
     inputs: [{ name: 'borrower', type: 'address' }],
-    outputs: [{ name: '', type: 'uint256' }],
+    outputs: [{ name: '', type: 'uint256[]' }],
   },
 ] as const
 
@@ -73,14 +73,17 @@ const REPAYMENT_TIERS = [
 export default function DashboardPage() {
   const { isConnected, address } = useAccount()
 
-  const { data: loanId } = useReadContract({
+  const { data: loanIdsData } = useReadContract({
     address: SPACE_FINANCE_ADDRESS,
-    abi: BORROW_TO_LOAN_ID_ABI,
-    functionName: 'borrowerToLoanId',
+    abi: GET_LOANS_BY_BORROWER_ABI,
+    functionName: 'getLoansByBorrower',
     args: address ? [address] : undefined,
     chainId: cc3Testnet.id,
     query: { enabled: !!address },
   })
+
+  const loanIds = loanIdsData as bigint[] | undefined
+  const loanId = loanIds && loanIds.length > 0 ? loanIds[loanIds.length - 1] : undefined
 
   const { data: loanData } = useReadContract({
     address: SPACE_FINANCE_ADDRESS,
