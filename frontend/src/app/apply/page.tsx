@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
+import { JetBrains_Mono } from 'next/font/google'
 import { WalletButton } from '@/components/WalletButton'
 import { useWriteContract, useWaitForTransactionReceipt, useAccount, useReadContract, useChainId, useSwitchChain, usePublicClient } from 'wagmi'
 import { parseEther, decodeEventLog, parseUnits, formatUnits, parseAbi } from 'viem'
@@ -9,9 +10,11 @@ import { sepolia } from 'wagmi/chains'
 import { cc3Testnet } from '@/lib/chains'
 import type { proofProvider } from '@gluwa/usc-sdk'
 
-type Step = 1 | 2 | 3 | 4 | 5
+type Step = 1 | 2 | 3 | 4 | 5 | 'loan-approved'
 
 const spaceGrotesk = { fontFamily: 'var(--font-space-grotesk), sans-serif' }
+const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'], weight: ['400', '600'] })
+const checkmarkStyle = { color: '#3DFFC0', fontFamily: jetbrainsMono.style.fontFamily }
 
 const STEPS = [
   { id: 1, chain: 'SEPOLIA', label: 'Deposit Collateral' },
@@ -55,11 +58,13 @@ const ATT_PHASE_LABEL: Record<AttPhase, string> = {
 }
 
 function StepSidebar({ current }: { current: Step }) {
+  // 'loan-approved' 是 Step 3→4 間的過渡畫面，側欄視覺上算進 Step 4
+  const currentNum = current === 'loan-approved' ? 4 : current
   return (
     <aside className="w-full lg:w-[35%] flex flex-col gap-2">
       {STEPS.map(s => {
-        const done = s.id < current
-        const active = s.id === current
+        const done = s.id < currentNum
+        const active = s.id === currentNum
         return (
           <div
             key={s.id}
@@ -682,6 +687,44 @@ function Step3Panel({
   )
 }
 
+function LoanApprovedPanel({ loanId, onNext }: { loanId: string; onNext: () => void }) {
+  const { data: loanAmount } = useReadContract({
+    address: CONTRACTS.spaceFinance.address,
+    abi: SPACE_FINANCE_ABI,
+    functionName: 'loanAmount',
+    chainId: cc3Testnet.id,
+  })
+
+  return (
+    <div>
+      <div className="mb-2 font-mono text-xs text-gray-500 uppercase tracking-wider">LOAN APPROVED</div>
+      <h2 style={spaceGrotesk} className="text-2xl font-semibold mb-6 flex items-center gap-2">
+        <span className="text-[#3DFFC0]">✓</span> Loan Approved
+      </h2>
+
+      <div className="bg-[#0F172A] border border-[#3DFFC0]/30 p-6 font-mono text-sm space-y-3 mb-8">
+        <div className="flex justify-between">
+          <span className="text-gray-500">Amount</span>
+          <span className="text-[#00C2FF]">
+            {loanAmount !== undefined ? formatUnits(loanAmount, 18) : 'Loading...'} mUSDF
+          </span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-gray-500">Loan ID</span>
+          <span className="text-[#00C2FF]">{loanId}</span>
+        </div>
+      </div>
+
+      <button
+        onClick={onNext}
+        className="bg-[#00C2FF] text-[#0F172A] font-mono text-xs uppercase tracking-wider px-6 py-3 hover:bg-[#75d1ff] transition-colors border border-[#00C2FF]"
+      >
+        PROCEED TO REPAY →
+      </button>
+    </div>
+  )
+}
+
 function Step4Panel({ loanId, onNext }: { loanId: string; onNext: () => void }) {
   const [amount, setAmount] = useState('1000')
   const [phase, setPhase] = useState<'idle' | 'approving' | 'repaying' | 'done' | 'error'>('idle')
@@ -793,12 +836,12 @@ function Step4Panel({ loanId, onNext }: { loanId: string; onNext: () => void }) 
           <div className="bg-[#0F172A] border border-[#3DFFC0]/30 p-4 font-mono text-sm space-y-2">
             {approveTxHash && (
               <div className="text-xs text-gray-500">
-                Approve Tx: <a href={`https://cc3-testnet.blockscout.com/tx/${approveTxHash}`} target="_blank" rel="noopener noreferrer" className="text-[#00C2FF] hover:text-[#75d1ff]">{approveTxHash.slice(0, 20)}...</a>
+                <span style={checkmarkStyle}>✓</span> Approve Tx: <a href={`https://cc3-testnet.blockscout.com/tx/${approveTxHash}`} target="_blank" rel="noopener noreferrer" className="text-[#00C2FF] hover:text-[#75d1ff]">{approveTxHash.slice(0, 20)}...</a>
               </div>
             )}
             {repayTxHash && (
               <div className="text-xs text-gray-500">
-                Repay Tx: <a href={`https://cc3-testnet.blockscout.com/tx/${repayTxHash}`} target="_blank" rel="noopener noreferrer" className="text-[#00C2FF] hover:text-[#75d1ff]">{repayTxHash.slice(0, 20)}...</a>
+                <span style={checkmarkStyle}>✓</span> Repay Tx: <a href={`https://cc3-testnet.blockscout.com/tx/${repayTxHash}`} target="_blank" rel="noopener noreferrer" className="text-[#00C2FF] hover:text-[#75d1ff]">{repayTxHash.slice(0, 20)}...</a>
               </div>
             )}
           </div>
@@ -998,6 +1041,12 @@ export default function ApplyPage() {
                 depositTxHash={depositTxHash}
                 registerBlock={registerBlock}
                 registerTxHash={registerTxHash}
+                onNext={() => setStep('loan-approved')}
+              />
+            )}
+            {step === 'loan-approved' && (
+              <LoanApprovedPanel
+                loanId={loanId}
                 onNext={() => setStep(4)}
               />
             )}

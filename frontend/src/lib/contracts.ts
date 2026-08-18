@@ -48,6 +48,7 @@ export const SPACE_FINANCE_ABI = parseAbi([
   'function markRepaid(uint256 loanId) external',
   'function getLoan(uint256 loanId) external view returns (address borrower, uint256 collateralAmount, uint256 usdValue, bytes32 nodeId, uint8 status, uint256 repaidAmount)',
   'function getLoansByBorrower(address borrower) external view returns (uint256[])',
+  'function loanAmount() external view returns (uint256)',
   'event LoanRepaid(uint256 indexed loanId, address indexed borrower)',
   'event PartialRepayment(uint256 indexed loanId, address indexed borrower, uint256 amount, uint256 totalRepaid)',
 ])
