@@ -893,8 +893,18 @@ function Step5Panel({ loanId, nodeId, sepoliaLoanId }: { loanId: string; nodeId:
     query: { enabled: sepoliaLoanIdBig > 0n, refetchInterval: 15000 },
   })
 
+  const { data: depositData } = useReadContract({
+    address: CONTRACTS.collateralVault.address,
+    abi: COLLATERAL_VAULT_ABI,
+    functionName: 'deposits',
+    args: [sepoliaLoanIdBig],
+    chainId: sepolia.id,
+    query: { enabled: sepoliaLoanIdBig > 0n, refetchInterval: 15000 },
+  })
+  const isWithdrawn = depositData?.[3] === true
+
   const { writeContract: writeWithdraw, data: withdrawTxHash, isPending: isWithdrawPending, error: withdrawError } = useWriteContract()
-  const { isLoading: isWithdrawConfirming, isSuccess: isWithdrawSuccess } = useWaitForTransactionReceipt({ hash: withdrawTxHash })
+  const { isLoading: isWithdrawConfirming } = useWaitForTransactionReceipt({ hash: withdrawTxHash })
 
   function handleWithdraw() {
     writeWithdraw({
@@ -953,8 +963,8 @@ function Step5Panel({ loanId, nodeId, sepoliaLoanId }: { loanId: string; nodeId:
 
         <ChainSwitchBanner requiredChainId={sepolia.id} requiredChainName="Sepolia" />
 
-        {isWithdrawSuccess ? (
-          <div className="text-sm font-mono text-[#3DFFC0]">✓ ETH returned to your wallet</div>
+        {isWithdrawn ? (
+          <div className="text-sm font-mono text-[#3DFFC0]">✓ ETH Returned to your wallet</div>
         ) : isAuthorized ? (
           <div className="space-y-3">
             <div className="text-xs font-mono text-[#3DFFC0]">✓ Withdrawal authorized by admin</div>

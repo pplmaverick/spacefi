@@ -28,6 +28,7 @@ export const COLLATERAL_VAULT_ABI = parseAbi([
   'function withdraw(uint256 loanId) external',
   'function authorizeWithdrawal(uint256 loanId) external',
   'function getDeposit(uint256 loanId) external view returns (address borrower, uint256 amount, uint256 usdValue, bool withdrawn)',
+  'function deposits(uint256 loanId) external view returns (address borrower, uint256 amount, uint256 usdValue, bool withdrawn)',
   'function getUsdValue(uint256 loanId) external view returns (uint256)',
   'event Deposited(address indexed borrower, uint256 loanId, uint256 amount, uint256 usdValue)',
 ])

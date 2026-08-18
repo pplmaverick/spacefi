@@ -5,7 +5,7 @@ import { useAccount, useReadContract, useChainId, useSwitchChain, useWriteContra
 import { formatEther } from 'viem'
 import { cc3Testnet } from '@/lib/chains'
 import { sepolia } from 'wagmi/chains'
-import { LOAN_STATUS } from '@/lib/contracts'
+import { LOAN_STATUS, COLLATERAL_VAULT_ABI } from '@/lib/contracts'
 import { useEffect, useState } from 'react'
 
 const ESCROW_ADDRESS = '0xC130F5D76f0b4Ce8FE2ceA0D2C2b8f53A39a5cd0'
@@ -143,8 +143,21 @@ function LoanCard({ loanId }: { loanId: bigint }) {
     },
   })
 
+  const { data: depositData } = useReadContract({
+    address: COLLATERAL_VAULT_ADDRESS,
+    abi: COLLATERAL_VAULT_ABI,
+    functionName: 'deposits',
+    args: [sepoliaLoanId],
+    chainId: sepolia.id,
+    query: {
+      enabled: loan?.status === 4 && sepoliaLoanId > 0n,
+      refetchInterval: 15000,
+    },
+  })
+  const isWithdrawn = depositData?.[3] === true
+
   const { writeContract: writeWithdraw, data: withdrawTxHash, isPending: isWithdrawPending, error: withdrawError } = useWriteContract()
-  const { isLoading: isWithdrawConfirming, isSuccess: isWithdrawSuccess } = useWaitForTransactionReceipt({ hash: withdrawTxHash })
+  const { isLoading: isWithdrawConfirming } = useWaitForTransactionReceipt({ hash: withdrawTxHash })
 
   function handleWithdraw() {
     writeWithdraw({
@@ -325,8 +338,8 @@ function LoanCard({ loanId }: { loanId: bigint }) {
 
             <ChainSwitchBanner requiredChainId={sepolia.id} requiredChainName="Sepolia" />
 
-            {isWithdrawSuccess ? (
-              <div className="text-sm font-mono text-[#3DFFC0]">✓ ETH returned to your wallet</div>
+            {isWithdrawn ? (
+              <div className="text-sm font-mono text-[#3DFFC0]">✓ ETH Returned</div>
             ) : isWithdrawAuthorized ? (
               <div className="space-y-3">
                 <div className="text-xs font-mono text-[#3DFFC0] mb-2">✓ Withdrawal authorized</div>
