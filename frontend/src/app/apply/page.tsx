@@ -582,9 +582,6 @@ function Step3Panel({
       }
       console.log('ATT #1 confirmed on-chain, proceeding with ATT #2...')
 
-      // 等 CC3 finalize ATT#1 再送 ATT#2，避免 timing race
-      await new Promise(resolve => setTimeout(resolve, 20_000))
-
       setAtt2Phase('submitting')
 
       const args = buildExecuteArgs(1, proof)
