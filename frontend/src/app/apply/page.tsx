@@ -376,6 +376,7 @@ function AttColumn({
   error,
   pct,
   onRetry,
+  waitingLabel,
 }: {
   label: string
   phase: AttPhase
@@ -383,6 +384,7 @@ function AttColumn({
   error: string
   pct: number
   onRetry: () => void
+  waitingLabel?: string
 }) {
   return (
     <div className="border border-[#334155] bg-[#1E293B] p-4 flex flex-col gap-2">
@@ -394,7 +396,7 @@ function AttColumn({
       {phase !== 'error' && phase !== 'proof_ready' && (
         <>
           <div className={`font-mono text-xs text-gray-300 ${phase !== 'done' ? 'animate-pulse' : ''}`}>
-            {ATT_PHASE_LABEL[phase]}
+            {phase === 'waiting' && waitingLabel ? waitingLabel : ATT_PHASE_LABEL[phase]}
           </div>
           <div className="w-full h-2 bg-[#0F172A] border border-[#334155] overflow-hidden">
             <div
@@ -580,6 +582,9 @@ function Step3Panel({
       }
       console.log('ATT #1 confirmed on-chain, proceeding with ATT #2...')
 
+      // 等 CC3 finalize ATT#1 再送 ATT#2，避免 timing race
+      await new Promise(resolve => setTimeout(resolve, 20_000))
+
       setAtt2Phase('submitting')
 
       const args = buildExecuteArgs(1, proof)
@@ -665,6 +670,7 @@ function Step3Panel({
             error={att2Error}
             pct={phasePct(att2Phase)}
             onRetry={runAtt2}
+            waitingLabel={att1TxHash ? 'Waiting for CC3 to finalize ATT#1...' : undefined}
           />
         </div>
 
