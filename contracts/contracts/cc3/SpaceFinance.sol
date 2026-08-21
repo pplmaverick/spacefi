@@ -71,7 +71,6 @@ contract SpaceFinance is Ownable, ReentrancyGuard, USCBase {
     // TODO: layer in Spacecoin node revenue once it's available on-chain (see getNodeRevenue).
     uint256 public constant LTV_PERCENT = 70;
 
-    uint256 public loanCounter;
     mapping(uint256 => Loan) public loans;
     mapping(address => uint256[]) public borrowerToLoanIds;
 
@@ -129,13 +128,11 @@ contract SpaceFinance is Ownable, ReentrancyGuard, USCBase {
         // topics[0] = event signature (already matched by getLogsByEventSignature)
         // topics[1] = borrower (indexed)
         // data      = loanId, amount, usdValue (NOT indexed — must abi.decode)
-        // The decoded loanId is CollateralVault's Sepolia-side id; it is intentionally discarded
-        // here because this loan is keyed by SpaceFinance's own loanCounter instead (see summary
-        // note on the two loanId namespaces no longer matching).
+        // `loanId` here is CollateralVault's Sepolia-side id, reused directly as the key into
+        // `loans` so both chains share one loanId namespace instead of SpaceFinance minting its
+        // own via a separate counter.
         address borrower = address(uint160(uint256(log.topics[1])));
-        (, uint256 amount, uint256 usdValue) = abi.decode(log.data, (uint256, uint256, uint256));
-
-        uint256 loanId = ++loanCounter;
+        (uint256 loanId, uint256 amount, uint256 usdValue) = abi.decode(log.data, (uint256, uint256, uint256));
 
         loans[loanId] = Loan({
             borrower: borrower,
