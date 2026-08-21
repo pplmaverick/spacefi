@@ -751,13 +751,16 @@ function LoanApprovedPanel({ loanId, onNext }: { loanId: string; onNext: () => v
 
 function Step4Panel({ loanId, onNext }: { loanId: string; onNext: () => void }) {
   const [amount, setAmount] = useState('1000')
-  const [phase, setPhase] = useState<'idle' | 'approving' | 'repaying' | 'done' | 'error'>('idle')
+  const [phase, setPhase] = useState<
+    'idle' | 'approving' | 'approve-confirming' | 'repaying' | 'repay-confirming' | 'done' | 'error'
+  >('idle')
   const [errorMsg, setErrorMsg] = useState('')
   const [approveTxHash, setApproveTxHash] = useState<`0x${string}` | null>(null)
   const [repayTxHash, setRepayTxHash] = useState<`0x${string}` | null>(null)
   const { isConnected, chainId, address } = useAccount()
   const isRightChain = chainId === cc3Testnet.id
   const { writeContractAsync } = useWriteContract()
+  const publicClient = usePublicClient({ chainId: cc3Testnet.id })
 
   const { data: cc3LoanIds } = useReadContract({
     address: CONTRACTS.spaceFinance.address,
@@ -804,6 +807,15 @@ function Step4Panel({ loanId, onNext }: { loanId: string; onNext: () => void }) 
       })
       setApproveTxHash(approveTx)
 
+      // Wait for the approve tx to actually land on-chain before submitting repay — otherwise
+      // repay could be sent (and even land in the same or an earlier block) before the allowance
+      // it depends on is actually set.
+      setPhase('approve-confirming')
+      const approveReceipt = await publicClient!.waitForTransactionReceipt({ hash: approveTx })
+      if (approveReceipt.status === 'reverted') {
+        throw new Error('Approve transaction reverted on-chain.')
+      }
+
       // Step B: repay
       setPhase('repaying')
       const repayTx = await writeContractAsync({
@@ -814,6 +826,13 @@ function Step4Panel({ loanId, onNext }: { loanId: string; onNext: () => void }) 
         chainId: cc3Testnet.id,
       })
       setRepayTxHash(repayTx)
+
+      setPhase('repay-confirming')
+      const repayReceipt = await publicClient!.waitForTransactionReceipt({ hash: repayTx })
+      if (repayReceipt.status === 'reverted') {
+        throw new Error('Repay transaction reverted on-chain.')
+      }
+
       setPhase('done')
     } catch (e) {
       setErrorMsg(e instanceof Error ? e.message.split('\n')[0] : String(e))
@@ -860,13 +879,24 @@ function Step4Panel({ loanId, onNext }: { loanId: string; onNext: () => void }) 
         </div>
       )}
 
-      {(phase === 'approving' || phase === 'repaying') && (
+      {(phase === 'approving' || phase === 'approve-confirming' || phase === 'repaying' || phase === 'repay-confirming') && (
         <div className="mt-6 space-y-3">
           <div className="text-xs font-mono text-gray-400">
-            {phase === 'approving' ? '1/2 Approving mUSDF spend...' : '2/2 Submitting repayment...'}
+            {phase === 'approving' && '1/2 Confirm approve in wallet...'}
+            {phase === 'approve-confirming' && '1/2 Confirming approve on CC3...'}
+            {phase === 'repaying' && '2/2 Confirm repay in wallet...'}
+            {phase === 'repay-confirming' && '2/2 Confirming repay on CC3...'}
           </div>
           <div className="w-full h-2 bg-[#1E293B] border border-[#334155] overflow-hidden">
-            <div className="h-full bg-[#00C2FF] animate-pulse" style={{ width: phase === 'approving' ? '40%' : '80%' }} />
+            <div
+              className="h-full bg-[#00C2FF] animate-pulse"
+              style={{
+                width:
+                  phase === 'approving' ? '20%' :
+                  phase === 'approve-confirming' ? '40%' :
+                  phase === 'repaying' ? '60%' : '80%',
+              }}
+            />
           </div>
         </div>
       )}
