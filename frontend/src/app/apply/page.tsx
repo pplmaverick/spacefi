@@ -409,8 +409,7 @@ function AttColumn({
 
       {phase === 'proof_ready' && (
         <div>
-          <div className="text-xs font-mono text-[#3DFFC0] mb-2">✓ USC proof generated</div>
-          <div className="text-xs font-mono text-[#FF6B35] mb-3">Switch to CC3 Testnet to submit</div>
+          <div className="text-xs font-mono text-[#3DFFC0] mb-3">✓ USC proof generated</div>
           <ChainSwitchBanner requiredChainId={cc3Testnet.id} requiredChainName="CC3 Testnet" />
         </div>
       )}
