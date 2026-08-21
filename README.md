@@ -17,9 +17,9 @@ A DePIN infrastructure financing protocol built on Creditcoin CC3, enabling node
 - NodeRegistry: [0x16af69f36B80Ef7F150Af88e5693f38b2eA013B9](https://sepolia.etherscan.io/address/0x16af69f36B80Ef7F150Af88e5693f38b2eA013B9)
 
 **CC3 Testnet**
-- SpaceFinance: [0xEE93Cc7c31367599bf21aB78Aea21D6011d8750B](https://creditcoin-testnet.blockscout.com/address/0xEE93Cc7c31367599bf21aB78Aea21D6011d8750B)
-- MockPayoutToken: [0x0a75041429506A30ad804EF757bB0f4942F6811c](https://creditcoin-testnet.blockscout.com/address/0x0a75041429506A30ad804EF757bB0f4942F6811c)
-- GuildPool: [0x7EBc98c14920C9A9b060B81047ec96A8906b06C1](https://creditcoin-testnet.blockscout.com/address/0x7EBc98c14920C9A9b060B81047ec96A8906b06C1)
+- SpaceFinance: [0xE1B5749dd615B854e161c4af8782aE5Ed5c36080](https://creditcoin-testnet.blockscout.com/address/0xE1B5749dd615B854e161c4af8782aE5Ed5c36080)
+- MockPayoutToken: [0x2d570B5B2027B2505e3c38E178Ad1591d042f906](https://creditcoin-testnet.blockscout.com/address/0x2d570B5B2027B2505e3c38E178Ad1591d042f906)
+- GuildPool: [0x16b52581EEf61d3CdB3Fa065dB972767130C571a](https://creditcoin-testnet.blockscout.com/address/0x16b52581EEf61d3CdB3Fa065dB972767130C571a)
 
 ---
 
@@ -67,9 +67,10 @@ Once both proofs are verified on-chain, `SpaceFinance` automatically updates loa
 
 | Contract | Address |
 |---|---|
-| SpaceFinance | [0xEE93Cc7c31367599bf21aB78Aea21D6011d8750B](https://creditcoin-testnet.blockscout.com/address/0xEE93Cc7c31367599bf21aB78Aea21D6011d8750B) |
-| MockPayoutToken (mUSDF) | [0x0a75041429506A30ad804EF757bB0f4942F6811c](https://creditcoin-testnet.blockscout.com/address/0x0a75041429506A30ad804EF757bB0f4942F6811c) |
-| EvmV1Decoder (lib) | `0xcAC5B9d2817325E78090E3Ce4b9C299C819cF953` |
+| SpaceFinance | [0xE1B5749dd615B854e161c4af8782aE5Ed5c36080](https://creditcoin-testnet.blockscout.com/address/0xE1B5749dd615B854e161c4af8782aE5Ed5c36080) |
+| MockPayoutToken (mUSDF) | [0x2d570B5B2027B2505e3c38E178Ad1591d042f906](https://creditcoin-testnet.blockscout.com/address/0x2d570B5B2027B2505e3c38E178Ad1591d042f906) |
+| GuildPool | [0x16b52581EEf61d3CdB3Fa065dB972767130C571a](https://creditcoin-testnet.blockscout.com/address/0x16b52581EEf61d3CdB3Fa065dB972767130C571a) |
+| EvmV1Decoder (lib) | [0x417e0C4E4cbEF8973f7Dfd4b417B52637bbF91dF](https://creditcoin-testnet.blockscout.com/address/0x417e0C4E4cbEF8973f7Dfd4b417B52637bbF91dF) |
 
 ---
 
@@ -136,7 +137,7 @@ CC3's precompile gas estimation is unreliable for `SpaceFinance.execute()`. The 
 | Development | Hardhat + ethers.js v6 |
 | Cross-chain | Creditcoin Attestcoin Protocol (USC) |
 | Proof generation | `@gluwa/usc-sdk` ProofBuilder |
-| Testnet token | mUSDF (`0x0a75...811c`) |
+| Testnet token | mUSDF (`0x2d57...f906`) |
 
 ---
 
