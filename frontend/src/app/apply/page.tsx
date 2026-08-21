@@ -772,6 +772,22 @@ function Step4Panel({ loanId, onNext }: { loanId: string; onNext: () => void }) 
     ? loanIds[loanIds.length - 1]  // 取最新的一筆
     : undefined
 
+  const { data: loanData } = useReadContract({
+    address: CONTRACTS.spaceFinance.address,
+    abi: SPACE_FINANCE_ABI,
+    functionName: 'getLoan',
+    args: [cc3LoanId!],
+    chainId: cc3Testnet.id,
+    query: { enabled: cc3LoanId !== undefined },
+  })
+  const contractLoanAmount = loanData ? (loanData as unknown as unknown[])[6] as bigint : undefined
+
+  useEffect(() => {
+    if (contractLoanAmount !== undefined) {
+      setAmount(formatUnits(contractLoanAmount, 18))
+    }
+  }, [contractLoanAmount])
+
   async function handleRepay() {
     setPhase('approving')
     setErrorMsg('')
