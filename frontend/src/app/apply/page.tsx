@@ -690,31 +690,14 @@ function Step3Panel({
 }
 
 function LoanApprovedPanel({ loanId, onNext }: { loanId: string; onNext: () => void }) {
-  // `loanId` here is CollateralVault's Sepolia-side id, not SpaceFinance's CC3-side loanCounter
-  // (see SpaceFinance.sol's note on the two loanId namespaces). Resolve the real CC3 loanId via
-  // getLoansByBorrower the same way Step4Panel does, then read that loan's disbursed amount.
-  const { address } = useAccount()
-
-  const { data: cc3LoanIds } = useReadContract({
-    address: CONTRACTS.spaceFinance.address,
-    abi: SPACE_FINANCE_ABI,
-    functionName: 'getLoansByBorrower',
-    args: [address!],
-    chainId: cc3Testnet.id,
-    query: { enabled: !!address },
-  })
-  const loanIds = cc3LoanIds as readonly bigint[] | undefined
-  const cc3LoanId = loanIds && loanIds.length > 0
-    ? loanIds[loanIds.length - 1]  // 取最新的一筆
-    : undefined
-
+  // CC3's `loans` mapping is keyed by the same loanId as Sepolia's CollateralVault
+  // (SpaceFinance._handleCollateralDeposited reuses it directly), so no lookup is needed.
   const { data: loanData } = useReadContract({
     address: CONTRACTS.spaceFinance.address,
     abi: SPACE_FINANCE_ABI,
     functionName: 'getLoan',
-    args: [cc3LoanId!],
+    args: [BigInt(loanId)],
     chainId: cc3Testnet.id,
-    query: { enabled: cc3LoanId !== undefined },
   })
   const loanAmount = loanData ? (loanData as unknown as unknown[])[6] as bigint : undefined
 
@@ -756,31 +739,21 @@ function Step4Panel({ loanId, onNext }: { loanId: string; onNext: () => void }) 
   const [errorMsg, setErrorMsg] = useState('')
   const [approveTxHash, setApproveTxHash] = useState<`0x${string}` | null>(null)
   const [repayTxHash, setRepayTxHash] = useState<`0x${string}` | null>(null)
-  const { isConnected, chainId, address } = useAccount()
+  const { isConnected, chainId } = useAccount()
   const isRightChain = chainId === cc3Testnet.id
   const { writeContractAsync } = useWriteContract()
   const publicClient = usePublicClient({ chainId: cc3Testnet.id })
 
-  const { data: cc3LoanIds } = useReadContract({
-    address: CONTRACTS.spaceFinance.address,
-    abi: SPACE_FINANCE_ABI,
-    functionName: 'getLoansByBorrower',
-    args: [address!],
-    chainId: cc3Testnet.id,
-    query: { enabled: !!address },
-  })
-  const loanIds = cc3LoanIds as readonly bigint[] | undefined
-  const cc3LoanId = loanIds && loanIds.length > 0
-    ? loanIds[loanIds.length - 1]  // 取最新的一筆
-    : undefined
+  // CC3's `loans` mapping is keyed by the same loanId as Sepolia's CollateralVault
+  // (SpaceFinance._handleCollateralDeposited reuses it directly), so no lookup is needed.
+  const cc3LoanId = BigInt(loanId)
 
   const { data: loanData } = useReadContract({
     address: CONTRACTS.spaceFinance.address,
     abi: SPACE_FINANCE_ABI,
     functionName: 'getLoan',
-    args: [cc3LoanId!],
+    args: [cc3LoanId],
     chainId: cc3Testnet.id,
-    query: { enabled: cc3LoanId !== undefined },
   })
   const contractLoanAmount = loanData ? (loanData as unknown as unknown[])[6] as bigint : undefined
 
@@ -821,7 +794,7 @@ function Step4Panel({ loanId, onNext }: { loanId: string; onNext: () => void }) 
         address: CONTRACTS.spaceFinance.address,
         abi: SPACE_FINANCE_ABI,
         functionName: 'repay',
-        args: [cc3LoanId!, amountWei],
+        args: [cc3LoanId, amountWei],
         chainId: cc3Testnet.id,
       })
       setRepayTxHash(repayTx)
@@ -855,8 +828,6 @@ function Step4Panel({ loanId, onNext }: { loanId: string; onNext: () => void }) 
           <div className="bg-[#0F172A] border border-[#334155] p-4 font-mono text-sm">
             <div className="text-gray-500 text-xs mb-1">Loan ID</div>
             <div className="text-[#00C2FF]">{loanId}</div>
-            <div className="text-gray-500 text-xs mt-2 mb-1">CC3 Loan ID</div>
-            <div className="text-[#00C2FF]">{cc3LoanId !== undefined ? cc3LoanId.toString() : 'Loading...'}</div>
           </div>
           <div>
             <label className="font-mono text-xs text-gray-500 uppercase tracking-wider block mb-2">Amount (mUSDF)</label>
@@ -870,7 +841,7 @@ function Step4Panel({ loanId, onNext }: { loanId: string; onNext: () => void }) 
           </div>
           <button
             onClick={handleRepay}
-            disabled={!amount || !cc3LoanId}
+            disabled={!amount}
             className="bg-[#00C2FF] text-[#0F172A] font-mono text-xs uppercase tracking-wider px-6 py-3 hover:bg-[#75d1ff] transition-colors border border-[#00C2FF] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Repay →
