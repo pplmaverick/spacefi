@@ -7,10 +7,6 @@ import { loadDeployment, saveDeployment } from "./utils/deployment";
 // registerSourceContract() is called again with the real addresses.
 const PLACEHOLDER_ADDRESS = "0x000000000000000000000000000000000000dEaD";
 
-// Flat per-loan payout for the skeleton. mUSDF has 18 decimals (default ERC20). Override with
-// LOAN_AMOUNT_TOKENS in .env if you want a different size.
-const LOAN_AMOUNT_TOKENS = process.env.LOAN_AMOUNT_TOKENS ?? "1000";
-
 /**
  * Deploys the CC3-side contracts: MockPayoutToken + SpaceFinance, then wires up
  * registerSourceContract() with whatever Sepolia addresses are on record.
@@ -27,8 +23,6 @@ async function main() {
   if (!process.env.TREASURY_ADDRESS) {
     console.log(`No TREASURY_ADDRESS set in .env — using deployer as treasury: ${treasury}`);
   }
-
-  const loanAmount = ethers.parseUnits(LOAN_AMOUNT_TOKENS, 18);
 
   const MockPayoutToken = await ethers.getContractFactory("MockPayoutToken");
   const token = await MockPayoutToken.deploy();
@@ -52,7 +46,7 @@ async function main() {
       "@gluwa/usc-contracts/contracts/decoding/EvmV1Decoder.sol:EvmV1Decoder": decoderLibAddress,
     },
   });
-  const spaceFinance = await SpaceFinance.deploy(deployer.address, tokenAddress, treasury, loanAmount);
+  const spaceFinance = await SpaceFinance.deploy(deployer.address, tokenAddress, treasury);
   await spaceFinance.waitForDeployment();
   const spaceFinanceAddress = await spaceFinance.getAddress();
   console.log(`SpaceFinance deployed to:    ${spaceFinanceAddress}`);
@@ -87,7 +81,9 @@ async function main() {
     mockPayoutToken: tokenAddress,
     spaceFinance: spaceFinanceAddress,
     treasury,
-    loanAmount: loanAmount.toString(),
+    // Loan sizing is now computed on-chain per loan (70% of proved collateral usdValue) instead
+    // of being a fixed deploy-time constant — clear the stale field from prior deployments.
+    loanAmount: undefined,
   });
 
   console.log("\n=== CC3 deployment summary ===");
@@ -95,7 +91,7 @@ async function main() {
   console.log(`MockPayoutToken: ${tokenAddress}`);
   console.log(`SpaceFinance:    ${spaceFinanceAddress}`);
   console.log(`Treasury:        ${treasury}`);
-  console.log(`Loan amount:     ${loanAmount.toString()} (${LOAN_AMOUNT_TOKENS} mUSDF)`);
+  console.log(`Loan sizing:     dynamic — 70% of proved collateral usdValue (SpaceFinance.LTV_PERCENT)`);
 
   console.log(
     "\nNote: treasury does not yet hold or approve any mUSDF. Before a loan can actually " +

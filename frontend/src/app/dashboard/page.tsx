@@ -39,6 +39,7 @@ const GET_LOAN_ABI = [
       { name: 'nodeId', type: 'bytes32' },
       { name: 'status', type: 'uint8' },
       { name: 'repaidAmount', type: 'uint256' },
+      { name: 'loanAmount', type: 'uint256' },
     ],
   },
 ] as const

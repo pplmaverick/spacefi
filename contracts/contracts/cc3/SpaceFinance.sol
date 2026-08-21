@@ -41,6 +41,10 @@ contract SpaceFinance is Ownable, ReentrancyGuard, USCBase {
         bytes32 nodeId;
         LoanStatus status;
         uint256 repaidAmount;
+        // Disbursed principal for this loan, set once in `_disburse` (70% of `usdValue`). Stored
+        // per-loan rather than as a single contract-wide constant because LTV now varies with each
+        // loan's collateral value; `repay` compares cumulative repayment against this field.
+        uint256 loanAmount;
     }
 
     // keccak256("Deposited(address,uint256,uint256,uint256)") — CollateralVault.Deposited canonical
@@ -63,11 +67,9 @@ contract SpaceFinance is Ownable, ReentrancyGuard, USCBase {
 
     IERC20 public payoutToken;
     address public treasury;
-    // Flat disbursement amount for the hackathon skeleton.
-    // TODO: size this from the borrower's collateral and/or their Spacecoin node revenue
-    // (see TokenPaymentEscrow.ReceiptClaimed on CC3 mainnet — same-chain read, no USC needed)
-    // instead of a fixed constant.
-    uint256 public loanAmount;
+    // LTV applied against a loan's proved collateral usdValue at disbursement time. 70 = 70%.
+    // TODO: layer in Spacecoin node revenue once it's available on-chain (see getNodeRevenue).
+    uint256 public constant LTV_PERCENT = 70;
 
     uint256 public loanCounter;
     mapping(uint256 => Loan) public loans;
@@ -84,13 +86,11 @@ contract SpaceFinance is Ownable, ReentrancyGuard, USCBase {
     constructor(
         address initialOwner,
         address payoutToken_,
-        address treasury_,
-        uint256 loanAmount_
+        address treasury_
     ) Ownable(initialOwner) {
         require(payoutToken_ != address(0) && treasury_ != address(0), "zero address");
         payoutToken = IERC20(payoutToken_);
         treasury = treasury_;
-        loanAmount = loanAmount_;
     }
 
     /// @notice One-time (or updatable, owner-only) wiring of the trusted Sepolia source contracts.
@@ -143,7 +143,8 @@ contract SpaceFinance is Ownable, ReentrancyGuard, USCBase {
             usdValue: usdValue,
             nodeId: bytes32(0),
             status: LoanStatus.CollateralVerified,
-            repaidAmount: 0
+            repaidAmount: 0,
+            loanAmount: 0
         });
         borrowerToLoanIds[borrower].push(loanId);
 
@@ -204,15 +205,18 @@ contract SpaceFinance is Ownable, ReentrancyGuard, USCBase {
 
     function _disburse(uint256 loanId) internal nonReentrant {
         Loan storage loan = loans[loanId];
+        uint256 amount = (loan.usdValue * LTV_PERCENT) / 100;
+        loan.loanAmount = amount;
         loan.status = LoanStatus.Active;
 
-        emit LoanDisbursed(loanId, loan.borrower, loanAmount);
+        emit LoanDisbursed(loanId, loan.borrower, amount);
 
-        payoutToken.safeTransferFrom(treasury, loan.borrower, loanAmount);
+        payoutToken.safeTransferFrom(treasury, loan.borrower, amount);
     }
 
     /// @notice Repay an active loan. Accepts partial repayments; once cumulative repayment meets
-    /// or exceeds `loanAmount`, the loan is marked `Repaid`.
+    /// or exceeds `loan.loanAmount` (the principal disbursed for this specific loan), the loan is
+    /// marked `Repaid`.
     function repay(uint256 loanId, uint256 amount) external nonReentrant {
         Loan storage loan = loans[loanId];
         require(loan.status == LoanStatus.Active, "loan not active");
@@ -221,7 +225,7 @@ contract SpaceFinance is Ownable, ReentrancyGuard, USCBase {
         payoutToken.safeTransferFrom(msg.sender, treasury, amount);
         loan.repaidAmount += amount;
 
-        if (loan.repaidAmount >= loanAmount) {
+        if (loan.repaidAmount >= loan.loanAmount) {
             loan.status = LoanStatus.Repaid;
             emit LoanRepaid(loanId, msg.sender);
         } else {

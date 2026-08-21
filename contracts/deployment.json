@@ -6,11 +6,10 @@
   },
   "cc3": {
     "chainId": 102031,
-    "evmV1Decoder": "0xfAd4Ce92CD6bE7dF707BEFD8b09eF3297f51F583",
-    "mockPayoutToken": "0x0a75041429506A30ad804EF757bB0f4942F6811c",
-    "spaceFinance": "0xEE93Cc7c31367599bf21aB78Aea21D6011d8750B",
+    "evmV1Decoder": "0x417e0C4E4cbEF8973f7Dfd4b417B52637bbF91dF",
+    "mockPayoutToken": "0x2d570B5B2027B2505e3c38E178Ad1591d042f906",
+    "spaceFinance": "0xE1B5749dd615B854e161c4af8782aE5Ed5c36080",
     "treasury": "0xed2B5717c9b936ecC76d75401026A99143e278F5",
-    "loanAmount": "1000000000000000000000",
-    "guildPool": "0x7EBc98c14920C9A9b060B81047ec96A8906b06C1"
+    "guildPool": "0x16b52581EEf61d3CdB3Fa065dB972767130C571a"
   }
 }

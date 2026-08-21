@@ -691,12 +691,33 @@ function Step3Panel({
 }
 
 function LoanApprovedPanel({ loanId, onNext }: { loanId: string; onNext: () => void }) {
-  const { data: loanAmount } = useReadContract({
+  // `loanId` here is CollateralVault's Sepolia-side id, not SpaceFinance's CC3-side loanCounter
+  // (see SpaceFinance.sol's note on the two loanId namespaces). Resolve the real CC3 loanId via
+  // getLoansByBorrower the same way Step4Panel does, then read that loan's disbursed amount.
+  const { address } = useAccount()
+
+  const { data: cc3LoanIds } = useReadContract({
     address: CONTRACTS.spaceFinance.address,
     abi: SPACE_FINANCE_ABI,
-    functionName: 'loanAmount',
+    functionName: 'getLoansByBorrower',
+    args: [address!],
     chainId: cc3Testnet.id,
+    query: { enabled: !!address },
   })
+  const loanIds = cc3LoanIds as readonly bigint[] | undefined
+  const cc3LoanId = loanIds && loanIds.length > 0
+    ? loanIds[loanIds.length - 1]  // 取最新的一筆
+    : undefined
+
+  const { data: loanData } = useReadContract({
+    address: CONTRACTS.spaceFinance.address,
+    abi: SPACE_FINANCE_ABI,
+    functionName: 'getLoan',
+    args: [cc3LoanId!],
+    chainId: cc3Testnet.id,
+    query: { enabled: cc3LoanId !== undefined },
+  })
+  const loanAmount = loanData ? (loanData as unknown as unknown[])[6] as bigint : undefined
 
   return (
     <div>

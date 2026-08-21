@@ -34,4 +34,30 @@ async function main() {
   console.log("✅ Treasury setup complete");
 }
 
-main().catch(console.error);
+async function reapprove() {
+  const deployment = loadDeployment();
+  const privateKey = process.env.PRIVATE_KEY!;
+  const cc3RpcUrl = process.env.CC3_TESTNET_RPC_URL!;
+
+  const provider = new ethers.JsonRpcProvider(cc3RpcUrl);
+  const wallet = new ethers.Wallet(privateKey, provider);
+
+  const payoutToken = new ethers.Contract(
+    deployment.cc3!.mockPayoutToken!,
+    MockPayoutTokenAbi.abi,
+    wallet
+  );
+
+  console.log("Approving SpaceFinance to spend mUSDF (MaxUint256)...");
+  const approveTx = await payoutToken.approve(deployment.cc3!.spaceFinance!, ethers.MaxUint256);
+  await approveTx.wait();
+  console.log(`Treasury re-approved. Tx: ${approveTx.hash}`);
+}
+
+// 根據 argv 決定跑哪個函式
+const args = process.argv.slice(2);
+if (args[0] === "reapprove") {
+  reapprove().catch(console.error);
+} else {
+  main().catch(console.error);
+}
