@@ -5,7 +5,7 @@ import { JetBrains_Mono } from 'next/font/google'
 import { WalletButton } from '@/components/WalletButton'
 import { useWriteContract, useWaitForTransactionReceipt, useAccount, useReadContract, useChainId, useSwitchChain, usePublicClient } from 'wagmi'
 import { parseEther, decodeEventLog, parseUnits, formatUnits, parseAbi } from 'viem'
-import { CONTRACTS, COLLATERAL_VAULT_ABI, NODE_REGISTRY_ABI, SPACE_FINANCE_ABI, MOCK_PAYOUT_TOKEN_ABI } from '@/lib/contracts'
+import { CONTRACTS, COLLATERAL_VAULT_ABI, NODE_REGISTRY_ABI, SPACE_FINANCE_ABI, MOCK_PAYOUT_TOKEN_ABI, LOAN_STATUS } from '@/lib/contracts'
 import { sepolia } from 'wagmi/chains'
 import { cc3Testnet } from '@/lib/chains'
 import type { proofProvider } from '@gluwa/usc-sdk'
@@ -911,16 +911,24 @@ function Step4Panel({ loanId, onNext }: { loanId: string; onNext: () => void }) 
   )
 }
 
+// LoanStatus enum order: None, CollateralVerified, NodeVerified, Active, Repaid, Withdrawn
+const LOAN_STATUS_COLOR = ['#FF6B35', '#FF6B35', '#FF6B35', '#00C2FF', '#3DFFC0', '#3DFFC0']
+
 function Step5Panel({ loanId, nodeId, sepoliaLoanId }: { loanId: string; nodeId: string; sepoliaLoanId: string }) {
-  const { address } = useAccount()
-  const { data: mUsdfBalance } = useReadContract({
-    address: CONTRACTS.mockPayoutToken.address,
-    abi: MOCK_PAYOUT_TOKEN_ABI,
-    functionName: 'balanceOf',
-    args: address ? [address] : undefined,
+  // Real on-chain status/amounts for this specific loan — previously this panel showed the
+  // connected wallet's whole mUSDF balanceOf(), which is unrelated to the loan (and was
+  // dominated by the treasury's 10,000 mUSDF mint whenever the demo wallet doubles as treasury).
+  const { data: loanData } = useReadContract({
+    address: CONTRACTS.spaceFinance.address,
+    abi: SPACE_FINANCE_ABI,
+    functionName: 'getLoan',
+    args: [BigInt(loanId)],
     chainId: cc3Testnet.id,
-    query: { enabled: !!address },
   })
+  const loanFields = loanData as unknown as unknown[] | undefined
+  const loanStatus = loanFields ? (loanFields[4] as number) : undefined
+  const repaidAmount = loanFields ? (loanFields[5] as bigint) : undefined
+  const disbursedAmount = loanFields ? (loanFields[6] as bigint) : undefined
 
   const sepoliaLoanIdBig = BigInt(sepoliaLoanId || '0')
 
@@ -967,8 +975,12 @@ function Step5Panel({ loanId, nodeId, sepoliaLoanId }: { loanId: string; nodeId:
       <div className="bg-[#1E293B] border border-[#00C2FF]/30 p-6 mb-6 space-y-3">
         <div className="flex justify-between items-center">
           <span className="font-mono text-xs text-gray-500 uppercase tracking-wider">Status</span>
-          <span className="font-mono text-xs text-[#3DFFC0] flex items-center gap-2">
-            <span className="text-[8px]">●</span> LOAN ACTIVE
+          <span
+            className="font-mono text-xs flex items-center gap-2"
+            style={{ color: loanStatus !== undefined ? LOAN_STATUS_COLOR[loanStatus] : '#64748B' }}
+          >
+            <span className="text-[8px]">●</span>
+            {loanStatus !== undefined ? LOAN_STATUS[loanStatus].toUpperCase() : 'Loading...'}
           </span>
         </div>
         <div className="flex justify-between font-mono text-sm border-t border-[#334155] pt-3">
@@ -980,8 +992,12 @@ function Step5Panel({ loanId, nodeId, sepoliaLoanId }: { loanId: string; nodeId:
           <span className="text-[#00C2FF] break-all text-right">{nodeId}</span>
         </div>
         <div className="flex justify-between font-mono text-sm">
-          <span className="text-gray-500">mUSDF Balance</span>
-          <span className="text-white">{mUsdfBalance !== undefined ? formatUnits(mUsdfBalance, 18) : 'Loading...'} mUSDF</span>
+          <span className="text-gray-500">Repaid</span>
+          <span className="text-white">
+            {repaidAmount !== undefined && disbursedAmount !== undefined
+              ? `${formatUnits(repaidAmount, 18)} / ${formatUnits(disbursedAmount, 18)} mUSDF`
+              : 'Loading...'}
+          </span>
         </div>
       </div>
 
