@@ -1,0 +1,555 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>SpaceFinance Pitch Deck</title>
+<style>
+  @page { size: 960px 540px; margin: 0; }
+  * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  html, body { margin: 0; padding: 0; background: #070B14; }
+
+  :root {
+    --bg: #070B14;
+    --bg-elev: #0E1524;
+    --bg-elev-2: #121A2C;
+    --border: rgba(255,255,255,0.09);
+    --border-strong: rgba(255,255,255,0.16);
+    --text-primary: #F3F6FB;
+    --text-secondary: #A7B2C8;
+    --text-tertiary: #64708A;
+    --cyan: #4CD9FF;
+    --purple: #9C8CFF;
+    --green: #35D399;
+    --cyan-dim: rgba(76,217,255,0.10);
+    --purple-dim: rgba(156,140,255,0.10);
+    --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+    --font-mono: "SF Mono", Menlo, Consolas, monospace;
+  }
+
+  /* Outer frame = actual PDF page size (960x540). Clips the scaled inner stage. */
+  .slide {
+    width: 960px;
+    height: 540px;
+    position: relative;
+    overflow: hidden;
+    background: var(--bg);
+    background-image: url('../assets/bg.jpg');
+    background-size: cover;
+    background-position: center;
+    page-break-after: always;
+  }
+  .slide:last-of-type { page-break-after: auto; }
+
+  /* Inner stage = design canvas at 1280x720, zoomed down 0.75x to exactly fill the 960x540 frame.
+     Uses `zoom` instead of `transform: scale()` because Chrome's print-to-PDF pipeline
+     (Puppeteer page.pdf()) fails to render SVGs and background-clip:text gradients that
+     live inside a `transform`-scaled ancestor, even though they render fine on-screen. */
+  .stage {
+    position: absolute;
+    top: 0; left: 0;
+    width: 1280px;
+    height: 720px;
+    zoom: 0.75;
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    padding: 72px 96px;
+    overflow: hidden;
+  }
+
+  .stars {
+    position: absolute; inset: 0;
+    background-image:
+      radial-gradient(1.4px 1.4px at 6% 15%, rgba(255,255,255,.55), transparent 60%),
+      radial-gradient(1px 1px at 14% 62%, rgba(255,255,255,.35), transparent 60%),
+      radial-gradient(1.6px 1.6px at 22% 30%, rgba(255,255,255,.4), transparent 60%),
+      radial-gradient(1px 1px at 30% 78%, rgba(255,255,255,.3), transparent 60%),
+      radial-gradient(1.2px 1.2px at 38% 12%, rgba(255,255,255,.45), transparent 60%),
+      radial-gradient(1px 1px at 46% 55%, rgba(255,255,255,.3), transparent 60%),
+      radial-gradient(1.6px 1.6px at 54% 88%, rgba(255,255,255,.4), transparent 60%),
+      radial-gradient(1px 1px at 62% 22%, rgba(255,255,255,.3), transparent 60%),
+      radial-gradient(1.2px 1.2px at 70% 68%, rgba(255,255,255,.4), transparent 60%),
+      radial-gradient(1px 1px at 78% 40%, rgba(255,255,255,.3), transparent 60%),
+      radial-gradient(1.6px 1.6px at 86% 82%, rgba(255,255,255,.45), transparent 60%),
+      radial-gradient(1px 1px at 92% 18%, rgba(255,255,255,.3), transparent 60%),
+      radial-gradient(1.2px 1.2px at 96% 58%, rgba(255,255,255,.4), transparent 60%),
+      radial-gradient(1px 1px at 10% 92%, rgba(255,255,255,.3), transparent 60%),
+      radial-gradient(1px 1px at 58% 6%, rgba(255,255,255,.3), transparent 60%);
+    pointer-events: none;
+  }
+  .glow-tr { position:absolute; top:-220px; right:-220px; width:560px; height:560px; border-radius:50%;
+    background: radial-gradient(circle, var(--cyan-dim) 0%, transparent 70%); pointer-events:none; }
+  .glow-bl { position:absolute; bottom:-260px; left:-200px; width:560px; height:560px; border-radius:50%;
+    background: radial-gradient(circle, var(--purple-dim) 0%, transparent 70%); pointer-events:none; }
+
+  .content { position: relative; z-index: 1; height: 100%; display: flex; flex-direction: column; }
+
+  .eyebrow { font-size: 14px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--cyan); margin: 0 0 18px; }
+  h2 { font-size: 46px; font-weight: 800; letter-spacing: -0.02em; margin: 0 0 28px; line-height: 1.1; }
+  .lead { font-size: 19px; color: var(--text-secondary); line-height: 1.6; margin: 0 0 30px; max-width: 900px; }
+
+  .footer { position: absolute; left: 96px; right: 96px; bottom: 40px; z-index: 2;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 12.5px; color: var(--text-tertiary); letter-spacing: .04em;
+    border-top: 1px solid var(--border); padding-top: 15px; }
+  .footer .brand { font-weight: 700; color: var(--text-secondary); }
+  .footer .brand span { color: var(--cyan); }
+
+  .badge { display: inline-flex; align-items: center; justify-content: center;
+    width: 38px; height: 38px; min-width: 38px; border-radius: 10px;
+    border: 1px solid var(--border-strong); background: var(--bg-elev);
+    color: var(--cyan); font-weight: 700; font-size: 15px; font-family: var(--font-mono); }
+
+  .card { background: var(--bg-elev); border: 1px solid var(--border); border-radius: 16px; padding: 26px 28px; }
+
+  .pill { display: inline-block; padding: 6px 16px; border-radius: 999px; font-size: 13px;
+    font-weight: 600; border: 1px solid var(--border-strong); color: var(--text-secondary);
+    background: var(--bg-elev); }
+
+  code, .mono { font-family: var(--font-mono); }
+
+  /* ---------- Slide 1: Title ---------- */
+  .stage-title { display: flex; align-items: center; justify-content: center; padding: 0; }
+  .stage-title .content { align-items: center; justify-content: center; text-align: center; }
+  .orbit { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); z-index: 0; opacity: .55; }
+  .title-wrap { position: relative; z-index: 1; }
+  .title-wrap .kicker { font-size: 15px; letter-spacing: .3em; text-transform: uppercase;
+    color: var(--text-tertiary); margin-bottom: 26px; }
+  .title-wrap h1 { font-size: 104px; font-weight: 800; letter-spacing: -0.03em; margin: 0;
+    color: var(--text-primary); }
+  .title-wrap .sub { font-size: 26px; color: var(--text-secondary); margin-top: 22px; font-weight: 500; }
+  .title-pills { margin-top: 46px; display: flex; gap: 14px; justify-content: center; }
+
+  /* ---------- Problem cards ---------- */
+  .grid-2x2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 8px; }
+  .prob-card { display: flex; gap: 18px; align-items: flex-start; }
+  .prob-card .txt-h { font-size: 17px; font-weight: 700; margin: 0 0 6px; }
+  .prob-card .txt-p { font-size: 15px; color: var(--text-secondary); line-height: 1.5; margin: 0; }
+
+  /* ---------- Solution flow ---------- */
+  .flow-row { display: flex; align-items: stretch; gap: 14px; margin-bottom: 18px; }
+  .flow-label { width: 96px; flex: 0 0 96px; display: flex; align-items: center;
+    font-size: 13px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-tertiary); }
+  .flow-box { flex: 1; background: var(--bg-elev); border: 1px solid var(--border); border-radius: 14px;
+    padding: 18px 20px; font-size: 15.5px; font-weight: 600; display: flex; align-items: center; text-align:center; justify-content:center; }
+  .flow-box.accent { border-color: rgba(76,217,255,.35); color: var(--cyan); background: var(--cyan-dim); }
+  .flow-arrow { flex: 0 0 40px; display: flex; align-items: center; justify-content: center; color: var(--text-tertiary); font-size: 22px; }
+  .callout { margin-top: 22px; padding: 20px 26px; border-radius: 14px; border: 1px solid rgba(76,217,255,.3);
+    background: linear-gradient(90deg, var(--cyan-dim), var(--purple-dim)); font-size: 16.5px; font-weight: 600; }
+
+  /* ---------- Why Creditcoin ---------- */
+  .req-row { display: flex; gap: 22px; align-items: flex-start; padding: 20px 4px; border-bottom: 1px solid var(--border); }
+  .req-row:last-of-type { border-bottom: none; }
+  .req-row .req-name { font-size: 17px; font-weight: 700; color: var(--text-primary); margin: 0 0 5px; }
+  .req-row .req-desc { font-size: 15px; color: var(--text-secondary); margin: 0; line-height:1.5; }
+  .statement { margin-top: 26px; text-align: center; font-size: 22px; font-weight: 700;
+    color: var(--text-primary); }
+  .statement span { color: var(--cyan); }
+
+  /* ---------- Architecture ---------- */
+  .arch-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; justify-content: center; }
+  .arch-card { width: 620px; background: var(--bg-elev); border: 1px solid var(--border-strong); border-radius: 16px; padding: 22px 30px; }
+  .arch-card .chain-name { font-size: 12.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--purple); margin-bottom: 10px; }
+  .arch-card.cc3 .chain-name { color: var(--cyan); }
+  .arch-card ul { margin: 0; padding-left: 20px; font-size: 15.5px; color: var(--text-primary); line-height: 1.9; }
+  .arch-connector { display: flex; flex-direction: column; align-items: center; padding: 10px 0; }
+  .arch-connector .line { width: 2px; height: 26px; background: repeating-linear-gradient(180deg, var(--border-strong) 0 6px, transparent 6px 12px); }
+  .arch-connector .label { font-size: 13px; color: var(--text-tertiary); margin: 6px 0; font-family: var(--font-mono); }
+  .arch-connector .arrow { color: var(--text-tertiary); font-size: 16px; }
+
+  /* ---------- USC integration ---------- */
+  .num-row { display: flex; gap: 24px; margin-bottom: 20px; }
+  .num-item { flex: 1; }
+  .num-item .n { font-size: 38px; font-weight: 800; color: var(--purple); font-family: var(--font-mono); margin: 0 0 12px; }
+  .num-item .t { font-size: 16px; font-weight: 700; margin: 0 0 6px; }
+  .num-item .d { font-size: 14px; color: var(--text-secondary); line-height: 1.5; margin: 0; }
+  .term-box { margin-top: 8px; background: #05070C; border: 1px solid var(--border-strong); border-radius: 12px;
+    padding: 16px 22px; font-family: var(--font-mono); font-size: 14.5px; color: var(--green); }
+
+  /* ---------- GuildPool ---------- */
+  .guild-wrap { display: flex; gap: 60px; align-items: center; flex: 1; }
+  .guild-list { flex: 1; }
+  .guild-item { display: flex; gap: 16px; margin-bottom: 24px; align-items: flex-start; }
+  .guild-item .t { font-size: 17px; font-weight: 700; margin: 0 0 5px; }
+  .guild-item .d { font-size: 14.5px; color: var(--text-secondary); line-height: 1.5; margin: 0; }
+  .guild-italic { font-size: 17px; color: var(--text-secondary); font-style: italic; margin: -8px 0 26px; }
+
+  /* ---------- Traction ---------- */
+  .trac-list { display: flex; flex-direction: column; gap: 20px; margin-top: 6px; }
+  .trac-item { display: flex; align-items: center; gap: 18px; }
+  .check { width: 30px; height: 30px; min-width:30px; border-radius: 50%; background: rgba(53,211,153,.12);
+    border: 1px solid rgba(53,211,153,.4); display:flex; align-items:center; justify-content:center; }
+  .trac-item .t { font-size: 18px; font-weight: 600; }
+  .trac-item .t code { color: var(--cyan); font-size: 16px; }
+
+  /* ---------- Roadmap ---------- */
+  .timeline { display: flex; gap: 20px; margin-top: 20px; position: relative; }
+  .phase { flex: 1; border-radius: 16px; padding: 24px 22px; border: 1px solid var(--border); background: var(--bg-elev); }
+  .phase.current { border-color: rgba(76,217,255,.45); background: linear-gradient(160deg, var(--cyan-dim), var(--bg-elev)); }
+  .phase .ph-num { font-family: var(--font-mono); font-size: 13px; color: var(--text-tertiary); margin-bottom: 10px; letter-spacing:.08em; }
+  .phase.current .ph-num { color: var(--cyan); }
+  .phase .ph-title { font-size: 18px; font-weight: 800; margin: 0 0 4px; }
+  .phase .ph-badge { display:inline-block; font-size: 11px; font-weight:700; color: var(--cyan); background: var(--cyan-dim);
+    border: 1px solid rgba(76,217,255,.4); padding: 3px 10px; border-radius: 999px; margin-bottom: 12px; }
+  .phase .ph-desc { font-size: 14px; color: var(--text-secondary); line-height: 1.55; margin: 0; }
+
+  /* ---------- Team ---------- */
+  .team-wrap { display: flex; gap: 64px; align-items: center; flex: 1; }
+  .team-name { font-size: 46px; font-weight: 800; margin: 0 0 8px; }
+  .team-role { font-size: 18px; color: var(--text-secondary); margin: 0 0 26px; }
+  .stack-pills { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 30px; }
+  .links { display: flex; flex-direction: column; gap: 12px; }
+  .link-row { display: flex; gap: 12px; align-items: center; font-size: 16px; }
+  .link-row .k { width: 78px; color: var(--text-tertiary); font-size: 13px; text-transform: uppercase; letter-spacing: .08em; }
+  .link-row .v { color: var(--cyan); font-family: var(--font-mono); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<!-- 1: TITLE -->
+<section class="slide">
+  <div class="stage stage-title">
+  <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(to right, #0a0e1a 0%, #0a0e1a 45%, rgba(10,14,26,0.7) 65%, rgba(10,14,26,0.1) 100%);pointer-events:none;z-index:0;"></div>
+  <div class="stars"></div><div class="glow-tr"></div><div class="glow-bl"></div>
+  <svg class="orbit" width="720" height="720" viewBox="0 0 720 720">
+    <ellipse cx="360" cy="360" rx="330" ry="120" fill="none" stroke="#4CD9FF" stroke-opacity="0.18" stroke-width="1.4"/>
+    <ellipse cx="360" cy="360" rx="330" ry="120" fill="none" stroke="#9C8CFF" stroke-opacity="0.14" stroke-width="1.4" transform="rotate(60 360 360)"/>
+    <ellipse cx="360" cy="360" rx="330" ry="120" fill="none" stroke="#4CD9FF" stroke-opacity="0.12" stroke-width="1.4" transform="rotate(120 360 360)"/>
+    <circle cx="672" cy="330" r="5" fill="#4CD9FF"/>
+  </svg>
+  <div class="content">
+    <div class="title-wrap">
+      <div class="kicker">PITCH DECK</div>
+      <h1>SpaceFinance</h1>
+      <div class="sub">DePIN Node Financing on Creditcoin CC3</div>
+      <div class="title-pills">
+        <span class="pill">Ethereum Sepolia</span>
+        <span class="pill">Creditcoin CC3</span>
+        <span class="pill">Attestcoin USC</span>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><div class="brand">Space<span>Finance</span></div><div>01 / 10</div></div>
+  </div>
+</section>
+
+<!-- 2: PROBLEM -->
+<section class="slide">
+  <div class="stage">
+  <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(to right, #0a0e1a 0%, #0a0e1a 45%, rgba(10,14,26,0.7) 65%, rgba(10,14,26,0.1) 100%);pointer-events:none;z-index:0;"></div>
+  <div class="stars"></div><div class="glow-tr"></div>
+  <div class="content">
+    <div class="eyebrow">Problem</div>
+    <h2>Node operators are capital-rich, liquidity-poor</h2>
+    <p class="lead">Spacecoin node operators invest real capital to run satellite ground station infrastructure.</p>
+    <div class="grid-2x2">
+      <div class="card prob-card">
+        <div class="badge">01</div>
+        <div><p class="txt-h">Gradual revenue</p><p class="txt-p">Revenue arrives gradually via on-chain service fees.</p></div>
+      </div>
+      <div class="card prob-card">
+        <div class="badge">02</div>
+        <div><p class="txt-h">Capital locked</p><p class="txt-p">Capital is locked in hardware — no liquidity.</p></div>
+      </div>
+      <div class="card prob-card">
+        <div class="badge">03</div>
+        <div><p class="txt-h">Ignored by TradFi</p><p class="txt-p">Traditional finance ignores DePIN operators.</p></div>
+      </div>
+      <div class="card prob-card">
+        <div class="badge">04</div>
+        <div><p class="txt-h">Ignored by DeFi</p><p class="txt-p">Existing DeFi lending ignores real-world revenue streams.</p></div>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><div class="brand">Space<span>Finance</span></div><div>02 / 10</div></div>
+  </div>
+</section>
+
+<!-- 3: SOLUTION -->
+<section class="slide">
+  <div class="stage">
+  <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(to right, #0a0e1a 0%, #0a0e1a 45%, rgba(10,14,26,0.7) 65%, rgba(10,14,26,0.1) 100%);pointer-events:none;z-index:0;"></div>
+  <div class="stars"></div><div class="glow-bl"></div>
+  <div class="content">
+    <div class="eyebrow">Solution</div>
+    <h2>Unlock liquidity without selling the asset</h2>
+    <p class="lead">SpaceFinance lets node operators unlock liquidity without selling their assets.</p>
+
+    <div class="flow-row">
+      <div class="flow-label">Borrow</div>
+      <div class="flow-box accent">Lock ETH on Sepolia</div>
+      <div class="flow-arrow">&#8594;</div>
+      <div class="flow-box">USC proof</div>
+      <div class="flow-arrow">&#8594;</div>
+      <div class="flow-box accent">Receive mUSDF loan on CC3</div>
+    </div>
+    <div class="flow-row">
+      <div class="flow-label">Repay</div>
+      <div class="flow-box accent">Repay from node revenue</div>
+      <div class="flow-arrow">&#8594;</div>
+      <div class="flow-box">USC proof</div>
+      <div class="flow-arrow">&#8594;</div>
+      <div class="flow-box accent">Collateral released</div>
+    </div>
+
+    <div class="callout">No bridges. No centralized oracles. Verified by Attestcoin Protocol.</div>
+  </div>
+  <div class="footer"><div class="brand">Space<span>Finance</span></div><div>03 / 10</div></div>
+  </div>
+</section>
+
+<!-- 4: WHY ONLY CREDITCOIN -->
+<section class="slide">
+  <div class="stage">
+  <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(to right, #0a0e1a 0%, #0a0e1a 45%, rgba(10,14,26,0.7) 65%, rgba(10,14,26,0.1) 100%);pointer-events:none;z-index:0;"></div>
+  <div class="stars"></div><div class="glow-tr"></div>
+  <div class="content">
+    <div class="eyebrow">Why Creditcoin</div>
+    <h2>Why Only Creditcoin</h2>
+    <p class="lead">Remove one primitive, and the entire product falls apart:</p>
+
+    <div>
+      <div class="req-row">
+        <div class="badge">A</div>
+        <div><p class="req-name">Attestcoin Protocol (USC verify)</p><p class="req-desc">Trustless cross-chain proof, no bridge required.</p></div>
+      </div>
+      <div class="req-row">
+        <div class="badge">B</div>
+        <div><p class="req-name">Creditcoin CC3</p><p class="req-desc">Where Spacecoin node revenue lives (ReceiptClaimed events).</p></div>
+      </div>
+      <div class="req-row">
+        <div class="badge">C</div>
+        <div><p class="req-name">mUSDF</p><p class="req-desc">Stablecoin native to the CC3 ecosystem.</p></div>
+      </div>
+    </div>
+
+    <p class="statement">This product <span>cannot exist</span> on any other chain.</p>
+  </div>
+  <div class="footer"><div class="brand">Space<span>Finance</span></div><div>04 / 10</div></div>
+  </div>
+</section>
+
+<!-- 5: ARCHITECTURE -->
+<section class="slide">
+  <div class="stage">
+  <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(to right, #0a0e1a 0%, #0a0e1a 45%, rgba(10,14,26,0.7) 65%, rgba(10,14,26,0.1) 100%);pointer-events:none;z-index:0;"></div>
+  <div class="stars"></div><div class="glow-bl"></div>
+  <div class="content">
+    <div class="eyebrow">Architecture</div>
+    <h2>Two-Chain Design</h2>
+
+    <div class="arch-wrap">
+      <div class="arch-card">
+        <div class="chain-name">Ethereum Sepolia</div>
+        <ul>
+          <li>CollateralVault</li>
+          <li>NodeRegistry</li>
+          <li>Chainlink ETH/USD</li>
+        </ul>
+      </div>
+      <div class="arch-connector">
+        <div class="line"></div>
+        <div class="label">USC Proof (~8&ndash;10 min)</div>
+        <div class="arrow">&#8595;</div>
+      </div>
+      <div class="arch-card cc3">
+        <div class="chain-name">Creditcoin CC3</div>
+        <ul>
+          <li><code class="mono">SpaceFinance.verifyAndExecute()</code></li>
+          <li>mUSDF disbursed</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout" style="text-align:center; margin-top:26px;">Live contracts on both chains. Full e2e verified.</div>
+  </div>
+  <div class="footer"><div class="brand">Space<span>Finance</span></div><div>05 / 10</div></div>
+  </div>
+</section>
+
+<!-- 6: USC INTEGRATION -->
+<section class="slide">
+  <div class="stage">
+  <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(to right, #0a0e1a 0%, #0a0e1a 45%, rgba(10,14,26,0.7) 65%, rgba(10,14,26,0.1) 100%);pointer-events:none;z-index:0;"></div>
+  <div class="stars"></div><div class="glow-tr"></div>
+  <div class="content">
+    <div class="eyebrow">USC Protocol</div>
+    <h2>USC Integration</h2>
+    <p class="lead">USC <code class="mono">verify()</code> called at 3 points:</p>
+
+    <div class="num-row">
+      <div class="card num-item">
+        <p class="n">01</p>
+        <p class="t">Node registration proof</p>
+        <p class="d">Sepolia NodeRegistry event</p>
+      </div>
+      <div class="card num-item">
+        <p class="n">02</p>
+        <p class="t">Collateral lock proof</p>
+        <p class="d">Sepolia WETH Transfer event</p>
+      </div>
+      <div class="card num-item">
+        <p class="n">03</p>
+        <p class="t">Repayment confirmation</p>
+        <p class="d">Before collateral release</p>
+      </div>
+    </div>
+
+    <div class="term-box">&gt; EvmV1Decoder deployed on-chain, linked into SpaceFinance contract.</div>
+  </div>
+  <div class="footer"><div class="brand">Space<span>Finance</span></div><div>06 / 10</div></div>
+  </div>
+</section>
+
+<!-- 7: GUILDPOOL -->
+<section class="slide">
+  <div class="stage">
+  <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(to right, #0a0e1a 0%, #0a0e1a 45%, rgba(10,14,26,0.7) 65%, rgba(10,14,26,0.1) 100%);pointer-events:none;z-index:0;"></div>
+  <div class="stars"></div><div class="glow-bl"></div>
+  <div class="content">
+    <div class="eyebrow">Social Risk Layer</div>
+    <h2>GuildPool</h2>
+    <p class="guild-italic">Inspired by the Grameen Bank microfinance model.</p>
+
+    <div class="guild-wrap">
+      <svg width="280" height="260" viewBox="0 0 280 260">
+        <line x1="140" y1="30" x2="204.7" y2="229" stroke="#9C8CFF" stroke-opacity="0.25" stroke-width="1.3"/>
+        <line x1="140" y1="30" x2="75.3" y2="229" stroke="#9C8CFF" stroke-opacity="0.25" stroke-width="1.3"/>
+        <line x1="244.6" y1="106" x2="75.3" y2="229" stroke="#9C8CFF" stroke-opacity="0.25" stroke-width="1.3"/>
+        <line x1="244.6" y1="106" x2="35.4" y2="106" stroke="#9C8CFF" stroke-opacity="0.25" stroke-width="1.3"/>
+        <line x1="204.7" y1="229" x2="35.4" y2="106" stroke="#9C8CFF" stroke-opacity="0.25" stroke-width="1.3"/>
+        <line x1="140" y1="30" x2="244.6" y2="106" stroke="#4CD9FF" stroke-opacity="0.55" stroke-width="1.8"/>
+        <line x1="244.6" y1="106" x2="204.7" y2="229" stroke="#4CD9FF" stroke-opacity="0.55" stroke-width="1.8"/>
+        <line x1="204.7" y1="229" x2="75.3" y2="229" stroke="#4CD9FF" stroke-opacity="0.55" stroke-width="1.8"/>
+        <line x1="75.3" y1="229" x2="35.4" y2="106" stroke="#4CD9FF" stroke-opacity="0.55" stroke-width="1.8"/>
+        <line x1="35.4" y1="106" x2="140" y2="30" stroke="#4CD9FF" stroke-opacity="0.55" stroke-width="1.8"/>
+        <g>
+          <circle cx="140" cy="30" r="15" fill="#0E1524" stroke="#4CD9FF" stroke-width="2"/>
+          <circle cx="244.6" cy="106" r="15" fill="#0E1524" stroke="#4CD9FF" stroke-width="2"/>
+          <circle cx="204.7" cy="229" r="15" fill="#0E1524" stroke="#4CD9FF" stroke-width="2"/>
+          <circle cx="75.3" cy="229" r="15" fill="#0E1524" stroke="#4CD9FF" stroke-width="2"/>
+          <circle cx="35.4" cy="106" r="15" fill="#0E1524" stroke="#4CD9FF" stroke-width="2"/>
+        </g>
+        <g fill="#4CD9FF">
+          <circle cx="140" cy="30" r="3.5"/>
+          <circle cx="244.6" cy="106" r="3.5"/>
+          <circle cx="204.7" cy="229" r="3.5"/>
+          <circle cx="75.3" cy="229" r="3.5"/>
+          <circle cx="35.4" cy="106" r="3.5"/>
+        </g>
+      </svg>
+      <div class="guild-list">
+        <div class="guild-item">
+          <div class="badge">5</div>
+          <div><p class="t">5-node operator mutual accountability pool</p>
+          <p class="d">Partial risk sharing lowers collateral requirements for every member.</p></div>
+        </div>
+        <div class="guild-item">
+          <div class="badge">&#128737;</div>
+          <div><p class="t">Sybil-proof</p>
+          <p class="d">Requires real on-chain revenue history to join.</p></div>
+        </div>
+        <div class="guild-item">
+          <div class="badge">&#10060;</div>
+          <div><p class="t">Anti-collusion</p>
+          <p class="d">Guild freezes on member default.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><div class="brand">Space<span>Finance</span></div><div>07 / 10</div></div>
+  </div>
+</section>
+
+<!-- 8: TRACTION -->
+<section class="slide">
+  <div class="stage">
+  <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(to right, #0a0e1a 0%, #0a0e1a 45%, rgba(10,14,26,0.7) 65%, rgba(10,14,26,0.1) 100%);pointer-events:none;z-index:0;"></div>
+  <div class="stars"></div><div class="glow-tr"></div>
+  <div class="content">
+    <div class="eyebrow">Traction</div>
+    <h2>Traction</h2>
+
+    <div class="trac-list">
+      <div class="trac-item"><div class="check">&#10003;</div><div class="t">4 smart contracts deployed on CC3 Testnet + Sepolia</div></div>
+      <div class="trac-item"><div class="check">&#10003;</div><div class="t">End-to-end flow verified on-chain</div></div>
+      <div class="trac-item"><div class="check">&#10003;</div><div class="t">Dynamic LTV via Chainlink ETH/USD</div></div>
+      <div class="trac-item"><div class="check">&#10003;</div><div class="t">Full React frontend live at <code class="mono">spacefi.vercel.app</code></div></div>
+      <div class="trac-item"><div class="check">&#10003;</div><div class="t">Demo video: <code class="mono">youtu.be/eSDE0DheM3w</code></div></div>
+    </div>
+  </div>
+  <div class="footer"><div class="brand">Space<span>Finance</span></div><div>08 / 10</div></div>
+  </div>
+</section>
+
+<!-- 9: ROADMAP -->
+<section class="slide">
+  <div class="stage">
+  <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(to right, #0a0e1a 0%, #0a0e1a 45%, rgba(10,14,26,0.7) 65%, rgba(10,14,26,0.1) 100%);pointer-events:none;z-index:0;"></div>
+  <div class="stars"></div><div class="glow-bl"></div>
+  <div class="content">
+    <div class="eyebrow">Roadmap</div>
+    <h2>Roadmap</h2>
+
+    <div class="timeline">
+      <div class="phase current">
+        <div class="ph-num">PHASE 1</div>
+        <div class="ph-badge">CURRENT</div>
+        <p class="ph-title">Testnet</p>
+        <p class="ph-desc">Testnet deployment, manual collateral release.</p>
+      </div>
+      <div class="phase">
+        <div class="ph-num">PHASE 2</div>
+        <p class="ph-title">Automation</p>
+        <p class="ph-desc">Automated release as USC expands source chain support.</p>
+      </div>
+      <div class="phase">
+        <div class="ph-num">PHASE 3</div>
+        <p class="ph-title">Live Revenue</p>
+        <p class="ph-desc">Live Spacecoin ReceiptClaimed revenue integration.</p>
+      </div>
+      <div class="phase">
+        <div class="ph-num">PHASE 4</div>
+        <p class="ph-title">Mainnet</p>
+        <p class="ph-desc">Mainnet deployment on Creditcoin CC3.</p>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><div class="brand">Space<span>Finance</span></div><div>09 / 10</div></div>
+  </div>
+</section>
+
+<!-- 10: TEAM -->
+<section class="slide">
+  <div class="stage">
+  <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(to right, #0a0e1a 0%, #0a0e1a 45%, rgba(10,14,26,0.7) 65%, rgba(10,14,26,0.1) 100%);pointer-events:none;z-index:0;"></div>
+  <div class="stars"></div><div class="glow-tr"></div><div class="glow-bl"></div>
+  <div class="content">
+    <div class="eyebrow">Team</div>
+    <h2>Team</h2>
+
+    <div class="team-wrap">
+      <div>
+        <p class="team-name">0xZero <span style="color:var(--text-tertiary); font-weight:500;">(pplmaverick)</span></p>
+        <p class="team-role">Independent on-chain builder, Taiwan</p>
+        <div class="stack-pills">
+          <span class="pill">Solidity</span>
+          <span class="pill">Hardhat</span>
+          <span class="pill">React</span>
+          <span class="pill">TypeScript</span>
+          <span class="pill">Rust</span>
+        </div>
+        <div class="links">
+          <div class="link-row"><span class="k">GitHub</span><span class="v">github.com/pplmaverick</span></div>
+          <div class="link-row"><span class="k">Twitter</span><span class="v">@SmsmSmsm87</span></div>
+          <div class="link-row"><span class="k">Demo</span><span class="v">spacefi.vercel.app</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><div class="brand">Space<span>Finance</span></div><div>10 / 10</div></div>
+  </div>
+</section>
+
+</body>
+</html>
