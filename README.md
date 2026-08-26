@@ -113,6 +113,16 @@ npx hardhat run scripts/e2e.ts --network cc3_testnet
 
 ---
 
+## Testing
+
+70 automated Hardhat tests covering all 4 contracts (CollateralVault, NodeRegistry, SpaceFinance, GuildPool), including edge cases, access control, and USC mock verification.
+
+```bash
+cd contracts && npx hardhat test
+```
+
+---
+
 ## Implementation Notes
 
 **Attestcoin Protocol Proof Generation (~8-10 min)**
