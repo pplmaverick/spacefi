@@ -76,7 +76,11 @@ SpaceFinance.repay()
 
 `SpaceFinance.registerOutbox()` and `CollateralVault`'s trusted-inbox/trusted-emitter wiring make this opt-in and backward compatible — `repay()`/`markRepaid()` behave exactly as before if no `Outbox` is registered, and `authorizeWithdrawal` remains as a manual fallback.
 
-**Honest disclosure on what's mocked and what isn't:** the `Outbox`, `Inbox`, `EOAValidator`, and `AttestorRegistry` contracts deployed above are the genuine, unmodified write-ability contracts from `@gluwa/usc-contracts@0.2.0` — no custom fork, no simplified reimplementation. The only mocked piece is the *attestor identity*: instead of a production USC attestor network, three freshly generated test EOAs stand in as the signing quorum (see `scripts/utils/mockAttestor.ts` and `scripts/relayer/relay-repayment.ts`), and `MockCoreFeeProvider` stands in for the Creditcoin-native `get_core_fee` precompile (returns a flat zero fee, so the ATTEST fee-custody path is simply unused rather than faked). This has been run end-to-end on the real CC3 testnet + Sepolia — a real `repay()` → real `Outbox.publishMessage` → real signed `Inbox.deliverMessage` → real automatic `withdraw()`, not just a local simulation.
+**Honest disclosure on what's mocked and what isn't:** the `Outbox`, `Inbox`, `EOAValidator`, and `AttestorRegistry` contracts deployed above are the genuine, unmodified write-ability contracts from `@gluwa/usc-contracts@0.2.0` — no custom fork, no simplified reimplementation. The only mocked piece is the *attestor identity*: instead of a production USC attestor network, three freshly generated test EOAs stand in as the signing quorum, and `MockCoreFeeProvider` stands in for the Creditcoin-native `get_core_fee` precompile (returns a flat zero fee, so the ATTEST fee-custody path is simply unused rather than faked).
+
+The signing + delivery step itself runs two ways: in production, `spacefi.vercel.app`'s `frontend/src/app/api/relay` Vercel serverless function triggers automatically the moment a borrower's `repay()` confirms (via `frontend/src/lib/useAutoRelay.ts`) — the borrower never sees or does anything extra. `contracts/scripts/relayer/relay-repayment.ts` is the same logic as a standalone CLI script, kept for local development and manual/offline testing (e.g. running the contracts test suite against a testnet without the frontend deployed). Both re-derive the message to sign strictly from on-chain events — neither ever trusts a caller-supplied payload — so the relay endpoint is safe to leave permissionless.
+
+This has been run end-to-end on the real CC3 testnet + Sepolia, through the actual live frontend — a real `repay()` → real `Outbox.publishMessage` → the serverless relayer signing and calling `Inbox.deliverMessage` → real automatic `withdraw()`, not just a local simulation.
 
 ---
 
@@ -164,8 +168,10 @@ npx hardhat run scripts/e2e.ts --network cc3_testnet
 npx hardhat run scripts/deploy-cc3-writeability.ts --network cc3_testnet
 npx hardhat run scripts/deploy-sepolia-writeability.ts --network sepolia
 
-# 8. After a SpaceFinance.repay() or markRepaid() call, relay the resulting
-#    message to Sepolia so CollateralVault auto-authorizes the withdrawal
+# 8. On the live frontend (spacefi.vercel.app), step 8 happens automatically: the moment a
+#    borrower's repay() confirms, the app calls a Vercel serverless function (/api/relay) that
+#    signs and delivers the message to Sepolia — no extra step for the borrower.
+#    For local development / testing without the frontend deployed, run the same logic manually:
 npx hardhat run scripts/relayer/relay-repayment.ts
 ```
 
@@ -228,11 +234,12 @@ CC3's precompile gas estimation is unreliable for `SpaceFinance.execute()`. The 
 - `CollateralVault` auto-authorizes withdrawal via `Inbox`/`MessageReceiverBase` — no admin step
 - Removes the Phase 1 limitation of a manual, admin-gated collateral release
 - Attestor *identity* is mocked (test EOAs); contract logic is the real, unmodified write-ability layer
+- Signing + delivery runs automatically via a Vercel serverless function (`/api/relay`), triggered the moment `repay()` confirms — no CLI script needed in production
+- Write-ability relay status ("Relaying repayment to Sepolia...", "Withdrawal authorized", ...) surfaced live to borrowers on `/apply` and `/dashboard`
+- Manual `authorizeWithdrawal` admin path deliberately kept as a fallback, not removed — used only if the automated relay ever fails
 
 **⬜ M2 — Frontend polish**
-- Remove the now-redundant manual "authorize withdrawal" admin step from the UI
 - Real-time loan status tracking across both chains
-- Surface the write-ability message/delivery status to borrowers
 
 **⬜ M3 — Mainnet**
 - Deploy to CC3 Mainnet with real CTC collateral
