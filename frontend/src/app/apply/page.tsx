@@ -1013,16 +1013,7 @@ function Step5Panel({ loanId, nodeId, sepoliaLoanId }: { loanId: string; nodeId:
         ⓘ Collateral release is automatic via the USC write-ability layer (CC3 → Sepolia) — no admin step required. See COLLATERAL RELEASE below.
       </div>
 
-      <div className="flex gap-4">
-        <Link href="/dashboard" className="bg-[#00C2FF] text-[#0F172A] font-mono text-xs uppercase tracking-wider px-6 py-3 hover:bg-[#75d1ff] transition-colors border border-[#00C2FF]">
-          VIEW DASHBOARD →
-        </Link>
-        <Link href="/revenue" className="border border-[#334155] text-gray-300 hover:border-[#00C2FF] font-mono text-xs uppercase tracking-wider px-6 py-3 transition-colors">
-          Node Revenue
-        </Link>
-      </div>
-
-      <div className="border-t border-[#334155] pt-6 mt-6">
+      <div className="mb-6">
         <div className="text-xs font-mono text-gray-500 uppercase tracking-wider mb-4">COLLATERAL RELEASE</div>
 
         <ChainSwitchBanner requiredChainId={sepolia.id} requiredChainName="Sepolia" />
@@ -1067,6 +1058,15 @@ function Step5Panel({ loanId, nodeId, sepoliaLoanId }: { loanId: string; nodeId:
             <div className="text-xs font-mono text-gray-600">No action needed — checking every 15s...</div>
           </div>
         )}
+      </div>
+
+      <div className="flex gap-4 border-t border-[#334155] pt-6 mt-6">
+        <Link href="/dashboard" className="bg-[#00C2FF] text-[#0F172A] font-mono text-xs uppercase tracking-wider px-6 py-3 hover:bg-[#75d1ff] transition-colors border border-[#00C2FF]">
+          VIEW DASHBOARD →
+        </Link>
+        <Link href="/revenue" className="border border-[#334155] text-gray-300 hover:border-[#00C2FF] font-mono text-xs uppercase tracking-wider px-6 py-3 transition-colors">
+          Node Revenue
+        </Link>
       </div>
     </div>
   )
