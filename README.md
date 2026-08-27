@@ -238,8 +238,10 @@ CC3's precompile gas estimation is unreliable for `SpaceFinance.execute()`. The 
 - Write-ability relay status ("Relaying repayment to Sepolia...", "Withdrawal authorized", ...) surfaced live to borrowers on `/apply` and `/dashboard`
 - Manual `authorizeWithdrawal` admin path deliberately kept as a fallback, not removed — used only if the automated relay ever fails
 
-**⬜ M2 — Frontend polish**
-- Real-time loan status tracking across both chains
+**⬜ M2 — Advanced Risk Engine**
+- Real revenue-based dynamic LTV (on-chain, not UI-layer)
+- Multi-node batch borrowing support
+- Guild pool auto-liquidation mechanism
 
 **⬜ M3 — Mainnet**
 - Deploy to CC3 Mainnet with real CTC collateral
