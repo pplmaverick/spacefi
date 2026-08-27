@@ -40,7 +40,7 @@ This project is not ported from another chain. Every design decision maps direct
 ---
 
 ## Architecture
-<img width="1101" height="566" alt="01" src="https://github.com/user-attachments/assets/152047bd-2f82-4411-953e-95ce250d8749" />
+<img width="1101" alt="SpaceFinance architecture: bidirectional Sepolia <-> Creditcoin CC3 flow via USC and the write-ability layer" src="assets/architecture.png" />
 
 ---
 
