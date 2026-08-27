@@ -6,6 +6,7 @@ import { formatEther } from 'viem'
 import { cc3Testnet } from '@/lib/chains'
 import { sepolia } from 'wagmi/chains'
 import { LOAN_STATUS, COLLATERAL_VAULT_ABI } from '@/lib/contracts'
+import { useAutoRelay } from '@/lib/useAutoRelay'
 import { useEffect, useState } from 'react'
 
 const ESCROW_ADDRESS = '0xC130F5D76f0b4Ce8FE2ceA0D2C2b8f53A39a5cd0'
@@ -156,6 +157,13 @@ function LoanCard({ loanId }: { loanId: bigint }) {
     },
   })
   const isWithdrawn = depositData?.[3] === true
+
+  const { status: relayStatus, error: relayError } = useAutoRelay({
+    loanId: sepoliaLoanId,
+    loanStatus: loan?.status,
+    isAuthorized: isWithdrawAuthorized,
+    isWithdrawn,
+  })
 
   const { writeContract: writeWithdraw, data: withdrawTxHash, isPending: isWithdrawPending, error: withdrawError } = useWriteContract()
   const { isLoading: isWithdrawConfirming } = useWaitForTransactionReceipt({ hash: withdrawTxHash })
@@ -343,7 +351,7 @@ function LoanCard({ loanId }: { loanId: bigint }) {
               <div className="text-sm font-mono text-[#3DFFC0]">✓ ETH Returned</div>
             ) : isWithdrawAuthorized ? (
               <div className="space-y-3">
-                <div className="text-xs font-mono text-[#3DFFC0] mb-2">✓ Withdrawal authorized</div>
+                <div className="text-xs font-mono text-[#3DFFC0] mb-2">✓ Withdrawal authorized (automatic)</div>
                 <button
                   onClick={handleWithdraw}
                   disabled={isWithdrawPending || isWithdrawConfirming}
@@ -364,14 +372,19 @@ function LoanCard({ loanId }: { loanId: bigint }) {
               </div>
             ) : (
               <div className="space-y-3">
-                <div className="text-xs font-mono text-[#FF6B35] mb-2">⏳ Awaiting admin authorization</div>
+                <div className="text-xs font-mono text-[#FF6B35] mb-2">
+                  {relayStatus === 'relaying' && '⏳ Relaying repayment to Sepolia...'}
+                  {relayStatus === 'error' && `⚠ Relay attempt failed, retrying... (${relayError ?? 'unknown error'})`}
+                  {(relayStatus === 'idle' || relayStatus === 'relayed' || relayStatus === 'already-relayed') &&
+                    '⏳ Waiting for automatic collateral release...'}
+                </div>
                 <button
                   disabled
                   className="w-full bg-[#1E293B] text-gray-600 font-mono text-xs uppercase tracking-wider px-6 py-3 border border-[#334155] cursor-not-allowed"
                 >
                   WITHDRAW ETH →
                 </button>
-                <div className="text-xs font-mono text-gray-600">Checking every 15s...</div>
+                <div className="text-xs font-mono text-gray-600">No action needed — checking every 15s...</div>
               </div>
             )}
           </div>

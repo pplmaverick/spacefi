@@ -165,7 +165,7 @@ function AuthorizeWithdrawalSection() {
   return (
     <AdminCard title="Authorize Withdrawal" chain="SEPOLIA">
       <WalletButton requiredChainId={sepolia.id} />
-      <p className="text-xs font-mono text-[#FF6B35]/80 mt-3 mb-3">Call after borrower has repaid on CC3. This unlocks their ETH collateral on Sepolia.</p>
+      <p className="text-xs font-mono text-[#FF6B35]/80 mt-3 mb-3">Manual fallback only — repaying on CC3 now auto-releases collateral via the USC write-ability layer. Use this if that automated relay ever fails.</p>
       <div className="mt-2 space-y-3">
         <TerminalInput value={loanId} onChange={setLoanId} placeholder="Sepolia Loan ID" type="number" />
         {error && <div className="text-xs text-red-400 font-mono">{error.message.split('\n')[0]}</div>}

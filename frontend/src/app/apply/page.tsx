@@ -6,6 +6,7 @@ import { WalletButton } from '@/components/WalletButton'
 import { useWriteContract, useWaitForTransactionReceipt, useAccount, useReadContract, useChainId, useSwitchChain, usePublicClient } from 'wagmi'
 import { parseEther, decodeEventLog, parseUnits, formatUnits, parseAbi } from 'viem'
 import { CONTRACTS, COLLATERAL_VAULT_ABI, NODE_REGISTRY_ABI, SPACE_FINANCE_ABI, MOCK_PAYOUT_TOKEN_ABI, LOAN_STATUS } from '@/lib/contracts'
+import { useAutoRelay } from '@/lib/useAutoRelay'
 import { sepolia } from 'wagmi/chains'
 import { cc3Testnet } from '@/lib/chains'
 import type { proofProvider } from '@gluwa/usc-sdk'
@@ -951,6 +952,13 @@ function Step5Panel({ loanId, nodeId, sepoliaLoanId }: { loanId: string; nodeId:
   })
   const isWithdrawn = depositData?.[3] === true
 
+  const { status: relayStatus, error: relayError } = useAutoRelay({
+    loanId: sepoliaLoanIdBig,
+    loanStatus,
+    isAuthorized,
+    isWithdrawn,
+  })
+
   const { writeContract: writeWithdraw, data: withdrawTxHash, isPending: isWithdrawPending, error: withdrawError } = useWriteContract()
   const { isLoading: isWithdrawConfirming } = useWaitForTransactionReceipt({ hash: withdrawTxHash })
 
@@ -1001,8 +1009,8 @@ function Step5Panel({ loanId, nodeId, sepoliaLoanId }: { loanId: string; nodeId:
         </div>
       </div>
 
-      <div className="bg-[#0F172A] border border-[#FF6B35]/30 p-4 mb-6 font-mono text-xs text-[#FF6B35]">
-        ⚠ Collateral release requires USC Attestation #3. Contact admin or wait for Phase 2 automation.
+      <div className="bg-[#0F172A] border border-[#00C2FF]/30 p-4 mb-6 font-mono text-xs text-[#00C2FF]">
+        ⓘ Collateral release is automatic via the USC write-ability layer (CC3 → Sepolia) — no admin step required. See COLLATERAL RELEASE below.
       </div>
 
       <div className="flex gap-4">
@@ -1023,7 +1031,7 @@ function Step5Panel({ loanId, nodeId, sepoliaLoanId }: { loanId: string; nodeId:
           <div className="text-sm font-mono text-[#3DFFC0]">✓ ETH Returned to your wallet</div>
         ) : isAuthorized ? (
           <div className="space-y-3">
-            <div className="text-xs font-mono text-[#3DFFC0]">✓ Withdrawal authorized by admin</div>
+            <div className="text-xs font-mono text-[#3DFFC0]">✓ Withdrawal authorized</div>
             <button
               onClick={handleWithdraw}
               disabled={isWithdrawPending || isWithdrawConfirming}
@@ -1044,14 +1052,19 @@ function Step5Panel({ loanId, nodeId, sepoliaLoanId }: { loanId: string; nodeId:
           </div>
         ) : (
           <div className="space-y-3">
-            <div className="text-xs font-mono text-[#FF6B35]">⏳ Awaiting admin authorization to release collateral</div>
+            <div className="text-xs font-mono text-[#FF6B35]">
+              {relayStatus === 'relaying' && '⏳ Relaying repayment to Sepolia (USC write-ability layer)...'}
+              {relayStatus === 'error' && `⚠ Relay attempt failed, retrying... (${relayError ?? 'unknown error'})`}
+              {(relayStatus === 'idle' || relayStatus === 'relayed' || relayStatus === 'already-relayed') &&
+                '⏳ Waiting for automatic collateral release...'}
+            </div>
             <button
               disabled
               className="bg-[#334155] text-gray-600 font-mono text-xs uppercase tracking-wider px-6 py-3 border border-[#334155] cursor-not-allowed"
             >
               WITHDRAW ETH →
             </button>
-            <div className="text-xs font-mono text-gray-600">Checking every 15s...</div>
+            <div className="text-xs font-mono text-gray-600">No action needed — checking every 15s...</div>
           </div>
         )}
       </div>
