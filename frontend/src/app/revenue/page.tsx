@@ -11,9 +11,12 @@ const BLOCKSCOUT_CC3 = 'https://creditcoin.blockscout.com'
 const spaceGrotesk = { fontFamily: 'var(--font-space-grotesk), sans-serif' }
 
 const PAGE_SIZE = 10
+// ReceiptClaimed amounts are DePIN micropayments (typically << 0.01 CTC per record), so 2 decimals
+// rounds small totals/averages straight to "0.00". 4 decimals keeps them visible.
+const DECIMALS = 4
 
 function splitNumber(value: string) {
-  const [intPart, decPart = '00'] = value.split('.')
+  const [intPart, decPart = '0'.repeat(DECIMALS)] = value.split('.')
   return { intPart: Number(intPart).toLocaleString('en-US'), decPart }
 }
 
@@ -56,8 +59,20 @@ export default function RevenuePage() {
     }
   }
 
-  const total = records ? records.reduce((s, r) => s + parseFloat(r.amount), 0).toFixed(2) : '0'
-  const avg = records && records.length > 0 ? (parseFloat(total) / records.length).toFixed(2) : '0'
+  const rawTotal = records ? records.reduce((s, r) => s + parseFloat(r.amount), 0) : 0
+  const total = rawTotal.toFixed(DECIMALS)
+
+  // Group by calendar month (YYYY-MM) so "Monthly Avg" is an actual monthly average instead of
+  // total / record-count — a single node can rack up 100+ micropayment records within one month.
+  const monthlyTotals = records
+    ? records.reduce<Record<string, number>>((acc, r) => {
+        const month = r.date.slice(0, 7) // YYYY-MM
+        acc[month] = (acc[month] ?? 0) + parseFloat(r.amount)
+        return acc
+      }, {})
+    : {}
+  const monthCount = Object.keys(monthlyTotals).length
+  const avg = (monthCount > 0 ? rawTotal / monthCount : 0).toFixed(DECIMALS)
 
   const totalSplit = splitNumber(total)
   const avgSplit = splitNumber(avg)
