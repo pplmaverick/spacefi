@@ -6,6 +6,7 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {EvmV1Decoder} from "@gluwa/usc-contracts/contracts/decoding/EvmV1Decoder.sol";
+import {IOutbox} from "usc-write-ability/contracts/write-ability/abstract/IOutbox.sol";
 import {USCBase} from "./USCBase.sol";
 
 /// @title SpaceFinance
@@ -65,6 +66,11 @@ contract SpaceFinance is Ownable, ReentrancyGuard, USCBase {
     address public collateralVault;
     address public nodeRegistry;
 
+    // USC write-ability Outbox (CC3 -> Sepolia). Optional: while unset, repay()/markRepaid() behave
+    // exactly as before (collateral release stays a manual Sepolia-side admin action). Once set,
+    // a fully repaid loan is announced automatically via publishMessage — see _publishRepayment.
+    address public outbox;
+
     IERC20 public payoutToken;
     address public treasury;
     // LTV applied against a loan's proved collateral usdValue at disbursement time. 70 = 70%.
@@ -75,6 +81,8 @@ contract SpaceFinance is Ownable, ReentrancyGuard, USCBase {
     mapping(address => uint256[]) public borrowerToLoanIds;
 
     event SourceContractsRegistered(address indexed collateralVault, address indexed nodeRegistry);
+    event OutboxRegistered(address indexed outbox);
+    event RepaymentPublished(uint256 indexed loanId, bytes32 indexed messageId);
     event CollateralVerified(uint256 indexed loanId, address indexed borrower, uint256 amount);
     event NodeVerified(uint256 indexed loanId, address indexed operator, bytes32 nodeId);
     event LoanDisbursed(uint256 indexed loanId, address indexed borrower, uint256 amount);
@@ -98,6 +106,14 @@ contract SpaceFinance is Ownable, ReentrancyGuard, USCBase {
         collateralVault = collateralVault_;
         nodeRegistry = nodeRegistry_;
         emit SourceContractsRegistered(collateralVault_, nodeRegistry_);
+    }
+
+    /// @notice One-time (or updatable, owner-only) wiring of the USC write-ability Outbox used to
+    /// announce repayments to Sepolia. See `outbox` and `_publishRepayment`.
+    function registerOutbox(address outbox_) external onlyOwner {
+        require(outbox_ != address(0), "zero address");
+        outbox = outbox_;
+        emit OutboxRegistered(outbox_);
     }
 
     /// @dev Called by USCBase.execute() once the proof has verified. Fans out on `action`.
@@ -225,20 +241,34 @@ contract SpaceFinance is Ownable, ReentrancyGuard, USCBase {
         if (loan.repaidAmount >= loan.loanAmount) {
             loan.status = LoanStatus.Repaid;
             emit LoanRepaid(loanId, msg.sender);
+            _publishRepayment(loanId, loan.borrower);
         } else {
             emit PartialRepayment(loanId, msg.sender, amount, loan.repaidAmount);
         }
     }
 
-    /// @dev Placeholder for closing the loop. There is no automated CC3 -> Sepolia signal yet, so
-    /// this is owner-gated for the skeleton (mirrors CollateralVault.authorizeWithdrawal on the
-    /// other chain). TODO: replace with a verified repayment proof once the reverse direction is
-    /// designed.
+    /// @dev Owner-gated fallback for closing the loop without a full repay() (e.g. off-chain
+    /// settlement, or recovering a loan whose automated relay never arrived). Mirrors
+    /// CollateralVault.authorizeWithdrawal as the equivalent manual override on the other chain.
     function markRepaid(uint256 loanId) external onlyOwner {
         Loan storage loan = loans[loanId];
         require(loan.status == LoanStatus.Active, "loan not active");
         loan.status = LoanStatus.Repaid;
         emit LoanMarkedRepaid(loanId);
+        _publishRepayment(loanId, loan.borrower);
+    }
+
+    /// @notice Announces a fully repaid loan to Sepolia via the USC write-ability Outbox, so
+    /// CollateralVault can automatically authorize the collateral withdrawal (see
+    /// CollateralVault._processMessage). A no-op while `outbox` is unset, so this stays optional
+    /// and backward compatible with the manual CollateralVault.authorizeWithdrawal admin path.
+    /// @dev canAck = false: this deployment never runs the acknowledgment/relayer-fee side of the
+    /// write-ability layer, only message publishing + attestor-signed delivery.
+    function _publishRepayment(uint256 loanId, address borrower) internal {
+        if (outbox == address(0)) return;
+        bytes memory payload = abi.encode(loanId, borrower);
+        bytes32 messageId = IOutbox(outbox).publishMessage(false, payload);
+        emit RepaymentPublished(loanId, messageId);
     }
 
     function getLoan(uint256 loanId) external view returns (Loan memory) {

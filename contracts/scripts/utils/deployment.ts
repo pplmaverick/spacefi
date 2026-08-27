@@ -7,6 +7,12 @@ export interface SepoliaDeployment {
   chainId?: number;
   collateralVault?: string;
   nodeRegistry?: string;
+  // USC write-ability (CC3 -> Sepolia), from deploy-sepolia-writeability.ts
+  attestorRegistry?: string;
+  eoaValidator?: string;
+  inbox?: string;
+  // bytes32 chain key Inbox/EOAValidator use for this deployment (not an EVM chain id)
+  writeAbilityChainKey?: string;
 }
 
 export interface Cc3Deployment {
@@ -17,6 +23,15 @@ export interface Cc3Deployment {
   treasury?: string;
   loanAmount?: string;
   guildPool?: string;
+  // USC write-ability (CC3 -> Sepolia), from deploy-cc3-writeability.ts
+  mockCoreFeeProvider?: string;
+  feeRegistry?: string;
+  mockAttestToken?: string;
+  attestorRegistry?: string;
+  attestorVault?: string;
+  outbox?: string;
+  // uint32 USC client-chain key identifying Sepolia to this Outbox (reuses SOURCE_CHAIN_KEY)
+  writeAbilityChainKey?: number;
 }
 
 export interface DeploymentData {

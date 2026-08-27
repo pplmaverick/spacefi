@@ -4,6 +4,12 @@ import type { Signer } from "ethers";
 
 const ETH_USD_PRICE_8DEC = 3_000n * 10n ** 8n; // $3000.00000000, Chainlink-style 8 decimals
 
+// CollateralVault now extends MessageReceiverBase, which requires a nonzero `initialInbox` at
+// construction (see setTrustedInbox/_processMessage tests below for the real write-ability wiring
+// exercised elsewhere) — these deposit/withdraw tests don't exercise message delivery at all, so
+// any nonzero placeholder is fine here.
+const PLACEHOLDER_INBOX = "0x000000000000000000000000000000000000dEaD";
+
 describe("CollateralVault", function () {
   let owner: Signer;
   let borrower: Signer;
@@ -24,7 +30,7 @@ describe("CollateralVault", function () {
     await priceFeed.waitForDeployment();
 
     const CollateralVault = await ethers.getContractFactory("CollateralVault");
-    vault = await CollateralVault.deploy(ownerAddress, await priceFeed.getAddress());
+    vault = await CollateralVault.deploy(PLACEHOLDER_INBOX, ownerAddress, await priceFeed.getAddress());
     await vault.waitForDeployment();
   });
 

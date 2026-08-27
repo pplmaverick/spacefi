@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.30;
 
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import {MessageReceiverBase} from "usc-write-ability/contracts/write-ability/abstract/MessageReceiverBase.sol";
 
 interface AggregatorV3Interface {
     function latestRoundData()
@@ -21,11 +21,14 @@ interface AggregatorV3Interface {
 /// @notice Sepolia-side collateral custody for SpaceFinance. Borrowers deposit ETH here; the
 /// deposit event is proved cross-chain (via USC) to the SpaceFinance contract on CC3, which
 /// verifies the deposit and advances the loan state machine.
-/// @dev Release authorization ("loan repaid") is a temporary owner-gated flag for the hackathon
-/// skeleton. There is no automated CC3 -> Sepolia notification path yet: USC only proves events
-/// in the Sepolia -> CC3 direction, so closing the loop requires either a second oracle hop or an
-/// off-chain relayer. TODO: replace with a real cross-chain repayment signal.
-contract CollateralVault is Ownable, ReentrancyGuard {
+/// @dev Release authorization ("loan repaid") now has two paths: (1) automatic, via the USC
+/// write-ability layer — SpaceFinance.repay() on CC3 publishes a message through an Outbox, a
+/// quorum of attestors signs it, and the destination Inbox delivers it here as `receiveMessage`
+/// (see `_processMessage`), which authorizes the withdrawal without any admin step; (2)
+/// `authorizeWithdrawal`, an owner-gated manual fallback kept for when the automated relay is
+/// unavailable. `MessageReceiverBase` (from the USC write-ability contracts) supplies the
+/// Ownable2Step/trusted-inbox/replay-protection machinery `receiveMessage` runs on.
+contract CollateralVault is MessageReceiverBase, ReentrancyGuard {
     struct Deposit {
         address borrower;
         uint256 amount;
@@ -36,24 +39,49 @@ contract CollateralVault is Ownable, ReentrancyGuard {
     event Deposited(address indexed borrower, uint256 loanId, uint256 amount, uint256 usdValue);
     event WithdrawalAuthorized(uint256 indexed loanId);
     event Withdrawn(address indexed borrower, uint256 amount, uint256 indexed loanId);
+    event TrustedEmitterSet(address indexed emitter, uint256 sourceChainId);
+    event AutoWithdrawalAuthorized(uint256 indexed loanId, bytes32 indexed messageId);
 
     error ZeroAmount();
     error LoanNotFound();
     error NotBorrower();
     error AlreadyWithdrawn();
     error WithdrawalNotAuthorized();
+    error UntrustedEmitter(address emitter);
+    error UnexpectedSourceChain(uint256 sourceChainId);
+    error BorrowerMismatch(uint256 loanId, address expected, address got);
 
     uint256 public nextLoanId = 1;
 
     AggregatorV3Interface public priceFeed;
 
+    // The CC3 SpaceFinance contract address and CC3 chain id that this vault trusts
+    // `_processMessage` deliveries from — set once SpaceFinance is deployed on CC3, via
+    // setTrustedEmitter. Until then, delivered messages are rejected (fail-closed).
+    address public spaceFinanceEmitter;
+    uint256 public expectedSourceChainId;
+
     mapping(uint256 => Deposit) public deposits;
-    // TODO: this is a placeholder for the real "loan repaid on CC3" signal. Today it is set
-    // manually by the owner; it should eventually be driven by a verified cross-chain proof.
+    // Set either automatically by `_processMessage` (the write-ability auto-release path) or
+    // manually by the owner via `authorizeWithdrawal` (fallback for when the automated relay is
+    // unavailable).
     mapping(uint256 => bool) public withdrawalAuthorized;
 
-    constructor(address initialOwner, address priceFeed_) Ownable(initialOwner) {
+    constructor(
+        address initialInbox,
+        address initialOwner,
+        address priceFeed_
+    ) MessageReceiverBase(initialInbox, initialOwner) {
         priceFeed = AggregatorV3Interface(priceFeed_);
+    }
+
+    /// @notice One-time (or updatable, owner-only) wiring of the trusted CC3 SpaceFinance emitter
+    /// and chain id that `_processMessage` accepts repayment messages from.
+    function setTrustedEmitter(address emitter, uint256 sourceChainId_) external onlyOwner {
+        require(emitter != address(0), "zero address");
+        spaceFinanceEmitter = emitter;
+        expectedSourceChainId = sourceChainId_;
+        emit TrustedEmitterSet(emitter, sourceChainId_);
     }
 
     /// @notice Deposit ETH as collateral for a new loan. Emits `Deposited`, which is the event
@@ -75,12 +103,37 @@ contract CollateralVault is Ownable, ReentrancyGuard {
         emit Deposited(msg.sender, loanId, msg.value, usdValue);
     }
 
-    /// @dev Simplified stand-in for the real repayment signal. Only the owner (deployer /
-    /// operator for this hackathon skeleton) can flip this. TODO: replace with verified proof.
+    /// @dev Owner-gated manual fallback for the repayment signal, for when the automated
+    /// write-ability relay (see `_processMessage`) is unavailable.
     function authorizeWithdrawal(uint256 loanId) external onlyOwner {
         if (deposits[loanId].borrower == address(0)) revert LoanNotFound();
         withdrawalAuthorized[loanId] = true;
         emit WithdrawalAuthorized(loanId);
+    }
+
+    /// @notice Handles a repayment message delivered by a trusted Inbox (see
+    /// `MessageReceiverBase.receiveMessage`, which gates this on `trustedInboxes` and replay
+    /// protection before calling here). Payload is `abi.encode(uint256 loanId, address borrower)`,
+    /// published by `SpaceFinance._publishRepayment` on CC3. Reverting here (untrusted emitter,
+    /// wrong chain, unknown loan, or a borrower mismatch) is safe: the Inbox stores the message as
+    /// pending and anyone can retry it once the mismatch is fixed.
+    function _processMessage(
+        bytes32 messageId,
+        uint256 sourceChainId,
+        address emitterAddress,
+        bytes calldata payload
+    ) internal override {
+        if (emitterAddress != spaceFinanceEmitter) revert UntrustedEmitter(emitterAddress);
+        if (sourceChainId != expectedSourceChainId) revert UnexpectedSourceChain(sourceChainId);
+
+        (uint256 loanId, address borrower) = abi.decode(payload, (uint256, address));
+        Deposit storage dep = deposits[loanId];
+        if (dep.borrower == address(0)) revert LoanNotFound();
+        if (dep.borrower != borrower) revert BorrowerMismatch(loanId, dep.borrower, borrower);
+
+        withdrawalAuthorized[loanId] = true;
+        emit WithdrawalAuthorized(loanId);
+        emit AutoWithdrawalAuthorized(loanId, messageId);
     }
 
     /// @notice Withdraw collateral for a loan. Only the original borrower can withdraw, and only

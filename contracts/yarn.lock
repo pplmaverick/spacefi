@@ -581,6 +581,11 @@
     "@nomicfoundation/solidity-analyzer-linux-x64-musl" "0.1.2"
     "@nomicfoundation/solidity-analyzer-win32-x64-msvc" "0.1.2"
 
+"@openzeppelin/contracts@5.1.0":
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-5.1.0.tgz#4e61162f2a2bf414c4e10c45eca98ce5f1aadbd4"
+  integrity sha512-p1ULhl7BXzjjbha5aqst+QMLY+4/LCWADXOCsmLHRM77AqiPjnd9vvUN9sosUfhL9JGKpZ0TjEGxgvnizmWGSA==
+
 "@openzeppelin/contracts@5.4.0":
   version "5.4.0"
   resolved "https://registry.npmjs.org/@openzeppelin/contracts/-/contracts-5.4.0.tgz"
@@ -2453,6 +2458,13 @@ unpipe@~1.0.0:
   version "1.0.0"
   resolved "https://registry.npmjs.org/unpipe/-/unpipe-1.0.0.tgz"
   integrity sha512-pjy2bYhSsufwWlKwPc+l3cN7+wuJlK6uz0YdJEOlQDbl6jo/YlPi4mb8agUkVC8BF7V8NuzeyPNqRksA3hztKQ==
+
+"usc-write-ability@npm:@gluwa/usc-contracts@0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@gluwa/usc-contracts/-/usc-contracts-0.2.0.tgz#95d0f152621e20ccd4f75dca758944db6aa539d2"
+  integrity sha512-oqUsx0QWl6lbs7SdBxuSEEYXRm86r8F6MlX03t6Cpq7phHjc1zhi25/McBP3lqShnx1XYEBe8KT164SIbnQLTA==
+  dependencies:
+    "@openzeppelin/contracts" "5.1.0"
 
 util-deprecate@^1.0.1:
   version "1.0.2"

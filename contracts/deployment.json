@@ -1,15 +1,26 @@
 {
   "sepolia": {
     "chainId": 11155111,
-    "collateralVault": "0x5acB13a3750e9e1844643D3f20609B46F6E55ac2",
-    "nodeRegistry": "0x16af69f36B80Ef7F150Af88e5693f38b2eA013B9"
+    "collateralVault": "0x984a87770ff3F8D978704eEe9ae5A0DBBaB8125E",
+    "nodeRegistry": "0x9C22c9F1954f2E1D7B305c0E2932edEBE713bDc3",
+    "attestorRegistry": "0x6a888F55Db13cF949390D85ecFAF2C01fB66Fcfe",
+    "eoaValidator": "0xE38b8d44C849792A8B7ebcec7971b9bb0067B5d1",
+    "inbox": "0xa97075b19fda8c58728956323A3433ba8438b3fd",
+    "writeAbilityChainKey": "0x0000000000000000000000000000000000000000000000000000000000aa36a7"
   },
   "cc3": {
     "chainId": 102031,
-    "evmV1Decoder": "0xDFC42C019df5C7c71d819d4232b31ac67B3dF3b8",
-    "mockPayoutToken": "0x26224164a0892aDD238CB93E20af4d55C9BbA444",
-    "spaceFinance": "0xef33B95C009CA3c7021C294567237ce08679c0f1",
+    "evmV1Decoder": "0x717b7e01f2805E330586dD5e09c5221821Afe5Cb",
+    "mockPayoutToken": "0xbc7d2C3dafF757D47AF8f4Eb305A16A1e55feb3D",
+    "spaceFinance": "0x4Ee3fda05549955494184b28198210A427013760",
     "treasury": "0xed2B5717c9b936ecC76d75401026A99143e278F5",
-    "guildPool": "0x9C22c9F1954f2E1D7B305c0E2932edEBE713bDc3"
+    "guildPool": "0x9d56b68c55f044d493FD0AE0a0a2Bc6aEE9cE9d1",
+    "mockCoreFeeProvider": "0x84a9367612F6083e71fdf266B932CbbB8dB04F2d",
+    "feeRegistry": "0x72DFfEEcfcBdD249Dae5A7b6a753f5D897199950",
+    "mockAttestToken": "0x2fF53637e0446123390A6eDabB5c7ec942d462F6",
+    "attestorRegistry": "0x6A7061D3f754BB594ed5092815Ae9bD71DD185b7",
+    "attestorVault": "0x8Bf9F918C7ab80e195D2bFe51a14823c4548E108",
+    "outbox": "0x556e1cA65a003b1ffce58eDd14CE3c0c6F520137",
+    "writeAbilityChainKey": 1
   }
 }
