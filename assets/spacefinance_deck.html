@@ -148,14 +148,16 @@
 
   /* ---------- Architecture ---------- */
   .arch-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; justify-content: center; }
-  .arch-card { width: 620px; background: var(--bg-elev); border: 1px solid var(--border-strong); border-radius: 16px; padding: 22px 30px; }
-  .arch-card .chain-name { font-size: 12.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--purple); margin-bottom: 10px; }
+  .arch-card { width: 620px; background: var(--bg-elev); border: 1px solid var(--border-strong); border-radius: 16px; padding: 16px 30px; }
+  .arch-card .chain-name { font-size: 12.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--purple); margin-bottom: 8px; }
   .arch-card.cc3 .chain-name { color: var(--cyan); }
-  .arch-card ul { margin: 0; padding-left: 20px; font-size: 15.5px; color: var(--text-primary); line-height: 1.9; }
-  .arch-connector { display: flex; flex-direction: column; align-items: center; padding: 10px 0; }
+  .arch-card ul { margin: 0; padding-left: 20px; font-size: 15px; color: var(--text-primary); line-height: 1.65; }
+  .arch-connector { display: flex; flex-direction: column; align-items: center; padding: 4px 0; }
   .arch-connector .line { width: 2px; height: 26px; background: repeating-linear-gradient(180deg, var(--border-strong) 0 6px, transparent 6px 12px); }
   .arch-connector .label { font-size: 13px; color: var(--text-tertiary); margin: 6px 0; font-family: var(--font-mono); }
   .arch-connector .arrow { color: var(--text-tertiary); font-size: 16px; }
+  .arch-connector.reverse .arrow, .arch-connector.reverse .label { color: var(--purple); }
+  .arch-connector.reverse .line { background: repeating-linear-gradient(180deg, rgba(156,140,255,0.5) 0 6px, transparent 6px 12px); }
 
   /* ---------- USC integration ---------- */
   .num-row { display: flex; gap: 24px; margin-bottom: 20px; }
@@ -229,7 +231,7 @@
       </div>
     </div>
   </div>
-  <div class="footer"><div class="brand">Space<span>Finance</span></div><div>01 / 10</div></div>
+  <div class="footer"><div class="brand">Space<span>Finance</span></div><div>01 / 11</div></div>
   </div>
 </section>
 
@@ -249,7 +251,7 @@
       </div>
       <div class="card prob-card">
         <div class="badge">02</div>
-        <div><p class="txt-h">Capital locked</p><p class="txt-p">Capital is locked in hardware — no liquidity.</p></div>
+        <div><p class="txt-h">Capital locked</p><p class="txt-p">Capital is locked in hardware. No liquidity.</p></div>
       </div>
       <div class="card prob-card">
         <div class="badge">03</div>
@@ -261,7 +263,7 @@
       </div>
     </div>
   </div>
-  <div class="footer"><div class="brand">Space<span>Finance</span></div><div>02 / 10</div></div>
+  <div class="footer"><div class="brand">Space<span>Finance</span></div><div>02 / 11</div></div>
   </div>
 </section>
 
@@ -287,14 +289,14 @@
       <div class="flow-label">Repay</div>
       <div class="flow-box accent">Repay from node revenue</div>
       <div class="flow-arrow">&#8594;</div>
-      <div class="flow-box">USC proof</div>
+      <div class="flow-box">USC Write-ability</div>
       <div class="flow-arrow">&#8594;</div>
-      <div class="flow-box accent">Collateral released</div>
+      <div class="flow-box accent">Collateral released automatically</div>
     </div>
 
-    <div class="callout">No bridges. No centralized oracles. Verified by Attestcoin Protocol.</div>
+    <div class="callout">No bridges. No centralized oracles. No manual admin step. Verified by Attestcoin Protocol, both directions.</div>
   </div>
-  <div class="footer"><div class="brand">Space<span>Finance</span></div><div>03 / 10</div></div>
+  <div class="footer"><div class="brand">Space<span>Finance</span></div><div>03 / 11</div></div>
   </div>
 </section>
 
@@ -311,7 +313,7 @@
     <div>
       <div class="req-row">
         <div class="badge">A</div>
-        <div><p class="req-name">Attestcoin Protocol (USC verify)</p><p class="req-desc">Trustless cross-chain proof, no bridge required.</p></div>
+        <div><p class="req-name">Attestcoin Protocol (USC verify + Write-ability)</p><p class="req-desc">Trustless cross-chain proof in both directions, no bridge required.</p></div>
       </div>
       <div class="req-row">
         <div class="badge">B</div>
@@ -325,7 +327,7 @@
 
     <p class="statement">This product <span>cannot exist</span> on any other chain.</p>
   </div>
-  <div class="footer"><div class="brand">Space<span>Finance</span></div><div>04 / 10</div></div>
+  <div class="footer"><div class="brand">Space<span>Finance</span></div><div>04 / 11</div></div>
   </div>
 </section>
 
@@ -336,7 +338,7 @@
   <div class="stars"></div><div class="glow-bl"></div>
   <div class="content">
     <div class="eyebrow">Architecture</div>
-    <h2>Two-Chain Design</h2>
+    <h2>Bidirectional Two-Chain Design</h2>
 
     <div class="arch-wrap">
       <div class="arch-card">
@@ -345,25 +347,34 @@
           <li>CollateralVault</li>
           <li>NodeRegistry</li>
           <li>Chainlink ETH/USD</li>
+          <li>Inbox + EOAValidator</li>
         </ul>
       </div>
-      <div class="arch-connector">
-        <div class="line"></div>
-        <div class="label">USC Proof (~8&ndash;10 min)</div>
-        <div class="arrow">&#8595;</div>
+      <div style="display:flex; gap:40px; justify-content:center;">
+        <div class="arch-connector">
+          <div class="line"></div>
+          <div class="label">USC Proof (~8&ndash;10 min)</div>
+          <div class="arrow">&#8595;</div>
+        </div>
+        <div class="arch-connector reverse">
+          <div class="arrow">&#8593;</div>
+          <div class="label">USC Write-ability message</div>
+          <div class="line"></div>
+        </div>
       </div>
       <div class="arch-card cc3">
         <div class="chain-name">Creditcoin CC3</div>
         <ul>
-          <li><code class="mono">SpaceFinance.verifyAndExecute()</code></li>
+          <li><code class="mono">SpaceFinance.execute()</code></li>
           <li>mUSDF disbursed</li>
+          <li>Outbox</li>
         </ul>
       </div>
     </div>
 
-    <div class="callout" style="text-align:center; margin-top:26px;">Live contracts on both chains. Full e2e verified.</div>
+    <div class="callout" style="text-align:center; margin-top:10px;">Live contracts on both chains. Full e2e verified, both directions.</div>
   </div>
-  <div class="footer"><div class="brand">Space<span>Finance</span></div><div>05 / 10</div></div>
+  <div class="footer"><div class="brand">Space<span>Finance</span></div><div>05 / 11</div></div>
   </div>
 </section>
 
@@ -375,7 +386,7 @@
   <div class="content">
     <div class="eyebrow">USC Protocol</div>
     <h2>USC Integration</h2>
-    <p class="lead">USC <code class="mono">verify()</code> called at 3 points:</p>
+    <p class="lead">USC <code class="mono">verify()</code> called at 2 points:</p>
 
     <div class="num-row">
       <div class="card num-item">
@@ -386,22 +397,45 @@
       <div class="card num-item">
         <p class="n">02</p>
         <p class="t">Collateral lock proof</p>
-        <p class="d">Sepolia WETH Transfer event</p>
-      </div>
-      <div class="card num-item">
-        <p class="n">03</p>
-        <p class="t">Repayment confirmation</p>
-        <p class="d">Before collateral release</p>
+        <p class="d">Sepolia Deposited event (custom event, not WETH)</p>
       </div>
     </div>
 
-    <div class="term-box">&gt; EvmV1Decoder deployed on-chain, linked into SpaceFinance contract.</div>
+    <div class="term-box">&gt; EvmV1Decoder deployed on-chain, linked into SpaceFinance contract.<br>&gt; Repayment confirmation runs through USC Write-ability, not USC verify &mdash; see next page.</div>
   </div>
-  <div class="footer"><div class="brand">Space<span>Finance</span></div><div>06 / 10</div></div>
+  <div class="footer"><div class="brand">Space<span>Finance</span></div><div>06 / 11</div></div>
   </div>
 </section>
 
-<!-- 7: GUILDPOOL -->
+<!-- 7: USC WRITE-ABILITY -->
+<section class="slide">
+  <div class="stage">
+  <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(to right, #0a0e1a 0%, #0a0e1a 45%, rgba(10,14,26,0.7) 65%, rgba(10,14,26,0.1) 100%);pointer-events:none;z-index:0;"></div>
+  <div class="stars"></div><div class="glow-tr"></div>
+  <div class="content">
+    <div class="eyebrow">USC Write-ability</div>
+    <h2>Closing the Loop: CC3 &rarr; Sepolia</h2>
+    <p class="lead">Most cross-chain designs in this ecosystem stop at Sepolia &rarr; CC3. SpaceFinance implements the Write-ability layer to send messages back.</p>
+
+    <div class="flow-row">
+      <div class="flow-box accent">Outbox (CC3)</div>
+      <div class="flow-arrow">&#8594;</div>
+      <div class="flow-box">Attestor signs</div>
+      <div class="flow-arrow">&#8594;</div>
+      <div class="flow-box">Inbox (Sepolia)</div>
+      <div class="flow-arrow">&#8594;</div>
+      <div class="flow-box accent">Collateral auto-released</div>
+    </div>
+
+    <p class="lead" style="margin-top:10px;">On <code class="mono">repay()</code>, SpaceFinance publishes a message through <code class="mono">Outbox</code>. <code class="mono">EOAValidator</code> checks the attestor signature. <code class="mono">Inbox</code> delivers it to <code class="mono">CollateralVault</code>, which releases collateral automatically. No admin step.</p>
+
+    <div class="term-box">&gt; Attestor signature layer is a stub (Hardhat test wallets). Write-ability attestor infrastructure isn't yet live on public testnet &mdash; the message-passing, validation, and receiver logic are fully real, matching Creditcoin's official IMessageReceiver interface.<br>&gt; Committed 2026-08-27, ahead of the extended deadline.</div>
+  </div>
+  <div class="footer"><div class="brand">Space<span>Finance</span></div><div>07 / 11</div></div>
+  </div>
+</section>
+
+<!-- 8: GUILDPOOL -->
 <section class="slide">
   <div class="stage">
   <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(to right, #0a0e1a 0%, #0a0e1a 45%, rgba(10,14,26,0.7) 65%, rgba(10,14,26,0.1) 100%);pointer-events:none;z-index:0;"></div>
@@ -442,26 +476,26 @@
         <div class="guild-item">
           <div class="badge">5</div>
           <div><p class="t">5-node operator mutual accountability pool</p>
-          <p class="d">Partial risk sharing lowers collateral requirements for every member.</p></div>
+          <p class="d">Phase 1 skeleton: members are owner-vetted off-chain before approval.</p></div>
         </div>
         <div class="guild-item">
-          <div class="badge">&#128737;</div>
-          <div><p class="t">Sybil-proof</p>
-          <p class="d">Requires real on-chain revenue history to join.</p></div>
+          <div class="badge">&#8594;</div>
+          <div><p class="t">Designed to lower collateral requirements</p>
+          <p class="d">Once wired into SpaceFinance's LTV calculation. Not yet connected on-chain (Phase 2).</p></div>
         </div>
         <div class="guild-item">
-          <div class="badge">&#10060;</div>
-          <div><p class="t">Anti-collusion</p>
-          <p class="d">Guild freezes on member default.</p></div>
+          <div class="badge">&#8594;</div>
+          <div><p class="t">On-chain revenue-gated admission</p>
+          <p class="d">Planned for Phase 2, replacing today's manual approval step.</p></div>
         </div>
       </div>
     </div>
   </div>
-  <div class="footer"><div class="brand">Space<span>Finance</span></div><div>07 / 10</div></div>
+  <div class="footer"><div class="brand">Space<span>Finance</span></div><div>08 / 11</div></div>
   </div>
 </section>
 
-<!-- 8: TRACTION -->
+<!-- 9: TRACTION -->
 <section class="slide">
   <div class="stage">
   <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(to right, #0a0e1a 0%, #0a0e1a 45%, rgba(10,14,26,0.7) 65%, rgba(10,14,26,0.1) 100%);pointer-events:none;z-index:0;"></div>
@@ -471,18 +505,19 @@
     <h2>Traction</h2>
 
     <div class="trac-list">
-      <div class="trac-item"><div class="check">&#10003;</div><div class="t">4 smart contracts deployed on CC3 Testnet + Sepolia</div></div>
-      <div class="trac-item"><div class="check">&#10003;</div><div class="t">End-to-end flow verified on-chain</div></div>
+      <div class="trac-item"><div class="check">&#10003;</div><div class="t">4 core smart contracts + USC Write-ability layer (Outbox, Inbox, EOAValidator)</div></div>
+      <div class="trac-item"><div class="check">&#10003;</div><div class="t">Bidirectional end-to-end flow verified on-chain: Sepolia &harr; CC3</div></div>
+      <div class="trac-item"><div class="check">&#10003;</div><div class="t">75 automated Hardhat tests, CI passing</div></div>
       <div class="trac-item"><div class="check">&#10003;</div><div class="t">Dynamic LTV via Chainlink ETH/USD</div></div>
       <div class="trac-item"><div class="check">&#10003;</div><div class="t">Full React frontend live at <code class="mono">spacefi.vercel.app</code></div></div>
       <div class="trac-item"><div class="check">&#10003;</div><div class="t">Demo video: <code class="mono">youtu.be/eSDE0DheM3w</code></div></div>
     </div>
   </div>
-  <div class="footer"><div class="brand">Space<span>Finance</span></div><div>08 / 10</div></div>
+  <div class="footer"><div class="brand">Space<span>Finance</span></div><div>09 / 11</div></div>
   </div>
 </section>
 
-<!-- 9: ROADMAP -->
+<!-- 10: ROADMAP -->
 <section class="slide">
   <div class="stage">
   <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(to right, #0a0e1a 0%, #0a0e1a 45%, rgba(10,14,26,0.7) 65%, rgba(10,14,26,0.1) 100%);pointer-events:none;z-index:0;"></div>
@@ -496,12 +531,12 @@
         <div class="ph-num">PHASE 1</div>
         <div class="ph-badge">CURRENT</div>
         <p class="ph-title">Testnet</p>
-        <p class="ph-desc">Testnet deployment, manual collateral release.</p>
+        <p class="ph-desc">Bidirectional flow live on testnet, both directions automated.</p>
       </div>
       <div class="phase">
         <div class="ph-num">PHASE 2</div>
-        <p class="ph-title">Automation</p>
-        <p class="ph-desc">Automated release as USC expands source chain support.</p>
+        <p class="ph-title">Production + GuildPool</p>
+        <p class="ph-desc">Replace stub attestor with production Write-ability set; wire GuildPool into LTV; on-chain revenue-gated admission; batch verification.</p>
       </div>
       <div class="phase">
         <div class="ph-num">PHASE 3</div>
@@ -515,11 +550,11 @@
       </div>
     </div>
   </div>
-  <div class="footer"><div class="brand">Space<span>Finance</span></div><div>09 / 10</div></div>
+  <div class="footer"><div class="brand">Space<span>Finance</span></div><div>10 / 11</div></div>
   </div>
 </section>
 
-<!-- 10: TEAM -->
+<!-- 11: TEAM -->
 <section class="slide">
   <div class="stage">
   <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(to right, #0a0e1a 0%, #0a0e1a 45%, rgba(10,14,26,0.7) 65%, rgba(10,14,26,0.1) 100%);pointer-events:none;z-index:0;"></div>
@@ -547,7 +582,7 @@
       </div>
     </div>
   </div>
-  <div class="footer"><div class="brand">Space<span>Finance</span></div><div>10 / 10</div></div>
+  <div class="footer"><div class="brand">Space<span>Finance</span></div><div>11 / 11</div></div>
   </div>
 </section>
 
