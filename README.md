@@ -82,6 +82,11 @@ The signing + delivery step itself runs two ways: in production, `spacefi.vercel
 
 This has been run end-to-end on the real CC3 testnet + Sepolia, through the actual live frontend — a real `repay()` → real `Outbox.publishMessage` → the serverless relayer signing and calling `Inbox.deliverMessage` → real automatic `withdraw()`, not just a local simulation.
 
+### GuildPool — Social Risk Layer (Phase 1 skeleton)
+Inspired by the Grameen Bank microfinance model, `GuildPool` groups five node operators into a mutual-accountability guild: if one member defaults, the owner can freeze the whole guild. The design goal is to let members partially share risk and lower collateral requirements once wired into SpaceFinance's LTV calculation.
+
+**Honest disclosure on what's connected and what isn't:** that LTV connection isn't built yet — `SpaceFinance.sol` never references `guildPool`, and every loan's LTV stays fixed at `LTV_PERCENT = 70` regardless of guild membership. `GuildPool.sol` stores the `SpaceFinance` address in its constructor but doesn't call it, by its own comment ("Phase 2 (mainnet) work — `spaceFinance` is stored but not called yet"). Membership is also owner-gated rather than on-chain-verified: `createGuild`/`approveGuildMember` let the owner vet candidates off-chain before approval — there's no on-chain revenue check yet. Both the LTV wiring and on-chain revenue-gated admission are planned for Phase 2 (see [Roadmap](#roadmap)).
+
 ---
 
 ## Deployed Contracts
