@@ -1120,7 +1120,7 @@ export default function ApplyPage() {
   const navGuardActive = step === 3 && step3AttestationPending
   function confirmLeaveIfPending() {
     if (!navGuardActive) return true
-    return window.confirm('離開此頁面將導致目前的申請進度遺失，確定要離開嗎？')
+    return window.confirm('⚠ Leaving now will lose your application progress. Continue?')
   }
 
   const { address } = useAccount()
