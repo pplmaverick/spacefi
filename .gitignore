@@ -1,6 +1,9 @@
 .vercel
 node_modules
 
+# local Claude Code project settings — not for the repo
+.claude/
+
 # env secrets
 .env
 .env.*

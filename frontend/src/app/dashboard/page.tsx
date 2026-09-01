@@ -67,7 +67,7 @@ const COLLATERAL_VAULT_ADDRESS = process.env.NEXT_PUBLIC_COLLATERAL_VAULT as `0x
 const STATUS_COLOR: Record<number, string> = {
   0: 'text-gray-500',
   1: 'text-yellow-400',
-  2: 'text-blue-400',
+  2: 'text-indigo-600',
   3: 'text-green-400',
   4: 'text-gray-400',
 }
@@ -75,7 +75,7 @@ const STATUS_COLOR: Record<number, string> = {
 const STATUS_DOT: Record<number, string> = {
   0: 'bg-gray-500',
   1: 'bg-yellow-400',
-  2: 'bg-blue-400',
+  2: 'bg-indigo-600',
   3: 'bg-green-400',
   4: 'bg-gray-400',
 }
@@ -200,7 +200,7 @@ function LoanCard({ loanId }: { loanId: bigint }) {
         const json = await res.json()
 
         if (json.status !== '1' || !Array.isArray(json.result)) {
-          setMonthlyRevenue(0)
+          setMonthlyRevenue(null)
           return
         }
 
@@ -229,7 +229,7 @@ function LoanCard({ loanId }: { loanId: bigint }) {
         setMonthlyRevenue(Math.round(monthly * 100) / 100)
       } catch (e) {
         console.error('Revenue fetch error:', e)
-        setMonthlyRevenue(0)
+        setMonthlyRevenue(null)
       } finally {
         setRevenueLoading(false)
       }
@@ -254,11 +254,11 @@ function LoanCard({ loanId }: { loanId: bigint }) {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
-      {/* Left column (~60%) */}
-      <div className="lg:col-span-3 flex flex-col gap-6">
+      {/* Left column (~40%) — secondary */}
+      <div className="lg:col-span-2 flex flex-col gap-4">
         {/* Loan card */}
-        <div className="bg-[#1E293B] border border-[#334155] p-6">
-          <div className="flex items-center justify-between mb-6">
+        <div className="bg-[#1E293B]/60 border border-[#334155]/60 p-4">
+          <div className="flex items-center justify-between mb-4">
             <span className="text-xs font-mono text-[#64748B] uppercase tracking-wider">Loan #{loan?.id ?? '-'}</span>
             <div className="flex items-center gap-2">
               <span className={`w-2 h-2 rounded-full ${STATUS_DOT[(loan?.status ?? 0)]}`} />
@@ -268,7 +268,7 @@ function LoanCard({ loanId }: { loanId: bigint }) {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <div className="text-xs font-mono text-[#64748B] uppercase tracking-wider mb-1">Borrower</div>
               <div className="text-sm font-mono text-gray-300 break-all">
@@ -287,8 +287,8 @@ function LoanCard({ loanId }: { loanId: bigint }) {
         </div>
 
         {/* Repayment Schedule */}
-        <div className="bg-[#1E293B] border border-[#334155] p-6">
-          <div className="text-xs font-mono text-[#64748B] uppercase tracking-wider mb-4 pb-3 border-b border-[#334155]">Repayment Schedule</div>
+        <div className="bg-[#1E293B]/60 border border-[#334155]/60 p-4">
+          <div className="text-xs font-mono text-[#64748B] uppercase tracking-wider mb-3 pb-2 border-b border-[#334155]/60">Repayment Schedule</div>
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse font-mono text-sm">
               <thead>
@@ -303,9 +303,9 @@ function LoanCard({ loanId }: { loanId: bigint }) {
                   return (
                     <tr
                       key={tier.label}
-                      className={`border-b border-[#334155]/50 last:border-0 ${isCurrent ? 'border-l-2 border-l-[#00C2FF] bg-[#00C2FF]/5' : ''}`}
+                      className={`border-b border-[#334155]/50 last:border-0 ${isCurrent ? 'border-l-2 border-l-slate-300 bg-slate-700/40' : ''}`}
                     >
-                      <td className={`py-3 pl-2 ${isCurrent ? 'text-[#00C2FF]' : 'text-gray-300'}`}>{tier.label}</td>
+                      <td className={`py-3 pl-2 ${isCurrent ? 'text-white font-semibold' : 'text-gray-300'}`}>{tier.label}</td>
                       <td className={`py-3 pr-2 text-right ${tier.color} ${isCurrent ? 'font-semibold' : ''}`}>{tier.rate}</td>
                     </tr>
                   )
@@ -316,12 +316,12 @@ function LoanCard({ loanId }: { loanId: bigint }) {
         </div>
       </div>
 
-      {/* Right column (~40%) */}
-      <div className="lg:col-span-2 flex flex-col gap-6">
+      {/* Right column (~60%) — primary focus */}
+      <div className="lg:col-span-3 flex flex-col gap-6">
         {/* USC flow status */}
-        <div className="bg-[#1E293B] border border-[#334155] p-6">
-          <div className="text-xs font-mono text-[#64748B] uppercase tracking-wider mb-4">USC Attestation Flow</div>
-          <div className="space-y-3">
+        <div className="bg-[#1E293B] border-2 border-indigo-600/60 p-8">
+          <div className="text-sm font-mono text-indigo-600 uppercase tracking-wider mb-6 font-semibold">USC Attestation Flow</div>
+          <div className="space-y-5">
             {[
               { label: 'Collateral Deposited', done: (loan?.status ?? 0) >= 1 },
               { label: 'USC Attestation #1 (Deposited)', done: (loan?.status ?? 0) >= 2 },
@@ -329,12 +329,12 @@ function LoanCard({ loanId }: { loanId: bigint }) {
               { label: 'USC Attestation #2 (NodeRegistered)', done: (loan?.status ?? 0) >= 3 },
               { label: 'mUSDF Released', done: (loan?.status ?? 0) >= 3 },
             ].map(({ label, done }) => (
-              <div key={label} className="flex items-center gap-3">
-                <div className={`w-4 h-4 border flex items-center justify-center text-xs flex-shrink-0
+              <div key={label} className="flex items-center gap-4">
+                <div className={`w-5 h-5 border flex items-center justify-center text-sm flex-shrink-0
                   ${done ? 'bg-[#3DFFC0] border-[#3DFFC0] text-[#0F172A]' : 'border-[#334155] text-[#334155]'}`}>
                   {done ? '✓' : ''}
                 </div>
-                <span className={`text-sm font-mono ${done ? 'text-gray-300' : 'text-[#64748B]'}`}>{label}</span>
+                <span className={`text-base font-mono ${done ? 'text-gray-200' : 'text-[#64748B]'}`}>{label}</span>
               </div>
             ))}
           </div>
@@ -342,8 +342,8 @@ function LoanCard({ loanId }: { loanId: bigint }) {
 
         {/* Collateral Release */}
         {loan?.status === 4 && (
-          <div className="bg-[#1E293B] border border-[#334155] p-6">
-            <div className="text-xs font-mono text-gray-500 uppercase tracking-wider mb-4">COLLATERAL RELEASE</div>
+          <div className="bg-[#1E293B]/60 border border-[#334155]/60 p-4">
+            <div className="text-xs font-mono text-gray-500 uppercase tracking-wider mb-3">COLLATERAL RELEASE</div>
 
             <ChainSwitchBanner requiredChainId={sepolia.id} requiredChainName="Sepolia" />
 
@@ -355,13 +355,13 @@ function LoanCard({ loanId }: { loanId: bigint }) {
                 <button
                   onClick={handleWithdraw}
                   disabled={isWithdrawPending || isWithdrawConfirming}
-                  className="w-full bg-[#00C2FF] text-[#0F172A] font-mono text-xs uppercase tracking-wider px-6 py-3 hover:bg-[#75d1ff] transition-colors border border-[#00C2FF] disabled:opacity-50"
+                  className="w-full bg-indigo-600 text-[#0F172A] font-mono text-xs uppercase tracking-wider px-6 py-3 hover:bg-indigo-500 transition-colors border border-indigo-600 disabled:opacity-50"
                 >
                   {isWithdrawPending ? 'Confirm in wallet...' : isWithdrawConfirming ? 'Confirming...' : 'WITHDRAW ETH →'}
                 </button>
                 {withdrawTxHash && (
                   <div className="text-xs font-mono text-gray-500">
-                    Tx: <a href={`https://sepolia.etherscan.io/tx/${withdrawTxHash}`} target="_blank" rel="noopener noreferrer" className="text-[#00C2FF]">{withdrawTxHash.slice(0, 20)}...</a>
+                    Tx: <a href={`https://sepolia.etherscan.io/tx/${withdrawTxHash}`} target="_blank" rel="noopener noreferrer" className="text-indigo-600">{withdrawTxHash.slice(0, 20)}...</a>
                   </div>
                 )}
                 {withdrawError && (
@@ -373,7 +373,7 @@ function LoanCard({ loanId }: { loanId: bigint }) {
             ) : (
               <div className="space-y-3">
                 <div className="text-xs font-mono text-[#FF6B35] mb-2">
-                  {relayStatus === 'relaying' && '⏳ Relaying repayment to Sepolia...'}
+                  {relayStatus === 'relaying' && '⏳ Relaying repayment to Sepolia (USC write-ability layer)...'}
                   {relayStatus === 'error' && `⚠ Relay attempt failed, retrying... (${relayError ?? 'unknown error'})`}
                   {(relayStatus === 'idle' || relayStatus === 'relayed' || relayStatus === 'already-relayed') &&
                     '⏳ Waiting for automatic collateral release...'}
@@ -434,7 +434,7 @@ function LoanCard({ loanId }: { loanId: bigint }) {
         {(loan?.status ?? 0) === 0 && (
           <Link
             href="/apply"
-            className="block w-full text-center px-6 py-3 bg-[#00C2FF] text-[#0F172A] font-mono text-xs uppercase tracking-wider hover:bg-[#75d1ff] transition-colors border border-[#00C2FF]"
+            className="block w-full text-center px-6 py-3 bg-indigo-600 text-[#0F172A] font-mono text-xs uppercase tracking-wider hover:bg-indigo-500 transition-colors border border-indigo-600"
           >
             Start Application →
           </Link>
@@ -465,12 +465,13 @@ export default function DashboardPage() {
       <nav className="border-b border-[#334155] px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-6">
           <Link href="/" className="flex items-center gap-3">
-            <span className="font-mono text-xs text-[#00C2FF] tracking-widest uppercase">SpaceFinance</span>
+            <span className="font-mono text-xs text-indigo-600 tracking-widest uppercase">SpaceFinance</span>
           </Link>
-          <Link href="/" className="text-sm font-mono text-gray-400 hover:text-[#00C2FF] transition-colors">HOME</Link>
-          <Link href="/dashboard" className="text-xs font-mono uppercase tracking-wider text-[#00C2FF] border-b border-[#00C2FF] pb-1">Dashboard</Link>
-          <Link href="/revenue" className="text-xs font-mono uppercase tracking-wider text-[#94A3B8] hover:text-[#00C2FF] transition-colors">Revenue</Link>
-          <Link href="/guild" className="text-sm font-mono text-gray-400 hover:text-[#00C2FF] transition-colors">GUILD</Link>
+          <Link href="/" className="text-sm font-mono text-gray-400 hover:text-indigo-600 transition-colors">HOME</Link>
+          <Link href="/apply" className="text-xs font-mono uppercase tracking-wider text-[#94A3B8] hover:text-indigo-600 transition-colors">Apply</Link>
+          <Link href="/dashboard" className="text-xs font-mono uppercase tracking-wider text-indigo-600 border-b border-indigo-600 pb-1">Dashboard</Link>
+          <Link href="/revenue" className="text-xs font-mono uppercase tracking-wider text-[#94A3B8] hover:text-indigo-600 transition-colors">Revenue</Link>
+          <Link href="/guild" className="text-sm font-mono text-gray-400 hover:text-indigo-600 transition-colors">GUILD</Link>
         </div>
         <div className="flex items-center gap-4">
           {isOwner && (
@@ -506,7 +507,7 @@ export default function DashboardPage() {
               <div className="text-[#64748B] font-mono text-sm mb-4">No loans found</div>
               <Link
                 href="/apply"
-                className="inline-block px-6 py-3 bg-[#00C2FF] text-[#0F172A] font-mono text-xs uppercase tracking-wider hover:bg-[#75d1ff] transition-colors border border-[#00C2FF]"
+                className="inline-block px-6 py-3 bg-indigo-600 text-[#0F172A] font-mono text-xs uppercase tracking-wider hover:bg-indigo-500 transition-colors border border-indigo-600"
               >
                 Start Application →
               </Link>
@@ -520,18 +521,18 @@ export default function DashboardPage() {
           SpaceFinance · BUIDL CTC 2026 Fall · Built on Creditcoin CC3
         </span>
         <nav className="flex gap-4">
-          <a href="#" className="font-mono text-xs text-[#94A3B8] hover:text-[#00C2FF] underline transition-colors uppercase">
+          <a href="#" className="font-mono text-xs text-[#94A3B8] hover:text-indigo-600 underline transition-colors uppercase">
             Docs
           </a>
           <a
             href="https://github.com/pplmaverick/spacefi"
             target="_blank"
             rel="noopener noreferrer"
-            className="font-mono text-xs text-[#94A3B8] hover:text-[#00C2FF] underline transition-colors uppercase"
+            className="font-mono text-xs text-[#94A3B8] hover:text-indigo-600 underline transition-colors uppercase"
           >
             GitHub
           </a>
-          <a href="#" className="font-mono text-xs text-[#94A3B8] hover:text-[#00C2FF] underline transition-colors uppercase">
+          <a href="#" className="font-mono text-xs text-[#94A3B8] hover:text-indigo-600 underline transition-colors uppercase">
             Security
           </a>
         </nav>

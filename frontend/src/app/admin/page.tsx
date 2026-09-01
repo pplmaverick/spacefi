@@ -20,12 +20,13 @@ export default function AdminPage() {
       <nav className="border-b border-[#334155] px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-6">
           <Link href="/" className="flex items-center gap-3">
-            <span className="font-mono text-xs text-[#00C2FF] tracking-widest uppercase">SpaceFinance</span>
+            <span className="font-mono text-xs text-indigo-600 tracking-widest uppercase">SpaceFinance</span>
           </Link>
-          <Link href="/" className="text-sm font-mono text-gray-400 hover:text-[#00C2FF] transition-colors">HOME</Link>
-          <Link href="/dashboard" className="text-xs font-mono uppercase tracking-wider text-[#94A3B8] hover:text-[#00C2FF] transition-colors">Dashboard</Link>
-          <Link href="/revenue" className="text-xs font-mono uppercase tracking-wider text-[#94A3B8] hover:text-[#00C2FF] transition-colors">Revenue</Link>
-          <Link href="/guild" className="text-sm font-mono text-gray-400 hover:text-[#00C2FF] transition-colors">GUILD</Link>
+          <Link href="/" className="text-sm font-mono text-gray-400 hover:text-indigo-600 transition-colors">HOME</Link>
+          <Link href="/apply" className="text-xs font-mono uppercase tracking-wider text-[#94A3B8] hover:text-indigo-600 transition-colors">Apply</Link>
+          <Link href="/dashboard" className="text-xs font-mono uppercase tracking-wider text-[#94A3B8] hover:text-indigo-600 transition-colors">Dashboard</Link>
+          <Link href="/revenue" className="text-xs font-mono uppercase tracking-wider text-[#94A3B8] hover:text-indigo-600 transition-colors">Revenue</Link>
+          <Link href="/guild" className="text-sm font-mono text-gray-400 hover:text-indigo-600 transition-colors">GUILD</Link>
         </div>
         <div className="flex items-center gap-4">
           {isOwner && (
@@ -39,7 +40,7 @@ export default function AdminPage() {
 
       <main className="max-w-2xl mx-auto px-6 pt-16 pb-24 w-full flex-grow">
         <div className="mb-10">
-          <Link href="/" className="text-xs font-mono text-[#64748B] hover:text-[#00C2FF] transition-colors">← Back</Link>
+          <Link href="/" className="text-xs font-mono text-[#64748B] hover:text-indigo-600 transition-colors">← Back</Link>
           <h1 style={spaceGrotesk} className="text-3xl font-semibold mt-4 mb-1 uppercase">Admin Panel</h1>
           <p className="text-[#94A3B8] text-sm font-mono">Owner-only operations</p>
         </div>
@@ -69,18 +70,18 @@ export default function AdminPage() {
           SpaceFinance · BUIDL CTC 2026 Fall · Built on Creditcoin CC3
         </span>
         <nav className="flex gap-4">
-          <a href="#" className="font-mono text-xs text-[#94A3B8] hover:text-[#00C2FF] underline transition-colors uppercase">
+          <a href="#" className="font-mono text-xs text-[#94A3B8] hover:text-indigo-600 underline transition-colors uppercase">
             Docs
           </a>
           <a
             href="https://github.com/pplmaverick/spacefi"
             target="_blank"
             rel="noopener noreferrer"
-            className="font-mono text-xs text-[#94A3B8] hover:text-[#00C2FF] underline transition-colors uppercase"
+            className="font-mono text-xs text-[#94A3B8] hover:text-indigo-600 underline transition-colors uppercase"
           >
             GitHub
           </a>
-          <a href="#" className="font-mono text-xs text-[#94A3B8] hover:text-[#00C2FF] underline transition-colors uppercase">
+          <a href="#" className="font-mono text-xs text-[#94A3B8] hover:text-indigo-600 underline transition-colors uppercase">
             Security
           </a>
         </nav>
@@ -92,7 +93,7 @@ export default function AdminPage() {
 function AdminCard({ title, chain, children }: { title: string; chain: string; children: React.ReactNode }) {
   return (
     <div className="bg-[#1E293B] border border-[#334155] p-6">
-      <div className="text-xs font-mono text-[#00C2FF] uppercase tracking-wider mb-1">[{chain}]</div>
+      <div className="text-xs font-mono text-indigo-600 uppercase tracking-wider mb-1">[{chain}]</div>
       <h2 style={spaceGrotesk} className="text-lg font-semibold mb-4">{title}</h2>
       {children}
     </div>
@@ -106,7 +107,7 @@ function TxResult({ txHash, explorer }: { txHash: `0x${string}` | undefined; exp
     <div className="text-xs font-mono text-[#64748B] mt-2">
       {isLoading && 'Confirming...'}
       {isSuccess && <span className="text-[#3DFFC0]">✓ Confirmed · </span>}
-      <a href={`${explorer}/tx/${txHash}`} target="_blank" rel="noopener noreferrer" className="text-[#00C2FF]/70 hover:text-[#00C2FF]">
+      <a href={`${explorer}/tx/${txHash}`} target="_blank" rel="noopener noreferrer" className="text-indigo-600/70 hover:text-indigo-600">
         {txHash.slice(0, 20)}...
       </a>
     </div>
@@ -120,7 +121,7 @@ function TerminalInput({ value, onChange, placeholder, type = 'text' }: {
   type?: string
 }) {
   return (
-    <div className="bg-[#0F172A] border border-[#334155] flex items-center focus-within:border-2 focus-within:border-[#00C2FF]">
+    <div className="bg-[#0F172A] border border-[#334155] flex items-center focus-within:border-2 focus-within:border-indigo-600">
       <span className="font-mono text-sm text-[#64748B] px-2 select-none border-r border-[#334155]">&gt;</span>
       <input
         type={type}
@@ -148,7 +149,7 @@ function ApproveNodeSection() {
         <button
           onClick={() => writeContract({ address: CONTRACTS.nodeRegistry.address, abi: NODE_REGISTRY_ABI, functionName: 'approveNode', args: [operator as `0x${string}`, nodeId as `0x${string}`], chainId: sepolia.id })}
           disabled={isPending || !operator || !nodeId}
-          className="px-4 py-2 bg-[#00C2FF] text-[#0F172A] font-mono text-xs uppercase tracking-wider hover:bg-[#75d1ff] transition-colors border border-[#00C2FF] disabled:opacity-50"
+          className="px-4 py-2 bg-indigo-600 text-[#0F172A] font-mono text-xs uppercase tracking-wider hover:bg-indigo-500 transition-colors border border-indigo-600 disabled:opacity-50"
         >
           {isPending ? 'Confirming...' : 'Approve Node'}
         </button>
@@ -172,7 +173,7 @@ function AuthorizeWithdrawalSection() {
         <button
           onClick={() => writeContract({ address: CONTRACTS.collateralVault.address, abi: COLLATERAL_VAULT_ABI, functionName: 'authorizeWithdrawal', args: [BigInt(loanId)], chainId: sepolia.id })}
           disabled={isPending || !loanId}
-          className="px-4 py-2 bg-[#00C2FF] text-[#0F172A] font-mono text-xs uppercase tracking-wider hover:bg-[#75d1ff] transition-colors border border-[#00C2FF] disabled:opacity-50"
+          className="px-4 py-2 bg-indigo-600 text-[#0F172A] font-mono text-xs uppercase tracking-wider hover:bg-indigo-500 transition-colors border border-indigo-600 disabled:opacity-50"
         >
           {isPending ? 'Confirming...' : 'Authorize Withdrawal'}
         </button>
@@ -197,7 +198,7 @@ function ApproveMemberSection() {
         <button
           onClick={() => writeContract({ address: CONTRACTS.guildPool.address, abi: GUILD_POOL_ABI, functionName: 'approveGuildMember', args: [BigInt(guildId), member as `0x${string}`], chainId: cc3Testnet.id })}
           disabled={isPending || !guildId || !member}
-          className="px-4 py-2 bg-[#00C2FF] text-[#0F172A] font-mono text-xs uppercase tracking-wider hover:bg-[#75d1ff] transition-colors border border-[#00C2FF] disabled:opacity-50"
+          className="px-4 py-2 bg-indigo-600 text-[#0F172A] font-mono text-xs uppercase tracking-wider hover:bg-indigo-500 transition-colors border border-indigo-600 disabled:opacity-50"
         >
           {isPending ? 'Confirming...' : 'Approve Member'}
         </button>

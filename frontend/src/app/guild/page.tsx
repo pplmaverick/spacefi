@@ -46,12 +46,13 @@ export default function GuildPage() {
       <nav className="border-b border-[#334155] px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-6">
           <Link href="/" className="flex items-center gap-3">
-            <span className="font-mono text-xs text-[#00C2FF] tracking-widest uppercase">SpaceFinance</span>
+            <span className="font-mono text-xs text-indigo-600 tracking-widest uppercase">SpaceFinance</span>
           </Link>
-          <Link href="/" className="text-sm font-mono text-gray-400 hover:text-[#00C2FF] transition-colors">HOME</Link>
-          <Link href="/dashboard" className="text-xs font-mono uppercase tracking-wider text-[#94A3B8] hover:text-[#00C2FF] transition-colors">Dashboard</Link>
-          <Link href="/revenue" className="text-xs font-mono uppercase tracking-wider text-[#94A3B8] hover:text-[#00C2FF] transition-colors">Revenue</Link>
-          <Link href="/guild" className="text-sm font-mono text-[#00C2FF] border-b border-[#00C2FF] transition-colors">GUILD</Link>
+          <Link href="/" className="text-sm font-mono text-gray-400 hover:text-indigo-600 transition-colors">HOME</Link>
+          <Link href="/apply" className="text-xs font-mono uppercase tracking-wider text-[#94A3B8] hover:text-indigo-600 transition-colors">Apply</Link>
+          <Link href="/dashboard" className="text-xs font-mono uppercase tracking-wider text-[#94A3B8] hover:text-indigo-600 transition-colors">Dashboard</Link>
+          <Link href="/revenue" className="text-xs font-mono uppercase tracking-wider text-[#94A3B8] hover:text-indigo-600 transition-colors">Revenue</Link>
+          <Link href="/guild" className="text-sm font-mono text-indigo-600 border-b border-indigo-600 transition-colors">GUILD</Link>
         </div>
         <div className="flex items-center gap-4">
           {isOwner && (
@@ -76,13 +77,13 @@ export default function GuildPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-9 gap-6 items-start">
-            {/* Left column (~55%) */}
-            <div className="lg:col-span-5">
+            {/* Left column (~67%) — primary focus */}
+            <div className="lg:col-span-6">
               <CreateTab address={address} inGuild={inGuild} guildId={guildId} />
             </div>
 
-            {/* Right column (~45%) */}
-            <div className="lg:col-span-4 flex flex-col gap-6">
+            {/* Right column (~33%) */}
+            <div className="lg:col-span-3 flex flex-col gap-6">
               <div className="bg-[#1E293B] border border-[#334155] flex flex-col">
                 <div className="border-b border-[#334155] p-4 flex items-center justify-between">
                   <h2 style={spaceGrotesk} className="text-lg font-medium uppercase">Telemetry: Active Guild</h2>
@@ -113,18 +114,18 @@ export default function GuildPage() {
           SpaceFinance · BUIDL CTC 2026 Fall · Built on Creditcoin CC3
         </span>
         <nav className="flex gap-4">
-          <a href="#" className="font-mono text-xs text-[#94A3B8] hover:text-[#00C2FF] underline transition-colors uppercase">
+          <a href="#" className="font-mono text-xs text-[#94A3B8] hover:text-indigo-600 underline transition-colors uppercase">
             Docs
           </a>
           <a
             href="https://github.com/pplmaverick/spacefi"
             target="_blank"
             rel="noopener noreferrer"
-            className="font-mono text-xs text-[#94A3B8] hover:text-[#00C2FF] underline transition-colors uppercase"
+            className="font-mono text-xs text-[#94A3B8] hover:text-indigo-600 underline transition-colors uppercase"
           >
             GitHub
           </a>
-          <a href="#" className="font-mono text-xs text-[#94A3B8] hover:text-[#00C2FF] underline transition-colors uppercase">
+          <a href="#" className="font-mono text-xs text-[#94A3B8] hover:text-indigo-600 underline transition-colors uppercase">
             Security
           </a>
         </nav>
@@ -159,7 +160,7 @@ function StatusTab({ guildId, guild, isFrozen, inGuild, address }: {
       )}
       <div className="flex flex-col gap-1">
         <span className="text-xs font-mono text-[#64748B] uppercase tracking-wider">Guild Identifier</span>
-        <span className="font-mono text-lg text-[#00C2FF]">{guildId?.toString()}</span>
+        <span className="font-mono text-lg text-indigo-600">{guildId?.toString()}</span>
       </div>
       <div className="flex flex-col gap-1">
         <span className="text-xs font-mono text-[#64748B] uppercase tracking-wider">Members</span>
@@ -175,7 +176,7 @@ function StatusTab({ guildId, guild, isFrozen, inGuild, address }: {
         {guild?.[0]?.map((m, i) => (
           <div key={i} className="grid grid-cols-12 gap-2 p-2 border-b border-[#334155] last:border-0 font-mono text-xs items-center hover:bg-[#334155]/30 transition-colors">
             <div className="col-span-2 text-[#64748B]">{String(i).padStart(2, '0')}</div>
-            <div className={`col-span-7 truncate ${m === address ? 'text-[#00C2FF]' : 'text-gray-300'}`}>
+            <div className={`col-span-7 truncate ${m === address ? 'text-indigo-600' : 'text-gray-300'}`}>
               {m.slice(0, 10)}...{m.slice(-6)}{m === address ? ' (You)' : ''}
             </div>
             <div className={`col-span-3 text-right ${guild[1][i] ? 'text-[#3DFFC0]' : 'text-[#64748B]'}`}>
@@ -219,28 +220,29 @@ function CreateTab({ address, inGuild, guildId }: { address: `0x${string}` | und
         <h2 style={spaceGrotesk} className="text-lg font-medium uppercase">Initialize Protocol Guild</h2>
       </div>
       <div className="p-4 flex flex-col gap-6">
-        <div className="flex flex-col gap-2">
-          <h3 className="text-xs font-mono text-[#00C2FF] uppercase tracking-wider">Grameen Bank Joint-Liability Model</h3>
-          <p className="text-sm text-[#94A3B8] leading-relaxed">
+        <div className="flex flex-col gap-3 pb-2">
+          <h3 className="text-lg md:text-xl font-mono font-semibold text-white uppercase tracking-wide">Grameen Bank Joint-Liability Model</h3>
+          <p className="text-base text-[#94A3B8] leading-relaxed">
             By forming a 5-peer micro-lending guild, members enter a joint-liability covenant. Default by any single entity triggers proportional collateral slashing across the guild. This mutualized risk model drastically reduces individual capital requirements.
           </p>
         </div>
 
         {/* Collateral Reduction visual */}
-        <div className="bg-[#0F172A] border border-[#334155] p-4 flex flex-col gap-2">
-          <div className="flex justify-between items-end">
-            <div className="flex flex-col">
+        <div className="bg-[#0F172A] border-2 border-indigo-600/50 p-6 flex flex-col gap-3">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-col gap-1">
               <span className="text-xs font-mono text-[#64748B] uppercase tracking-wider">Standard C-Ratio</span>
-              <span className="font-mono text-lg text-[#64748B] line-through">15%</span>
+              <span className="font-mono text-2xl md:text-3xl text-[#64748B]">15%</span>
             </div>
-            <div className="flex flex-col items-end">
-              <span className="text-xs font-mono text-[#00C2FF] uppercase tracking-wider">Guild C-Ratio</span>
-              <span className="font-mono text-lg text-[#00C2FF]">5%</span>
+            <span className="font-mono text-2xl md:text-3xl text-[#64748B]">→</span>
+            <div className="flex flex-col items-end gap-1">
+              <span className="text-xs font-mono text-indigo-600 uppercase tracking-wider">Guild C-Ratio</span>
+              <span className="font-mono text-4xl md:text-5xl font-bold text-indigo-600">5%</span>
             </div>
           </div>
           <div className="w-full h-2 flex gap-[2px] mt-2">
             {Array.from({ length: 10 }).map((_, i) => (
-              <div key={i} className={`flex-1 ${i < 3 ? 'bg-[#00C2FF]' : 'bg-[#334155]'}`} />
+              <div key={i} className={`flex-1 ${i < 3 ? 'bg-indigo-600' : 'bg-[#334155]'}`} />
             ))}
           </div>
         </div>
@@ -250,21 +252,21 @@ function CreateTab({ address, inGuild, guildId }: { address: `0x${string}` | und
             Already in Guild #{guildId?.toString()}
           </div>
         ) : (
-          <div className="flex flex-col gap-2">
-            <h3 className="text-xs font-mono text-white uppercase tracking-wider">Member Addresses (0/5)</h3>
-            <div className="font-mono text-xs text-[#64748B] px-3 py-2 bg-[#0F172A] border border-[#334155]">
+          <div className="flex flex-col gap-1.5">
+            <h3 className="text-[11px] font-mono text-[#64748B] uppercase tracking-wider">Member Addresses (0/5)</h3>
+            <div className="font-mono text-xs text-[#64748B] px-3 py-1.5 bg-[#0F172A] border border-[#334155]/50">
               members[0]: {address} (you)
             </div>
             <div className="flex flex-col gap-1">
               {members.map((m, i) => (
-                <div key={i} className="bg-[#0F172A] border border-[#334155] flex items-center focus-within:border-2 focus-within:border-[#00C2FF]">
-                  <span className="font-mono text-sm text-[#64748B] px-2 select-none border-r border-[#334155]">&gt;</span>
+                <div key={i} className="bg-[#0F172A] border border-[#334155]/50 flex items-center focus-within:border-2 focus-within:border-indigo-600">
+                  <span className="font-mono text-sm text-[#64748B] px-2 select-none border-r border-[#334155]/50">&gt;</span>
                   <input
                     type="text"
                     value={m}
                     onChange={e => { const n = [...members]; n[i] = e.target.value; setMembers(n) }}
                     placeholder="0x..."
-                    className="w-full bg-transparent border-none text-white font-mono text-sm focus:outline-none focus:ring-0 px-2 py-2"
+                    className="w-full bg-transparent border-none text-white font-mono text-sm focus:outline-none focus:ring-0 px-2 py-1.5"
                   />
                 </div>
               ))}
@@ -275,7 +277,7 @@ function CreateTab({ address, inGuild, guildId }: { address: `0x${string}` | und
             <button
               onClick={handleCreate}
               disabled={isPending}
-              className="mt-2 w-full bg-[#00C2FF] text-[#0F172A] font-mono text-xs uppercase tracking-wider py-3 hover:bg-[#75d1ff] transition-colors border border-[#00C2FF] disabled:opacity-50"
+              className="mt-2 w-full bg-indigo-600 text-[#0F172A] font-mono text-xs uppercase tracking-wider py-3 hover:bg-indigo-500 transition-colors border border-indigo-600 disabled:opacity-50"
             >
               {isPending ? 'Confirm in wallet...' : 'Create Guild →'}
             </button>
@@ -334,12 +336,12 @@ function JoinTab({ inGuild }: { address: `0x${string}` | undefined; inGuild: boo
           value={guildIdInput}
           onChange={e => setGuildIdInput(e.target.value)}
           placeholder="Guild ID (e.g. 1)"
-          className="bg-[#0F172A] border border-[#334155] text-white font-mono px-4 py-2 w-40 focus:outline-none focus:border-2 focus:border-[#00C2FF]"
+          className="bg-[#0F172A] border border-[#334155] text-white font-mono px-4 py-2 w-40 focus:outline-none focus:border-2 focus:border-indigo-600"
         />
         <button
           onClick={handleJoin}
           disabled={isPending || !guildIdInput}
-          className="px-6 py-2 bg-[#00C2FF] text-[#0F172A] font-mono text-xs uppercase tracking-wider hover:bg-[#75d1ff] transition-colors border border-[#00C2FF] disabled:opacity-50"
+          className="px-6 py-2 bg-indigo-600 text-[#0F172A] font-mono text-xs uppercase tracking-wider hover:bg-indigo-500 transition-colors border border-indigo-600 disabled:opacity-50"
         >
           {isPending ? 'Confirm...' : 'Join →'}
         </button>

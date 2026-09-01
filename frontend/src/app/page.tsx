@@ -1,6 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { WalletButton } from '@/components/WalletButton'
+import { Hero } from '@/components/Hero'
 import { useAccount } from 'wagmi'
 
 const spaceGrotesk = { fontFamily: 'var(--font-space-grotesk), sans-serif' }
@@ -18,6 +19,9 @@ export default function HomePage() {
           <span className="font-mono text-xs text-[#00C2FF] tracking-widest uppercase">SpaceFinance</span>
           <div className="hidden md:flex gap-6">
             <Link href="/" className="text-sm font-mono text-[#00C2FF] border-b border-[#00C2FF] transition-colors">HOME</Link>
+            <Link href="/apply" className="text-xs font-mono uppercase tracking-wider text-[#94A3B8] hover:text-[#00C2FF] transition-colors">
+              Apply
+            </Link>
             <Link href="/dashboard" className="text-xs font-mono uppercase tracking-wider text-[#94A3B8] hover:text-[#00C2FF] transition-colors">
               Dashboard
             </Link>
@@ -37,77 +41,11 @@ export default function HomePage() {
         </div>
       </nav>
 
-      {/* Hero */}
-      <section className="max-w-[1440px] mx-auto px-6 md:px-8 py-16 md:py-24 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center min-h-[80vh]">
-        <div className="flex flex-col gap-6 z-10">
-          <div className="inline-flex items-center gap-2 bg-[#1E293B] border border-[#334155] px-3 py-1 w-fit">
-            <span className="text-[#00C2FF] text-[10px]">•</span>
-            <span className="font-mono text-[10px] text-[#94A3B8] uppercase tracking-wider">CREDITCOIN CC3 · DEPIN TRACK</span>
-          </div>
-          <h1 style={spaceGrotesk} className="text-5xl font-semibold leading-tight">
-            Finance your <br />
-            <span className="text-[#00C2FF]">Spacecoin node</span> <br />
-            on-chain.
-          </h1>
-          <p className="text-[#94A3B8] text-lg max-w-xl leading-relaxed">
-            Deposit ETH as collateral on Sepolia. Prove your node identity via USC cross-chain attestation.
-            Receive mUSDF financing on Creditcoin CC3 — trustlessly, without intermediaries.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 mt-2">
-            <Link
-              href="/apply"
-              className="group bg-[#00C2FF] text-[#0F172A] font-mono text-xs uppercase tracking-wider px-6 py-3 hover:bg-[#75d1ff] transition-colors border border-[#00C2FF] flex items-center justify-center gap-2"
-            >
-              Apply for Financing
-              <span className="inline-block group-hover:translate-x-1 transition-transform">→</span>
-            </Link>
-            <Link
-              href="/revenue"
-              className="bg-transparent text-[#F8FAFC] font-mono text-xs uppercase tracking-wider px-6 py-3 border border-[#334155] hover:border-[#00C2FF] transition-colors text-center"
-            >
-              View Node Revenue
-            </Link>
-          </div>
-        </div>
-
-        {/* Orbital animation */}
-        <div className="relative w-full h-[400px] lg:h-[600px] bg-[#1E293B] border border-[#334155] overflow-hidden flex items-center justify-center">
-          <div className="w-full h-full opacity-80 mix-blend-screen">
-            <svg viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-              {/* Central Node Cluster */}
-              <circle cx="200" cy="200" r="10" fill="#00C2FF" />
-              <circle cx="185" cy="185" r="4" fill="#00C2FF" opacity="0.6" />
-              <circle cx="215" cy="215" r="4" fill="#00C2FF" opacity="0.6" />
-              <circle cx="215" cy="185" r="4" fill="#00C2FF" opacity="0.6" />
-              <circle cx="185" cy="215" r="4" fill="#00C2FF" opacity="0.6" />
-              {/* Orbit Paths */}
-              <ellipse cx="200" cy="200" rx="160" ry="80" stroke="#00C2FF" strokeWidth="1" strokeDasharray="4 4" opacity="0.4" />
-              <ellipse cx="200" cy="200" rx="80" ry="160" stroke="#00C2FF" strokeWidth="1" strokeDasharray="4 4" opacity="0.4" />
-              {/* Traveling Orbit Dots */}
-              <circle r="4" fill="#00C2FF">
-                <animateMotion dur="8s" repeatCount="indefinite" path="M 40,200 A 160,80 0 1,1 360,200 A 160,80 0 1,1 40,200" />
-              </circle>
-              <circle r="4" fill="#3DFFC0">
-                <animateMotion dur="12s" repeatCount="indefinite" path="M 200,40 A 80,160 0 1,1 200,360 A 80,160 0 1,1 200,40" />
-              </circle>
-              {/* Attestation Pulses */}
-              <circle cx="200" cy="200" r="10" stroke="#00C2FF" strokeWidth="2">
-                <animate attributeName="r" from="10" to="60" dur="3s" repeatCount="indefinite" />
-                <animate attributeName="opacity" from="0.6" to="0" dur="3s" repeatCount="indefinite" />
-              </circle>
-            </svg>
-          </div>
-          <div className="absolute top-2 left-2 font-mono text-xs text-[#334155]">SYS.OP.STATUS // ACTIVE</div>
-          <div className="absolute bottom-2 right-2 font-mono text-xs text-[#00C2FF] opacity-50 flex items-center gap-2">
-            <span className="w-2 h-2 bg-[#00C2FF] rounded-full animate-pulse" />
-            SYNCING
-          </div>
-        </div>
-      </section>
+      <Hero />
 
       {/* Stats bar */}
-      <section className="border-y border-[#334155] bg-[#1E293B]">
-        <div className="max-w-[1440px] mx-auto grid grid-cols-2 md:grid-cols-4 divide-x divide-y md:divide-y-0 divide-[#334155]">
+      <section className="border-y border-slate-200 bg-slate-50">
+        <div className="max-w-[1440px] mx-auto grid grid-cols-2 md:grid-cols-4 divide-x divide-y md:divide-y-0 divide-slate-200">
           {[
             { label: 'Protocol', value: 'USC Attestcoin' },
             { label: 'Collateral Chain', value: 'Sepolia ETH' },
@@ -115,72 +53,77 @@ export default function HomePage() {
             { label: 'Attestation Time', value: '8–10 min', accent: true },
           ].map(({ label, value, accent }) => (
             <div key={label} className="p-4 flex flex-col gap-1">
-              <span className="font-mono text-xs text-[#94A3B8] uppercase tracking-wider">{label}</span>
-              <span className={`font-mono text-sm ${accent ? 'text-[#00C2FF]' : 'text-[#F8FAFC]'}`}>{value}</span>
+              <span className="font-mono text-xs text-slate-500 uppercase tracking-wider">{label}</span>
+              <span className={`font-mono text-sm ${accent ? 'text-indigo-600' : 'text-slate-900'}`}>{value}</span>
             </div>
           ))}
         </div>
       </section>
 
       {/* Operational Protocol */}
-      <section className="max-w-[1440px] mx-auto px-6 md:px-8 py-16">
-        <div className="mb-8">
-          <h2 style={spaceGrotesk} className="text-2xl md:text-3xl font-semibold">
-            OPERATIONAL PROTOCOL
-          </h2>
-          <div className="w-16 h-1 bg-[#00C2FF] mt-2" />
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[
-            { chain: 'SEPOLIA', title: 'Deposit & Register', desc: 'Lock ETH in CollateralVault and submit your Spacecoin nodeId to NodeRegistry.' },
-            { chain: 'USC', title: 'Parallel Attestation', desc: 'USC simultaneously attests your Deposited and NodeRegistered events. Takes 8–10 minutes.' },
-            { chain: 'CC3', title: 'Financing Active', desc: 'SpaceFinance releases mUSDF to your wallet after both attestations confirm.' },
-            { chain: 'CC3', title: 'Repay', desc: 'Repay your mUSDF loan at your dynamic rate based on node revenue.' },
-            { chain: 'SEPOLIA', title: 'Unlock Collateral', desc: 'Repayment confirmed, ETH collateral returned to your wallet.' },
-          ].map(({ chain, title, desc }, i) => (
-            <div
-              key={title}
-              className="bg-[#1E293B] border border-[#334155] p-4 flex flex-col gap-2 relative group hover:border-[#00C2FF] transition-colors"
-            >
-              <div className="absolute top-0 right-0 bg-[#334155] text-[#94A3B8] font-mono px-2 py-1 text-[10px] opacity-50 group-hover:opacity-100 transition-opacity">
-                [{chain}]
+      <section className="bg-white">
+        <div className="max-w-[1440px] mx-auto px-6 md:px-8 py-16">
+          <div className="mb-8">
+            <h2 style={spaceGrotesk} className="text-2xl md:text-3xl font-semibold text-slate-900">
+              OPERATIONAL PROTOCOL
+            </h2>
+            <div className="w-16 h-1 bg-indigo-600 mt-2" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[
+              { chain: 'SEPOLIA', title: 'Deposit & Register', desc: 'Lock ETH in CollateralVault and submit your Spacecoin nodeId to NodeRegistry.' },
+              { chain: 'USC', title: 'Parallel Attestation', desc: 'USC simultaneously attests your Deposited and NodeRegistered events. Takes 8–10 minutes.' },
+              { chain: 'CC3', title: 'Financing Active', desc: 'SpaceFinance releases mUSDF to your wallet after both attestations confirm.' },
+              { chain: 'CC3', title: 'Repay', desc: 'Repay your mUSDF loan at your dynamic rate based on node revenue.' },
+              { chain: 'USC', title: 'Write-Ability Attestation', desc: "Your repayment is published to CC3's Outbox, signed by USC attestors, and delivered to Sepolia's Inbox — authorizing the unlock automatically. No admin step required." },
+              { chain: 'SEPOLIA', title: 'Unlock Collateral', desc: 'Repayment confirmed, ETH collateral returned to your wallet.' },
+            ].map(({ chain, title, desc }, i) => (
+              <div
+                key={title}
+                className="bg-slate-50 border border-slate-200 p-4 flex flex-col gap-2 relative group hover:border-indigo-600 transition-colors"
+              >
+                <div className="absolute top-0 right-0 bg-slate-100 text-slate-500 font-mono px-2 py-1 text-[10px] opacity-50 group-hover:opacity-100 transition-opacity">
+                  [{chain}]
+                </div>
+                <div className="font-mono text-lg text-indigo-600">{String(i + 1).padStart(2, '0')}</div>
+                <h3 className="text-lg font-medium text-slate-900">{title}</h3>
+                <p className="text-sm text-slate-500">{desc}</p>
               </div>
-              <div className="font-mono text-lg text-[#00C2FF]">{String(i + 1).padStart(2, '0')}</div>
-              <h3 className="text-lg font-medium">{title}</h3>
-              <p className="text-sm text-[#94A3B8]">{desc}</p>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
 
       {/* System Advantages */}
-      <section className="max-w-[1440px] mx-auto px-6 md:px-8 py-16 border-t border-[#334155]">
-        <div className="mb-8">
-          <h2 style={spaceGrotesk} className="text-2xl md:text-3xl font-semibold">
-            SYSTEM ADVANTAGES
-          </h2>
-          <div className="w-16 h-1 bg-[#00C2FF] mt-2" />
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {[
-            {
-              title: 'Trustless cross-chain',
-              desc: 'Powered by USC attestations, removing centralized oracles or bridges. Your collateral state is verified cryptographically by the network.',
-            },
-            {
-              title: 'Revenue-based credit',
-              desc: "Your Spacecoin node's ReceiptClaimed revenue history on CC3 mainnet determines your credit limit — up to monthly average × 3, in addition to ETH collateral.",
-            },
-            {
-              title: 'Guild accountability',
-              desc: "Join a 5-node GuildPool based on Grameen Bank's joint-liability model. Any default freezes the guild's borrowing. Members unlock collateral requirements as low as 5%.",
-            },
-          ].map(({ title, desc }) => (
-            <div key={title} className="bg-[#1E293B] border border-[#334155] p-6 flex flex-col gap-4">
-              <h3 className="text-lg font-medium">{title}</h3>
-              <p className="text-sm text-[#94A3B8]">{desc}</p>
-            </div>
-          ))}
+      <section className="bg-white border-t border-slate-200">
+        <div className="max-w-[1440px] mx-auto px-6 md:px-8 py-16">
+          <div className="mb-8">
+            <h2 style={spaceGrotesk} className="text-2xl md:text-3xl font-semibold text-slate-900">
+              SYSTEM ADVANTAGES
+            </h2>
+            <div className="w-16 h-1 bg-indigo-600 mt-2" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[
+              {
+                title: 'Trustless cross-chain',
+                desc: 'Powered by USC attestations, removing centralized oracles or bridges. Your collateral state is verified cryptographically by the network.',
+              },
+              {
+                title: 'Revenue-based credit',
+                desc: "Your Spacecoin node's ReceiptClaimed revenue history on CC3 mainnet determines your credit limit — up to monthly average × 3, in addition to ETH collateral.",
+              },
+              {
+                title: 'Guild accountability',
+                desc: "Join a 5-node GuildPool based on Grameen Bank's joint-liability model. Any default freezes the guild's borrowing. Members unlock collateral requirements as low as 5%.",
+              },
+            ].map(({ title, desc }) => (
+              <div key={title} className="bg-slate-50 border border-slate-200 p-6 flex flex-col gap-4">
+                <h3 className="text-lg font-medium text-slate-900">{title}</h3>
+                <p className="text-sm text-slate-500">{desc}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 

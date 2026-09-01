@@ -88,12 +88,13 @@ export default function RevenuePage() {
       <nav className="border-b border-[#334155] px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-6">
           <Link href="/" className="flex items-center gap-3">
-            <span className="font-mono text-xs text-[#00C2FF] tracking-widest uppercase">SpaceFinance</span>
+            <span className="font-mono text-xs text-indigo-600 tracking-widest uppercase">SpaceFinance</span>
           </Link>
-          <Link href="/" className="text-sm font-mono text-gray-400 hover:text-[#00C2FF] transition-colors">HOME</Link>
-          <Link href="/dashboard" className="text-xs font-mono uppercase tracking-wider text-[#94A3B8] hover:text-[#00C2FF] transition-colors">Dashboard</Link>
-          <Link href="/revenue" className="text-xs font-mono uppercase tracking-wider text-[#00C2FF] border-b border-[#00C2FF] pb-1">Revenue</Link>
-          <Link href="/guild" className="text-sm font-mono text-gray-400 hover:text-[#00C2FF] transition-colors">GUILD</Link>
+          <Link href="/" className="text-sm font-mono text-gray-400 hover:text-indigo-600 transition-colors">HOME</Link>
+          <Link href="/apply" className="text-xs font-mono uppercase tracking-wider text-[#94A3B8] hover:text-indigo-600 transition-colors">Apply</Link>
+          <Link href="/dashboard" className="text-xs font-mono uppercase tracking-wider text-[#94A3B8] hover:text-indigo-600 transition-colors">Dashboard</Link>
+          <Link href="/revenue" className="text-xs font-mono uppercase tracking-wider text-indigo-600 border-b border-indigo-600 pb-1">Revenue</Link>
+          <Link href="/guild" className="text-sm font-mono text-gray-400 hover:text-indigo-600 transition-colors">GUILD</Link>
         </div>
         <div className="flex items-center gap-4">
           {isOwner && (
@@ -120,14 +121,14 @@ export default function RevenuePage() {
               onChange={e => { setNodeIdInput(e.target.value); setInputError('') }}
               placeholder="0x0000000000000000000000000000000000000000000000000000000000000001"
               disabled={loading}
-              className="bg-[#0F172A] border border-[#334155] text-white font-mono px-4 py-2 w-full text-sm focus:outline-none focus:border-2 focus:border-[#00C2FF] disabled:opacity-50 transition-all"
+              className="bg-[#0F172A] border border-[#334155] text-white font-mono px-4 py-2 w-full text-sm focus:outline-none focus:border-2 focus:border-indigo-600 disabled:opacity-50 transition-all"
             />
             {inputError && <div className="text-xs font-mono text-red-400 mt-1">{inputError}</div>}
           </div>
           <button
             onClick={handleQuery}
             disabled={loading}
-            className="bg-[#00C2FF] text-[#0F172A] font-mono text-xs uppercase tracking-wider px-6 py-3 h-[42px] hover:bg-[#75d1ff] transition-colors border border-[#00C2FF] disabled:opacity-50 flex items-center justify-center gap-2 w-full md:w-auto"
+            className="bg-indigo-600 text-[#0F172A] font-mono text-xs uppercase tracking-wider px-6 py-3 h-[42px] hover:bg-indigo-500 transition-colors border border-indigo-600 disabled:opacity-50 flex items-center justify-center gap-2 w-full md:w-auto"
           >
             {loading ? 'Loading...' : <>🔍 Query</>}
           </button>
@@ -137,7 +138,7 @@ export default function RevenuePage() {
               href={`${BLOCKSCOUT_CC3}/address/${ESCROW}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[#64748B] hover:text-[#00C2FF] transition-colors"
+              className="text-[#64748B] hover:text-indigo-600 transition-colors"
             >
               {ESCROW ? `${ESCROW.slice(0, 10)}...${ESCROW.slice(-6)}` : 'loading...'}
             </a>
@@ -154,10 +155,10 @@ export default function RevenuePage() {
           <>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               <div className="bg-[#1E293B] border border-[#334155] p-4 flex flex-col gap-2 relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-1 h-full bg-[#00C2FF]" />
+                <div className="absolute top-0 left-0 w-1 h-full bg-indigo-600" />
                 <span className="text-xs font-mono text-[#64748B] uppercase tracking-wider">Total Revenue (CTC)</span>
                 <span style={spaceGrotesk} className="text-3xl md:text-4xl font-bold text-white">
-                  {totalSplit.intPart}<span className="text-lg text-[#00C2FF]">.{totalSplit.decPart}</span>
+                  {totalSplit.intPart}<span className="text-lg text-indigo-600">.{totalSplit.decPart}</span>
                 </span>
               </div>
               <div className="bg-[#1E293B] border border-[#334155] p-4 flex flex-col gap-2">
@@ -180,9 +181,9 @@ export default function RevenuePage() {
               <div className="bg-[#1E293B] border border-[#334155] flex flex-col">
                 <div className="border-b border-[#334155] p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
                   <h2 style={spaceGrotesk} className="text-lg font-medium text-white">Reward Transactions</h2>
-                  <div className="bg-[#00C2FF]/10 border border-[#00C2FF] px-3 py-1 flex items-center gap-2">
+                  <div className="bg-indigo-600/10 border border-indigo-600 px-3 py-1 flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-[#3DFFC0] animate-pulse" />
-                    <span className="text-xs font-mono text-[#00C2FF] uppercase tracking-wider">Spacecoin TokenPaymentEscrow · CC3 Mainnet</span>
+                    <span className="text-xs font-mono text-indigo-600 uppercase tracking-wider">Spacecoin TokenPaymentEscrow · CC3 Mainnet</span>
                   </div>
                 </div>
 
@@ -199,13 +200,13 @@ export default function RevenuePage() {
                       {pageRecords.map(r => (
                         <tr key={`${r.txHash}-${r.logIndex}`} className="border-b border-[#334155] last:border-0 hover:bg-[#334155]/30 transition-colors">
                           <td className="p-4 text-gray-300">{r.date}</td>
-                          <td className="p-4 text-right text-[#00C2FF]">{r.amount}</td>
+                          <td className="p-4 text-right text-indigo-600">{r.amount}</td>
                           <td className="p-4">
                             <a
                               href={`${BLOCKSCOUT_CC3}/tx/${r.txHash}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-[#64748B] hover:text-[#00C2FF] transition-colors"
+                              className="text-[#64748B] hover:text-indigo-600 transition-colors"
                             >
                               {r.txHash.slice(0, 10)}...{r.txHash.slice(-8)}
                             </a>
@@ -224,14 +225,14 @@ export default function RevenuePage() {
                     <button
                       onClick={() => setCurrentPage(p => Math.max(0, p - 1))}
                       disabled={!hasPrevPage}
-                      className="p-1 border border-[#334155] text-white hover:border-[#00C2FF] hover:text-[#00C2FF] transition-colors disabled:opacity-50 disabled:hover:border-[#334155] disabled:hover:text-white"
+                      className="p-1 border border-[#334155] text-white hover:border-indigo-600 hover:text-indigo-600 transition-colors disabled:opacity-50 disabled:hover:border-[#334155] disabled:hover:text-white"
                     >
                       ←
                     </button>
                     <button
                       onClick={() => setCurrentPage(p => (hasNextPage ? p + 1 : p))}
                       disabled={!hasNextPage}
-                      className="p-1 border border-[#334155] text-white hover:border-[#00C2FF] hover:text-[#00C2FF] transition-colors disabled:opacity-50 disabled:hover:border-[#334155] disabled:hover:text-white"
+                      className="p-1 border border-[#334155] text-white hover:border-indigo-600 hover:text-indigo-600 transition-colors disabled:opacity-50 disabled:hover:border-[#334155] disabled:hover:text-white"
                     >
                       →
                     </button>
@@ -254,18 +255,18 @@ export default function RevenuePage() {
           SpaceFinance · BUIDL CTC 2026 Fall · Built on Creditcoin CC3
         </span>
         <nav className="flex gap-4">
-          <a href="#" className="font-mono text-xs text-[#94A3B8] hover:text-[#00C2FF] underline transition-colors uppercase">
+          <a href="#" className="font-mono text-xs text-[#94A3B8] hover:text-indigo-600 underline transition-colors uppercase">
             Docs
           </a>
           <a
             href="https://github.com/pplmaverick/spacefi"
             target="_blank"
             rel="noopener noreferrer"
-            className="font-mono text-xs text-[#94A3B8] hover:text-[#00C2FF] underline transition-colors uppercase"
+            className="font-mono text-xs text-[#94A3B8] hover:text-indigo-600 underline transition-colors uppercase"
           >
             GitHub
           </a>
-          <a href="#" className="font-mono text-xs text-[#94A3B8] hover:text-[#00C2FF] underline transition-colors uppercase">
+          <a href="#" className="font-mono text-xs text-[#94A3B8] hover:text-indigo-600 underline transition-colors uppercase">
             Security
           </a>
         </nav>
