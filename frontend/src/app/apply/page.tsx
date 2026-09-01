@@ -132,7 +132,7 @@ function OrbitAnimation() {
   )
 }
 
-function Step1Panel({ onNext }: { onNext: (loanId: string, blockNumber: bigint, txHash: `0x${string}`) => void }) {
+function Step1Panel({ onNext, onPendingChange }: { onNext: (loanId: string, blockNumber: bigint, txHash: `0x${string}`) => void; onPendingChange: (pending: boolean) => void }) {
   const [amount, setAmount] = useState('0.01')
   const { isConnected, chainId } = useAccount()
   const isRightChain = chainId === sepolia.id
@@ -182,6 +182,13 @@ function Step1Panel({ onNext }: { onNext: (loanId: string, blockNumber: bigint, 
   }
 
   const isLoading = isPending || isConfirming
+
+  // Report the submitted-but-not-yet-confirmed window up to the leave-guard — isConfirming
+  // already flips false the moment the receipt resolves (same instant isSuccess flips true),
+  // so this naturally clears before the Deposited-event decode above fires onNext.
+  useEffect(() => {
+    onPendingChange(isLoading)
+  }, [isLoading, onPendingChange])
 
   return (
     <div>
@@ -259,7 +266,7 @@ function Step1Panel({ onNext }: { onNext: (loanId: string, blockNumber: bigint, 
   )
 }
 
-function Step2Panel({ onNext }: { onNext: (nodeId: string, blockNumber: bigint, txHash: `0x${string}`) => void }) {
+function Step2Panel({ onNext, onPendingChange }: { onNext: (nodeId: string, blockNumber: bigint, txHash: `0x${string}`) => void; onPendingChange: (pending: boolean) => void }) {
   const [nodeIdInput, setNodeIdInput] = useState('')
   const [inputError, setInputError] = useState('')
   const { isConnected, chainId } = useAccount()
@@ -308,6 +315,13 @@ function Step2Panel({ onNext }: { onNext: (nodeId: string, blockNumber: bigint, 
   }
 
   const isLoading = isPending || isConfirming
+
+  // Report the submitted-but-not-yet-confirmed window up to the leave-guard — isConfirming
+  // already flips false the moment the receipt resolves (same instant isSuccess flips true),
+  // so this naturally clears before the NodeRegistered-event decode above fires onNext.
+  useEffect(() => {
+    onPendingChange(isLoading)
+  }, [isLoading, onPendingChange])
 
   return (
     <div>
@@ -1114,10 +1128,19 @@ export default function ApplyPage() {
   const [registerBlock, setRegisterBlock] = useState<bigint>(0n)
   const [registerTxHash, setRegisterTxHash] = useState<`0x${string}` | undefined>(undefined)
 
+  // Step 1/2 in-progress guard — submitted-but-unconfirmed deposit/register tx here has no
+  // recovery path at all (no localStorage, no URL param, and the resume-loan effect further
+  // down can't see a loan until ATT#1 has already landed on CC3), so leaving mid-tx silently
+  // strands that tx hash for good.
+  const [step1DepositPending, setStep1DepositPending] = useState(false)
+  const [step2RegisterPending, setStep2RegisterPending] = useState(false)
   // Step 3 in-progress guard (beforeunload + nav-away confirm) — reported up by Step3Panel via
   // onPendingChange, since it's the one that knows whether both attestations have landed.
   const [step3AttestationPending, setStep3AttestationPending] = useState(true)
-  const navGuardActive = step === 3 && step3AttestationPending
+  const navGuardActive =
+    (step === 1 && step1DepositPending) ||
+    (step === 2 && step2RegisterPending) ||
+    (step === 3 && step3AttestationPending)
   function confirmLeaveIfPending() {
     if (!navGuardActive) return true
     return window.confirm('⚠ Leaving now will lose your application progress. Continue?')
@@ -1140,8 +1163,23 @@ export default function ApplyPage() {
     query: { enabled: !!address },
   })
 
+  // Guards the resume-check to run at most once per mount — existingLoanIds can refetch later
+  // (window refocus, wallet reconnect) while the user is already mid-flow, and re-running
+  // findActiveLoan() at that point would setStep(4) out from under an in-progress Step 2/3/
+  // loan-approved screen. The lock must be set the first time the query resolves AT ALL — even
+  // to an empty array, which is the normal state until ATT#1 lands and the loan is added to
+  // SpaceFinance's per-borrower list on CC3 — not just the first time it resolves non-empty.
+  // Gating the lock behind "non-empty" leaves it unset for as long as the array is empty (all of
+  // Step 1/2/early-3), so it ends up getting set by whichever refetch happens to land first with
+  // a non-empty result — which can just as easily be while the user is sitting on Step 3,
+  // loan-approved, or later, defeating the guard entirely.
+  const resumeCheckedRef = useRef(false)
+
   useEffect(() => {
-    if (!existingLoanIds || (existingLoanIds as bigint[]).length === 0 || !publicClient) return
+    if (existingLoanIds === undefined || !publicClient) return
+    if (resumeCheckedRef.current) return
+    resumeCheckedRef.current = true
+    if ((existingLoanIds as bigint[]).length === 0) return
 
     async function findActiveLoan() {
       const loans = await Promise.all(
@@ -1157,12 +1195,16 @@ export default function ApplyPage() {
       )
       const activeLoans = loans.filter((l) => l.status === 3)
       if (activeLoans.length === 0) return
+      // Only auto-resume from the untouched default step — never pull the user forward out of
+      // an application already in progress on this mount.
+      if (step !== 1) return
       const newest = activeLoans.reduce((a, b) => (b.id > a.id ? b : a))
       setLoanId(newest.id.toString())
       setStep(4)
     }
 
     findActiveLoan()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [existingLoanIds, publicClient])
 
   return (
@@ -1205,13 +1247,13 @@ export default function ApplyPage() {
               setDepositBlock(block)
               setDepositTxHash(txHash)
               setStep(2)
-            }} />}
+            }} onPendingChange={setStep1DepositPending} />}
             {step === 2 && <Step2Panel onNext={(id, block, txHash) => {
               setNodeId(id)
               setRegisterBlock(block)
               setRegisterTxHash(txHash)
               setStep(3)
-            }} />}
+            }} onPendingChange={setStep2RegisterPending} />}
             {step === 3 && depositTxHash !== undefined && registerTxHash !== undefined && (
               <Step3Panel
                 depositBlock={depositBlock}
