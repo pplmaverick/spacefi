@@ -70,10 +70,10 @@ function StepSidebar({ current }: { current: Step }) {
           <div
             key={s.id}
             className={`bg-[#1E293B] border p-4 flex flex-col gap-1 transition-colors
-              ${active ? 'border-2 border-[#00C2FF]' : 'border-[#334155]'}
+              ${active ? 'border-2 border-indigo-600' : 'border-[#334155]'}
               ${!active && !done ? 'opacity-50' : ''}`}
           >
-            <div className={`font-mono text-xs uppercase tracking-wider ${active ? 'text-[#00C2FF]' : done ? 'text-[#3DFFC0]' : 'text-gray-500'}`}>
+            <div className={`font-mono text-xs uppercase tracking-wider ${active ? 'text-indigo-600' : done ? 'text-[#3DFFC0]' : 'text-gray-500'}`}>
               STEP {String(s.id).padStart(2, '0')} {active ? '// CURRENT' : done ? '// DONE' : '// PENDING'}
             </div>
             <div className="font-mono text-sm text-white flex items-center gap-2">
@@ -114,16 +114,16 @@ function OrbitAnimation() {
   return (
     <div className="flex items-center justify-center mb-4">
       <svg viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg" width="300" height="300">
-        <circle cx="200" cy="200" r="12" fill="#00C2FF" />
-        <ellipse cx="200" cy="200" rx="160" ry="80" stroke="#00C2FF" strokeWidth="1" strokeDasharray="4 4" opacity="0.6" />
-        <ellipse cx="200" cy="200" rx="80" ry="160" stroke="#00C2FF" strokeWidth="1" strokeDasharray="4 4" opacity="0.6" />
-        <circle r="6" fill="#00C2FF">
+        <circle cx="200" cy="200" r="12" fill="#4F46E5" />
+        <ellipse cx="200" cy="200" rx="160" ry="80" stroke="#4F46E5" strokeWidth="1" strokeDasharray="4 4" opacity="0.6" />
+        <ellipse cx="200" cy="200" rx="80" ry="160" stroke="#4F46E5" strokeWidth="1" strokeDasharray="4 4" opacity="0.6" />
+        <circle r="6" fill="#4F46E5">
           <animateMotion dur="8s" repeatCount="indefinite" path="M 40,200 A 160,80 0 1,1 360,200 A 160,80 0 1,1 40,200" />
         </circle>
         <circle r="6" fill="#3DFFC0">
           <animateMotion dur="12s" repeatCount="indefinite" path="M 200,40 A 80,160 0 1,1 200,360 A 80,160 0 1,1 200,40" />
         </circle>
-        <circle cx="200" cy="200" r="12" stroke="#00C2FF" strokeWidth="2">
+        <circle cx="200" cy="200" r="12" stroke="#4F46E5" strokeWidth="2">
           <animate attributeName="r" from="12" to="60" dur="3s" repeatCount="indefinite" />
           <animate attributeName="opacity" from="0.6" to="0" dur="3s" repeatCount="indefinite" />
         </circle>
@@ -203,7 +203,7 @@ function Step1Panel({ onNext }: { onNext: (loanId: string, blockNumber: bigint, 
               step="0.001"
               min="0.001"
               disabled={isLoading}
-              className="bg-[#0F172A] border border-[#334155] text-white font-mono px-4 py-2 w-48 focus:outline-none focus:border-[#00C2FF] disabled:opacity-50"
+              className="bg-[#0F172A] border border-[#334155] text-white font-mono px-4 py-2 w-48 focus:outline-none focus:border-indigo-600 disabled:opacity-50"
             />
           </div>
 
@@ -218,7 +218,7 @@ function Step1Panel({ onNext }: { onNext: (loanId: string, blockNumber: bigint, 
             </div>
             <div className="text-right">
               <div className="text-xs font-mono text-gray-500 uppercase tracking-wider mb-1">Credit Limit</div>
-              <div className="text-sm font-mono text-[#00C2FF]">
+              <div className="text-sm font-mono text-indigo-600">
                 {creditLimitUsdf !== undefined
                   ? `${creditLimitUsdf.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} mUSDF`
                   : '—'}
@@ -229,7 +229,7 @@ function Step1Panel({ onNext }: { onNext: (loanId: string, blockNumber: bigint, 
           <button
             onClick={handleDeposit}
             disabled={isLoading || !amount}
-            className="bg-[#00C2FF] text-[#0F172A] font-mono text-xs uppercase tracking-wider px-6 py-3 hover:bg-[#75d1ff] transition-colors border border-[#00C2FF] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-indigo-600 text-[#0F172A] font-mono text-xs uppercase tracking-wider px-6 py-3 hover:bg-indigo-500 transition-colors border border-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isPending ? 'Confirm in wallet...' : isConfirming ? 'Confirming...' : 'Deposit ETH →'}
           </button>
@@ -243,7 +243,7 @@ function Step1Panel({ onNext }: { onNext: (loanId: string, blockNumber: bigint, 
                 href={`https://sepolia.etherscan.io/tx/${txHash}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#00C2FF] hover:text-[#75d1ff]"
+                className="text-indigo-600 hover:text-indigo-500"
               >{txHash.slice(0, 20)}...</a>
             </div>
           )}
@@ -330,7 +330,7 @@ function Step2Panel({ onNext }: { onNext: (nodeId: string, blockNumber: bigint, 
               onChange={e => { setNodeIdInput(e.target.value); setInputError('') }}
               placeholder="0x0000000000000000000000000000000000000000000000000000000000000001"
               disabled={isLoading}
-              className="bg-[#0F172A] border border-[#334155] text-white font-mono px-4 py-2 w-full focus:outline-none focus:border-[#00C2FF] text-sm disabled:opacity-50"
+              className="bg-[#0F172A] border border-[#334155] text-white font-mono px-4 py-2 w-full focus:outline-none focus:border-indigo-600 text-sm disabled:opacity-50"
             />
             {inputError && (
               <div className="text-xs font-mono text-red-400 mt-1">{inputError}</div>
@@ -343,7 +343,7 @@ function Step2Panel({ onNext }: { onNext: (nodeId: string, blockNumber: bigint, 
           <button
             onClick={handleRegister}
             disabled={isLoading || !nodeIdInput}
-            className="bg-[#00C2FF] text-[#0F172A] font-mono text-xs uppercase tracking-wider px-6 py-3 hover:bg-[#75d1ff] transition-colors border border-[#00C2FF] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-indigo-600 text-[#0F172A] font-mono text-xs uppercase tracking-wider px-6 py-3 hover:bg-indigo-500 transition-colors border border-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isPending ? 'Confirm in wallet...' : isConfirming ? 'Confirming...' : 'Register Node →'}
           </button>
@@ -354,7 +354,7 @@ function Step2Panel({ onNext }: { onNext: (nodeId: string, blockNumber: bigint, 
                 href={`https://sepolia.etherscan.io/tx/${txHash}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#00C2FF] hover:text-[#75d1ff]"
+                className="text-indigo-600 hover:text-indigo-500"
               >{txHash.slice(0, 20)}...</a>
             </div>
           )}
@@ -390,7 +390,7 @@ function AttColumn({
   return (
     <div className="border border-[#334155] bg-[#1E293B] p-4 flex flex-col gap-2">
       <div className="flex items-center justify-between">
-        <span className="font-mono text-xs text-[#00C2FF] uppercase tracking-wider">{label}</span>
+        <span className="font-mono text-xs text-indigo-600 uppercase tracking-wider">{label}</span>
         <span className="font-mono text-[10px] text-gray-600">[SEPOLIA→USC→CC3]</span>
       </div>
 
@@ -401,7 +401,7 @@ function AttColumn({
           </div>
           <div className="w-full h-2 bg-[#0F172A] border border-[#334155] overflow-hidden">
             <div
-              className={`h-full transition-all duration-1000 ${phase === 'done' ? 'bg-[#3DFFC0]' : 'bg-[#00C2FF]'}`}
+              className={`h-full transition-all duration-1000 ${phase === 'done' ? 'bg-[#3DFFC0]' : 'bg-indigo-600'}`}
               style={{ width: `${pct}%` }}
             />
           </div>
@@ -423,7 +423,7 @@ function AttColumn({
               href={`https://cc3-testnet.blockscout.com/tx/${txHash}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[#00C2FF] hover:text-[#75d1ff]"
+              className="text-indigo-600 hover:text-indigo-500"
             >
               · {txHash.slice(0, 14)}...
             </a>
@@ -438,7 +438,7 @@ function AttColumn({
           </div>
           <button
             onClick={onRetry}
-            className="self-start border border-[#334155] text-gray-300 hover:border-[#00C2FF] font-mono text-xs uppercase tracking-wider px-4 py-2 transition-colors"
+            className="self-start border border-[#334155] text-gray-300 hover:border-indigo-600 font-mono text-xs uppercase tracking-wider px-4 py-2 transition-colors"
           >
             Retry
           </button>
@@ -454,12 +454,14 @@ function Step3Panel({
   registerBlock,
   registerTxHash,
   onNext,
+  onPendingChange,
 }: {
   depositBlock: bigint
   depositTxHash: `0x${string}`
   registerBlock: bigint
   registerTxHash: `0x${string}`
   onNext: () => void
+  onPendingChange: (pending: boolean) => void
 }) {
   const [att1Phase, setAtt1Phase] = useState<AttPhase>('waiting')
   const [att2Phase, setAtt2Phase] = useState<AttPhase>('waiting')
@@ -480,6 +482,12 @@ function Step3Panel({
   const att1TxHashRef = useRef<`0x${string}` | null>(null)
 
   const att1ProofRef = useRef<proofProvider.ContinuityResponse | null>(null)
+
+  // ATT#2 送出前的同步鎖 — 防止並行呼叫的 runAtt2() 都通過檢查點、重複打 writeContractAsync
+  const att2SubmittingRef = useRef(false)
+
+  // 防止 mount effect（line 617-621）被觸發超過一次時，runAtt1/runAtt2 邏輯本體被真的執行兩次
+  const attFlowStartedRef = useRef(false)
 
   // 共用計時器 — 兩軌都到終態（done/error）才停止
   useEffect(() => {
@@ -554,6 +562,7 @@ function Step3Panel({
   async function runAtt2() {
     setAtt2Phase('waiting')
     setAtt2Error('')
+    att2SubmittingRef.current = false
     try {
       const { waitAndGetProof, buildExecuteArgs } = await import('@/lib/usc')
       const proof = await waitAndGetProof(registerBlock, registerTxHash)
@@ -582,6 +591,10 @@ function Step3Panel({
       }
       console.log('ATT #1 confirmed on-chain, proceeding with ATT #2...')
 
+      // 同步檢查並上鎖（比照 submitAtt1 line 512-514），必須在任何 await 之前完成，
+      // 讓並行呼叫的 runAtt2() 只有一個能通過這個檢查點
+      if (att2SubmittingRef.current) return
+      att2SubmittingRef.current = true
       setAtt2Phase('submitting')
 
       const args = buildExecuteArgs(1, proof)
@@ -614,7 +627,11 @@ function Step3Panel({
   }
 
   // 進入畫面立即並行開始兩軌 attestation
+  // attFlowStartedRef 防止這個 effect 被觸發超過一次時（例如 React StrictMode
+  // 下的 mount → cleanup → mount），runAtt1/runAtt2 的邏輯本體被真的執行兩次
   useEffect(() => {
+    if (attFlowStartedRef.current) return
+    attFlowStartedRef.current = true
     runAtt1()
     runAtt2()
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -635,20 +652,36 @@ function Step3Panel({
   const ss = String(seconds % 60).padStart(2, '0')
   const bothDone = att1Phase === 'done' && att2Phase === 'done'
 
+  // Low-cost guardrail until eth_getLogs-based history reconstruction lands: warn before an
+  // accidental refresh/close wipes depositTxHash/registerTxHash with no way to recover progress.
+  useEffect(() => {
+    onPendingChange(!bothDone)
+  }, [bothDone, onPendingChange])
+
+  useEffect(() => {
+    if (bothDone) return
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault()
+      e.returnValue = ''
+    }
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+  }, [bothDone])
+
   return (
     <div>
       <div className="mb-2 font-mono text-xs text-gray-500 uppercase tracking-wider">STEP 03: USC ATTESTATION</div>
       <h2 style={spaceGrotesk} className="text-2xl font-semibold mb-2">Waiting for Attestation</h2>
       <p className="text-gray-400 text-sm mb-6">
-        USC is attesting your <span className="text-[#00C2FF] font-mono">Deposited</span> and{' '}
-        <span className="text-[#00C2FF] font-mono">NodeRegistered</span> events in parallel.
+        USC is attesting your <span className="text-indigo-600 font-mono">Deposited</span> and{' '}
+        <span className="text-indigo-600 font-mono">NodeRegistered</span> events in parallel.
         This takes 8–10 minutes — trustless verification can&apos;t be rushed.
       </p>
 
       <div className="border border-[#334155] bg-[#0F172A] p-6">
         <div className="flex flex-col items-center text-center">
           <OrbitAnimation />
-          <div style={spaceGrotesk} className="text-4xl font-bold text-[#00C2FF] tabular-nums mb-6">{mm}:{ss}</div>
+          <div style={spaceGrotesk} className="text-4xl font-bold text-indigo-600 tabular-nums mb-6">{mm}:{ss}</div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -681,7 +714,7 @@ function Step3Panel({
       {bothDone && (
         <button
           onClick={onNext}
-          className="mt-6 bg-[#00C2FF] text-[#0F172A] font-mono text-xs uppercase tracking-wider px-6 py-3 hover:bg-[#75d1ff] transition-colors border border-[#00C2FF]"
+          className="mt-6 bg-indigo-600 text-[#0F172A] font-mono text-xs uppercase tracking-wider px-6 py-3 hover:bg-indigo-500 transition-colors border border-indigo-600"
         >
           Continue →
         </button>
@@ -712,19 +745,19 @@ function LoanApprovedPanel({ loanId, onNext }: { loanId: string; onNext: () => v
       <div className="bg-[#0F172A] border border-[#3DFFC0]/30 p-6 font-mono text-sm space-y-3 mb-8">
         <div className="flex justify-between">
           <span className="text-gray-500">Amount</span>
-          <span className="text-[#00C2FF]">
+          <span className="text-indigo-600">
             {loanAmount !== undefined ? formatUnits(loanAmount, 18) : 'Loading...'} mUSDF
           </span>
         </div>
         <div className="flex justify-between">
           <span className="text-gray-500">Loan ID</span>
-          <span className="text-[#00C2FF]">{loanId}</span>
+          <span className="text-indigo-600">{loanId}</span>
         </div>
       </div>
 
       <button
         onClick={onNext}
-        className="bg-[#00C2FF] text-[#0F172A] font-mono text-xs uppercase tracking-wider px-6 py-3 hover:bg-[#75d1ff] transition-colors border border-[#00C2FF]"
+        className="bg-indigo-600 text-[#0F172A] font-mono text-xs uppercase tracking-wider px-6 py-3 hover:bg-indigo-500 transition-colors border border-indigo-600"
       >
         PROCEED TO REPAY →
       </button>
@@ -828,7 +861,7 @@ function Step4Panel({ loanId, onNext }: { loanId: string; onNext: () => void }) 
         <div className="mt-6 space-y-4">
           <div className="bg-[#0F172A] border border-[#334155] p-4 font-mono text-sm">
             <div className="text-gray-500 text-xs mb-1">Loan ID</div>
-            <div className="text-[#00C2FF]">{loanId}</div>
+            <div className="text-indigo-600">{loanId}</div>
           </div>
           <div>
             <label className="font-mono text-xs text-gray-500 uppercase tracking-wider block mb-2">Amount (mUSDF)</label>
@@ -837,13 +870,13 @@ function Step4Panel({ loanId, onNext }: { loanId: string; onNext: () => void }) 
               value={amount}
               onChange={e => setAmount(e.target.value)}
               min="1"
-              className="bg-[#0F172A] border border-[#334155] text-white font-mono px-4 py-2 w-48 focus:outline-none focus:border-[#00C2FF]"
+              className="bg-[#0F172A] border border-[#334155] text-white font-mono px-4 py-2 w-48 focus:outline-none focus:border-indigo-600"
             />
           </div>
           <button
             onClick={handleRepay}
             disabled={!amount}
-            className="bg-[#00C2FF] text-[#0F172A] font-mono text-xs uppercase tracking-wider px-6 py-3 hover:bg-[#75d1ff] transition-colors border border-[#00C2FF] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-indigo-600 text-[#0F172A] font-mono text-xs uppercase tracking-wider px-6 py-3 hover:bg-indigo-500 transition-colors border border-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Repay →
           </button>
@@ -860,7 +893,7 @@ function Step4Panel({ loanId, onNext }: { loanId: string; onNext: () => void }) 
           </div>
           <div className="w-full h-2 bg-[#1E293B] border border-[#334155] overflow-hidden">
             <div
-              className="h-full bg-[#00C2FF] animate-pulse"
+              className="h-full bg-indigo-600 animate-pulse"
               style={{
                 width:
                   phase === 'approving' ? '20%' :
@@ -877,18 +910,18 @@ function Step4Panel({ loanId, onNext }: { loanId: string; onNext: () => void }) 
           <div className="bg-[#0F172A] border border-[#3DFFC0]/30 p-4 font-mono text-sm space-y-2">
             {approveTxHash && (
               <div className="text-xs text-gray-500">
-                <span style={checkmarkStyle}>✓</span> Approve Tx: <a href={`https://cc3-testnet.blockscout.com/tx/${approveTxHash}`} target="_blank" rel="noopener noreferrer" className="text-[#00C2FF] hover:text-[#75d1ff]">{approveTxHash.slice(0, 20)}...</a>
+                <span style={checkmarkStyle}>✓</span> Approve Tx: <a href={`https://cc3-testnet.blockscout.com/tx/${approveTxHash}`} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:text-indigo-500">{approveTxHash.slice(0, 20)}...</a>
               </div>
             )}
             {repayTxHash && (
               <div className="text-xs text-gray-500">
-                <span style={checkmarkStyle}>✓</span> Repay Tx: <a href={`https://cc3-testnet.blockscout.com/tx/${repayTxHash}`} target="_blank" rel="noopener noreferrer" className="text-[#00C2FF] hover:text-[#75d1ff]">{repayTxHash.slice(0, 20)}...</a>
+                <span style={checkmarkStyle}>✓</span> Repay Tx: <a href={`https://cc3-testnet.blockscout.com/tx/${repayTxHash}`} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:text-indigo-500">{repayTxHash.slice(0, 20)}...</a>
               </div>
             )}
           </div>
           <button
             onClick={onNext}
-            className="bg-[#00C2FF] text-[#0F172A] font-mono text-xs uppercase tracking-wider px-6 py-3 hover:bg-[#75d1ff] transition-colors border border-[#00C2FF]"
+            className="bg-indigo-600 text-[#0F172A] font-mono text-xs uppercase tracking-wider px-6 py-3 hover:bg-indigo-500 transition-colors border border-indigo-600"
           >
             Continue →
           </button>
@@ -902,7 +935,7 @@ function Step4Panel({ loanId, onNext }: { loanId: string; onNext: () => void }) 
           </div>
           <button
             onClick={() => { setPhase('idle'); setErrorMsg('') }}
-            className="border border-[#334155] text-gray-300 hover:border-[#00C2FF] font-mono text-xs uppercase tracking-wider px-6 py-3 transition-colors"
+            className="border border-[#334155] text-gray-300 hover:border-indigo-600 font-mono text-xs uppercase tracking-wider px-6 py-3 transition-colors"
           >
             Retry
           </button>
@@ -913,7 +946,7 @@ function Step4Panel({ loanId, onNext }: { loanId: string; onNext: () => void }) 
 }
 
 // LoanStatus enum order: None, CollateralVerified, NodeVerified, Active, Repaid, Withdrawn
-const LOAN_STATUS_COLOR = ['#FF6B35', '#FF6B35', '#FF6B35', '#00C2FF', '#3DFFC0', '#3DFFC0']
+const LOAN_STATUS_COLOR = ['#FF6B35', '#FF6B35', '#FF6B35', '#4F46E5', '#3DFFC0', '#3DFFC0']
 
 function Step5Panel({ loanId, nodeId, sepoliaLoanId }: { loanId: string; nodeId: string; sepoliaLoanId: string }) {
   // Real on-chain status/amounts for this specific loan — previously this panel showed the
@@ -980,7 +1013,7 @@ function Step5Panel({ loanId, nodeId, sepoliaLoanId }: { loanId: string; nodeId:
         Both USC attestations confirmed. mUSDF has been released to your wallet on Creditcoin CC3.
       </p>
 
-      <div className="bg-[#1E293B] border border-[#00C2FF]/30 p-6 mb-6 space-y-3">
+      <div className="bg-[#1E293B] border border-indigo-600/30 p-6 mb-6 space-y-3">
         <div className="flex justify-between items-center">
           <span className="font-mono text-xs text-gray-500 uppercase tracking-wider">Status</span>
           <span
@@ -993,11 +1026,11 @@ function Step5Panel({ loanId, nodeId, sepoliaLoanId }: { loanId: string; nodeId:
         </div>
         <div className="flex justify-between font-mono text-sm border-t border-[#334155] pt-3">
           <span className="text-gray-500">Loan ID</span>
-          <span className="text-[#00C2FF]">{loanId}</span>
+          <span className="text-indigo-600">{loanId}</span>
         </div>
         <div className="flex justify-between gap-4 font-mono text-sm">
           <span className="text-gray-500 flex-shrink-0">Node ID</span>
-          <span className="text-[#00C2FF] break-all text-right">{nodeId}</span>
+          <span className="text-indigo-600 break-all text-right">{nodeId}</span>
         </div>
         <div className="flex justify-between font-mono text-sm">
           <span className="text-gray-500">Repaid</span>
@@ -1009,7 +1042,7 @@ function Step5Panel({ loanId, nodeId, sepoliaLoanId }: { loanId: string; nodeId:
         </div>
       </div>
 
-      <div className="bg-[#0F172A] border border-[#00C2FF]/30 p-4 mb-6 font-mono text-xs text-[#00C2FF]">
+      <div className="bg-[#0F172A] border border-indigo-600/30 p-4 mb-6 font-mono text-xs text-indigo-600">
         ⓘ Collateral release is automatic via the USC write-ability layer (CC3 → Sepolia) — no admin step required. See COLLATERAL RELEASE below.
       </div>
 
@@ -1026,7 +1059,7 @@ function Step5Panel({ loanId, nodeId, sepoliaLoanId }: { loanId: string; nodeId:
             <button
               onClick={handleWithdraw}
               disabled={isWithdrawPending || isWithdrawConfirming}
-              className="bg-[#00C2FF] text-[#0F172A] font-mono text-xs uppercase tracking-wider px-6 py-3 hover:bg-[#75d1ff] transition-colors border border-[#00C2FF] disabled:opacity-50"
+              className="bg-indigo-600 text-[#0F172A] font-mono text-xs uppercase tracking-wider px-6 py-3 hover:bg-indigo-500 transition-colors border border-indigo-600 disabled:opacity-50"
             >
               {isWithdrawPending ? 'Confirm in wallet...' : isWithdrawConfirming ? 'Confirming...' : 'WITHDRAW ETH →'}
             </button>
@@ -1037,7 +1070,7 @@ function Step5Panel({ loanId, nodeId, sepoliaLoanId }: { loanId: string; nodeId:
             )}
             {withdrawTxHash && (
               <div className="text-xs font-mono text-gray-500">
-                Tx: <a href={`https://sepolia.etherscan.io/tx/${withdrawTxHash}`} target="_blank" rel="noopener noreferrer" className="text-[#00C2FF]">{withdrawTxHash.slice(0, 20)}...</a>
+                Tx: <a href={`https://sepolia.etherscan.io/tx/${withdrawTxHash}`} target="_blank" rel="noopener noreferrer" className="text-indigo-600">{withdrawTxHash.slice(0, 20)}...</a>
               </div>
             )}
           </div>
@@ -1061,10 +1094,10 @@ function Step5Panel({ loanId, nodeId, sepoliaLoanId }: { loanId: string; nodeId:
       </div>
 
       <div className="flex gap-4 border-t border-[#334155] pt-6 mt-6">
-        <Link href="/dashboard" className="bg-[#00C2FF] text-[#0F172A] font-mono text-xs uppercase tracking-wider px-6 py-3 hover:bg-[#75d1ff] transition-colors border border-[#00C2FF]">
+        <Link href="/dashboard" className="bg-indigo-600 text-[#0F172A] font-mono text-xs uppercase tracking-wider px-6 py-3 hover:bg-indigo-500 transition-colors border border-indigo-600">
           VIEW DASHBOARD →
         </Link>
-        <Link href="/revenue" className="border border-[#334155] text-gray-300 hover:border-[#00C2FF] font-mono text-xs uppercase tracking-wider px-6 py-3 transition-colors">
+        <Link href="/revenue" className="border border-[#334155] text-gray-300 hover:border-indigo-600 font-mono text-xs uppercase tracking-wider px-6 py-3 transition-colors">
           Node Revenue
         </Link>
       </div>
@@ -1081,19 +1114,84 @@ export default function ApplyPage() {
   const [registerBlock, setRegisterBlock] = useState<bigint>(0n)
   const [registerTxHash, setRegisterTxHash] = useState<`0x${string}` | undefined>(undefined)
 
+  // Step 3 in-progress guard (beforeunload + nav-away confirm) — reported up by Step3Panel via
+  // onPendingChange, since it's the one that knows whether both attestations have landed.
+  const [step3AttestationPending, setStep3AttestationPending] = useState(true)
+  const navGuardActive = step === 3 && step3AttestationPending
+  function confirmLeaveIfPending() {
+    if (!navGuardActive) return true
+    return window.confirm('離開此頁面將導致目前的申請進度遺失，確定要離開嗎？')
+  }
+
+  const { address } = useAccount()
+  const OWNER_ADDRESS = process.env.NEXT_PUBLIC_OWNER_ADDRESS?.toLowerCase()
+  const isOwner = address?.toLowerCase() === OWNER_ADDRESS
+
+  // Resume an in-progress loan on mount: if this wallet already has an Active loan (fully
+  // disbursed, just awaiting repay), jump straight to Step 4 instead of defaulting to Step 1 —
+  // otherwise a page reload strands the user with no way back to their own loan's repay step.
+  const publicClient = usePublicClient({ chainId: cc3Testnet.id })
+  const { data: existingLoanIds } = useReadContract({
+    address: CONTRACTS.spaceFinance.address,
+    abi: SPACE_FINANCE_ABI,
+    functionName: 'getLoansByBorrower',
+    args: address ? [address] : undefined,
+    chainId: cc3Testnet.id,
+    query: { enabled: !!address },
+  })
+
+  useEffect(() => {
+    if (!existingLoanIds || (existingLoanIds as bigint[]).length === 0 || !publicClient) return
+
+    async function findActiveLoan() {
+      const loans = await Promise.all(
+        (existingLoanIds as bigint[]).map(async (id) => {
+          const loanData = await publicClient!.readContract({
+            address: CONTRACTS.spaceFinance.address,
+            abi: SPACE_FINANCE_ABI,
+            functionName: 'getLoan',
+            args: [id],
+          })
+          return { id, status: (loanData as unknown as unknown[])[4] as number }
+        })
+      )
+      const activeLoans = loans.filter((l) => l.status === 3)
+      if (activeLoans.length === 0) return
+      const newest = activeLoans.reduce((a, b) => (b.id > a.id ? b : a))
+      setLoanId(newest.id.toString())
+      setStep(4)
+    }
+
+    findActiveLoan()
+  }, [existingLoanIds, publicClient])
+
   return (
     <div className="min-h-screen bg-[#0F172A] text-white">
       {/* Nav */}
       <nav className="border-b border-[#334155] px-6 py-4 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-3">
-          <span className="font-mono text-sm text-[#00C2FF] tracking-widest uppercase">SpaceFinance</span>
-        </Link>
-        <WalletButton />
+        <div className="flex items-center gap-6">
+          <Link href="/" onClick={(e) => { if (!confirmLeaveIfPending()) e.preventDefault() }} className="flex items-center gap-3">
+            <span className="font-mono text-xs text-indigo-600 tracking-widest uppercase">SpaceFinance</span>
+          </Link>
+          <Link href="/" onClick={(e) => { if (!confirmLeaveIfPending()) e.preventDefault() }} className="text-sm font-mono text-gray-400 hover:text-indigo-600 transition-colors">HOME</Link>
+          <Link href="/apply" className="text-xs font-mono uppercase tracking-wider text-indigo-600 border-b border-indigo-600 pb-1">Apply</Link>
+          <Link href="/dashboard" onClick={(e) => { if (!confirmLeaveIfPending()) e.preventDefault() }} className="text-xs font-mono uppercase tracking-wider text-[#94A3B8] hover:text-indigo-600 transition-colors">Dashboard</Link>
+          <Link href="/revenue" onClick={(e) => { if (!confirmLeaveIfPending()) e.preventDefault() }} className="text-xs font-mono uppercase tracking-wider text-[#94A3B8] hover:text-indigo-600 transition-colors">Revenue</Link>
+          <Link href="/guild" onClick={(e) => { if (!confirmLeaveIfPending()) e.preventDefault() }} className="text-sm font-mono text-gray-400 hover:text-indigo-600 transition-colors">GUILD</Link>
+        </div>
+        <div className="flex items-center gap-4">
+          {isOwner && (
+            <Link href="/admin" onClick={(e) => { if (!confirmLeaveIfPending()) e.preventDefault() }} className="text-sm font-mono text-[#FF6B35] hover:text-[#FF6B35]/80 transition-colors">
+              ADMIN
+            </Link>
+          )}
+          <WalletButton />
+        </div>
       </nav>
 
       <main className="max-w-6xl mx-auto px-6 pt-12 pb-24">
         <div className="mb-8">
-          <Link href="/" className="text-xs font-mono text-gray-600 hover:text-gray-400 transition-colors">← Back</Link>
+          <Link href="/" onClick={(e) => { if (!confirmLeaveIfPending()) e.preventDefault() }} className="text-xs font-mono text-gray-600 hover:text-gray-400 transition-colors">← Back</Link>
           <h1 style={spaceGrotesk} className="text-3xl font-semibold mt-4 mb-1">FINANCING APPLICATION</h1>
           <p className="text-gray-500 text-sm font-mono">Parallel USC attestation + repayment · ~15 minutes total</p>
         </div>
@@ -1121,6 +1219,7 @@ export default function ApplyPage() {
                 registerBlock={registerBlock}
                 registerTxHash={registerTxHash}
                 onNext={() => setStep('loan-approved')}
+                onPendingChange={setStep3AttestationPending}
               />
             )}
             {step === 'loan-approved' && (
